@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === MODULE CENTRAL DE TRADUCTION CHIRURGICALE GOOGLE — LIGNE PAR LIGNE ===
+   === MODULE CENTRAL DE TRADUCTION INDIVIDUELLE GOOGLE — INJECTION SANS CORS ===
    ========================================================================== */
 
 function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
@@ -11,41 +11,48 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
     let textePropre = texteATraduire.trim();
     if (textePropre === "" || textePropre === "...") return;
 
-    // COUVRE-SYMBOLE : On protège / et : pour force Google à traduire l'entièreté des rajouts de mots
+    // PROTECTION DES CARACTÈRES SPÉCIAUX POUR LES COMMANDES DE CHAT 7DTD
     textePropre = textePropre.replace(/\//g, "SLASHTOKEN ").replace(/:/g, " COLONTOKEN");
 
-    // L'URL OFFICIELLE DE L'API GOOGLE TRANSLATE BRUTE
-    const urlMoteurGoogle = "https://googleapis.com" + encodeURIComponent(textePropre);
+    // Supprime l'ancien pont s'il existe déjà dans la page
+    const oldScript = document.getElementById("qbcInvisibleTranslator");
+    if (oldScript) oldScript.remove();
 
-    fetch(urlMoteurGoogle)
-        .then(reponse => reponse.json())
-        .then(donnees => {
-            // EXTRACTION CHIURGICALE EXACTE : On va chercher le premier texte pur dans la matrice de Google
-            if (donnees && donnees[0] && donnees[0][0] && donnees[0][0][0]) {
-                let texteTraduit = donnees[0][0][0];
+    // RACCORDEMENT DU CALLBACK MAÎTRE POUR LIRE L'ARBRE DE DONNÉES DE GOOGLE
+    window.qbcGoogleCallback = function(data) {
+        try {
+            // Décompression chirurgicale de la matrice multi-crochets de Google Translate
+            if (data && data[0] && data[0][0] && data[0][0][0]) {
+                let texteTraduit = data[0][0][0];
 
-                // RESTAURATION STRICTE DES SYMBOLES ET COMMANDES DE CHAT 7DTD
+                // RESTAURATION STRICTE DES SYMBOLES ET DES ENTRAÎNEMENTS 7DTD
                 texteTraduit = texteTraduit.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
                 texteTraduit = texteTraduit.replace(/\/ /g, "/").replace(/ \//g, "/");
                 texteTraduit = texteTraduit.replace(/ :/g, " :").replace(/: /g, ": ");
 
-                // NETTOYAGE DES ACCENTS MAJUSCULES (É -> E, À -> A) POUR TEXTMESHPRO 7DTD
+                // NETTOYAGE DES ACCENTS MAJUSCULES (É -> E, À -> A) POUR TEXTMESHPRO
                 texteTraduit = texteTraduit.replace(/[ÉÈÊËéèêë]/g, "E")
                                            .replace(/[ÀÂÄàâä]/g, "A")
                                            .replace(/[ÔÖôö]/g, "O");
 
-                // Enregistrement de la vraie phrase anglaise de Google dans votre zone EN
+                // Enregistrement définitif dans ta case anglaise EN
                 line.text_en = prefixe + texteTraduit;
                 line.show_english = true;
 
-                // Rafraîchissement graphique immédiat de l'onglet actif
+                // Rafraîchissement graphique de l'onglet actif
                 if (isDesc) renderDescFormLines(); else renderFormLines();
             }
-        })
-        .catch(erreur => {
-            // RECOURS DE SÉCURITÉ : Si une micro-coupure survient, ON N'ÉCRASE PLUS l'anglais existant
-            console.error("Temporisation réseau Google sur la ligne " + (index + 1), erreur);
-        });
+        } catch(e) {
+            console.error("Erreur de décodage Google", e);
+        }
+        delete window.qbcGoogleCallback;
+    };
+
+    // INJECTION DU PONT INVISIBLE POUR PASSER AU-TRAVERS DU FILTRE CHROME SANS ERREUR CORS
+    const scriptEl = document.createElement("script");
+    scriptEl.id = "qbcInvisibleTranslator";
+    scriptEl.src = "https://googleapis.com" + encodeURIComponent(textePropre);
+    document.body.appendChild(scriptEl);
 }
 
 
