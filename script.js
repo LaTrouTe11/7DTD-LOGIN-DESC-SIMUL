@@ -63,7 +63,7 @@ function autoTranslateLine(isDesc, index) {
     let prefix = "";
     let cleanText = rawText;
     
-    // EXTRACTEUR NET SANS DOUBLE VIRGULE PARASITE
+    // EXTRACTEUR SANS DOUBLON : Isole proprement le "1-" ou le "2-" à gauche
     const numMatch = rawText.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
         prefix = numMatch[0]; 
@@ -104,7 +104,7 @@ function autoTranslateLine(isDesc, index) {
         delete window.qbcGoogleCallback;
     };
     
-    // RESTAURATION DE L'URL INFRASTRUCTURE GOOGLE COMPLÈTE AVEC LE SCRIPT INVISIBLE
+    // CORRECTIONS DE L'ADRESSE INFRASTRUCTURE GOOGLE INTERNATIONALE COMPLÈTE
     const scriptEl = document.createElement("script");
     scriptEl.id = "qbcInvisibleTranslator";
     scriptEl.src = "https://googleapis.com" + encodeURIComponent(textToTranslate);
@@ -114,6 +114,7 @@ function autoTranslateLine(isDesc, index) {
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
+
 
 /* ==========================================================================
    === SCRIPT.JS : BLOC 3 SUR 5 === [ COMMUTATEURS ET AGENCEMENT DE LIGNES ] ===
