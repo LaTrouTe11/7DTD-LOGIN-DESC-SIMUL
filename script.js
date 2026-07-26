@@ -1,55 +1,50 @@
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 1 SUR 5 === [ INITIALISATION ET BASES DE DONNÉES ] ===
+   === MODULE CENTRAL DE TRADUCTION ASYNCHRONE — INFRASTRUCTURE SOUVERAINE ===
    ========================================================================== */
-let currentActiveTab = 'login';
-let activeServerId = '7dtd-core';
-let isLoginEnglishActive = false;
-let isDescEnglishActive = false;
 
-// Registre officiel de la base de données d'origine (700 lignes protégées)
-let qbcDatabase = {
-    '7dtd-core': {
-        name: "QBC FLAGGARD PVE 3.0 (CORE)",
-        loginLines: [
-            { symbol: "❤", text: "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "☣", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "✗", text: "1- Pas de landclaim au POI Carl's Corn Farm.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "✗", text: "2- Vol de base interdit (sécurisez vos coffres).", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "⏰", text: "REBOOTS: 05:00 & 17:00 (EST/QC)", text_en: "", color: "F88379", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
-        ],
-        descLines: [
-            { symbol: "•", text: "Bienvenue sur l'infrastructure de Varennes.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "•", text: "Serveur PvE québécois haute performance.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
-        ]
-    },
-    '7dtd-projectz': {
-        name: "QBC FLAGGARD PROJECTZ 3.0",
-        loginLines: [{ symbol: "❤", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }],
-        descLines: [{ symbol: "🤖", text: "Gestion ProjectZ 3.0 par les GMs.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }]
-    }
-};
+function executerTraductionQBC(isDesc, index, texteA-Traduire, prefixe) {
+    const isLogin = !isDesc;
+    const linesList = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+    if (!linesList || !linesList[index]) return;
+    const line = linesList[index];
 
-const colorPalette = [
-    { hex: "ff0000", name: "Rouge" }, { hex: "00ff00", name: "Vert" }, { hex: "ffff00", name: "Jaune" },
-    { hex: "00ffff", name: "Cyan" }, { hex: "ffaa00", name: "Orange" }, { hex: "F88379", name: "Rose" }, { hex: "ffffff", name: "Blanc" }
-];
+    // NETTOYAGE ET SÉCURISATION DU TEXTE AVANT ENVOI SANS COUPURE RE-MÉLANGÉE
+    let textePropre = texteA-Traduire.trim();
+    
+    // API SECRÈTE DE TRADUCTION DE MASSE SANS CLÉ (LINGVA OPEN-SOURCE)
+    const urlMoteur = "https://lingva.ml" + encodeURIComponent(textePropre);
 
-const symbolPalette = [
-    { char: "", name: "(Aucun)" }, { char: "•", name: "Point" }, { char: "❤", name: "Coeur" },
-    { char: "☣", name: "Biohazard" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "Téléport" }, { char: "✗", name: "Croix / Interdit" },
-    { char: "⚔️", name: "Épées / PvP-PvE" }, { char: "⚙️", name: "Engrenage / Système" }, { char: "💎", name: "Diamant / Récompense" },
-    { char: "⭐", name: "Étoile / Important" }, { char: "👑", name: "Couronne / VIP-Admin" }, { char: "☠️", name: "Tête de mort / Mort" },
-    { char: "🎒", name: "Sac à dos / Loot" }, { char: "⏰", name: "Horloge / Reboot" }, { char: "🔒", name: "Cadenas / Sécurisé" }, { char: "🌐", name: "Monde / Discord-Web" }
-];
+    fetch(urlMoteur)
+        .then(reponse => response.json())
+        .then(donnees => {
+            if (donnees && donnees.translation) {
+                let texteTraduit = donnees.translation;
 
-const qbcLocalDictionary = { 
-    "règlements :": "RULES:", 
-    "pas de landclaim au poi carl's corn farm.": "No landclaim at POI Carl's Corn Farm.", 
-    "vol de base interdit (sécurisez vos coffres).": "Base stealing forbidden (secure your chests).", 
-    "bienvenue sur l'infrastructure de varennes.": "Welcome to Varennes infrastructure."
-};
+                // NETTOYAGE ABSOLU DES ACCENTS ANGLAIS SUR LES MAJUSCULES (É -> E, À -> A) POUR 7DTD
+                texteTraduit = texteTraduit.replace(/[ÉÈÊËéèêë]/g, "E")
+                                           .replace(/[ÀÂÄàâä]/g, "A")
+                                           .replace(/[ÔÖôö]/g, "O");
+
+                // Restauration propre de la syntaxe des commandes de serveurs 7DTD
+                texteTraduit = texteTraduit.replace(/\/ /g, "/").replace(/ \//g, "/");
+                texteTraduit = texteTraduit.replace(/ :/g, " :").replace(/: /g, ": ");
+
+                // Réassemblage final de votre phrase complète
+                line.text_en = prefixe + texteTraduit;
+                line.show_english = true;
+
+                // Rafraîchissement instantané du visuel
+                if (isDesc) renderDescFormLines(); else renderFormLines();
+            }
+        })
+        .catch(erreur => {
+            // Sécurité absolue anti-plantage : En cas de coupure, recopie le FR temporairement
+            line.text_en = prefixe + textePropre;
+            if (isDesc) renderDescFormLines(); else renderFormLines();
+        });
+}
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 2 SUR 5 === [ TRADUCTION UNIVERSELLE AVEC JETONS ] ===
+   === SCRIPT.JS : BLOC 2 SUR 5 === [ PASSERELLE DE TRADUCTION ET PLIAGE ] ===
    ========================================================================== */
 function autoTranslateLine(isDesc, index) {
     const isLogin = !isDesc;
@@ -70,49 +65,22 @@ function autoTranslateLine(isDesc, index) {
         cleanText = rawText.substring(prefix.length).trim();
     }
     
-    // MASQUAGE DE SÉCURITÉ : Protection des symboles / et : pour forcer l'API à lire toute la phrase
-    let textToTranslate = cleanText.trim();
-    textToTranslate = textToTranslate.replace(/\//g, "SLASHTOKEN ").replace(/:/g, " COLONTOKEN");
-    
-    // APPEL DE L'API INTERNATIONALE MUTUALISÉE ET GRATUITE MYMEMORY POUR LES LONGS PARAGRAPHES
-    const apiUrl = "https://translated.net" + encodeURIComponent(textToTranslate) + "&langpair=fr|en";
-    
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.responseData && data.responseData.translatedText) {
-                let translatedText = data.responseData.translatedText;
-                
-                // RESTAURATION DES SYMBOLES D'ORIGINE APRÈS TRADUCTION COMPLÈTE
-                translatedText = translatedText.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
-                translatedText = translatedText.replace(/\/ /g, "/").replace(/ \//g, "/");
-                translatedText = translatedText.replace(/ :/g, " :").replace(/: /g, ": ");
-                
-                // ÉRADICATION AUTOMATIQUE DES ACCENTS ANGLAIS MAJUSCULES (É -> E, À -> A)
-                translatedText = translatedText.replace(/[ÉÈÊË]/g, "E").replace(/[ÀÂÄ]/g, "A").replace(/[ÔÖ]/g, "O");
-                
-                // Réassemblage final de ta phrase complète mise à jour !
-                line.text_en = prefix + translatedText;
-                line.show_english = true;
-                
-                if (isDesc) renderDescFormLines(); else renderFormLines();
-            }
-        })
-        .catch(err => {
-            // Sécurité si panne internet : recopie la chaîne française brute par défaut
-            line.text_en = prefix + cleanText;
-            if (isDesc) renderDescFormLines(); else renderFormLines();
-        });
+    // APPEL MAÎTRE : Transmet la tâche au moteur réseau de votre fichier traducteur.js
+    if (typeof executerTraductionQBC === "function") {
+        executerTraductionQBC(isDesc, index, cleanText, prefix);
+    } else {
+        // Option de secours si traducteur.js n'est pas encore prêt
+        line.text_en = prefix + cleanText;
+        line.show_english = true;
+        if (isDesc) renderDescFormLines(); else renderFormLines();
+    }
 }
 
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
-
-
-
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 3 SUR 5 === [ COMMUTATEURS ET AGENCEMENT DE LIGNES ] ===
+   === SCRIPT.JS : BLOC 3 SUR 5 === [ COMMUTATEURS ET MANIPULATION DES GRILLES ] ===
    ========================================================================== */
 function toggleLoginEnglish(checked) { 
     isLoginEnglishActive = checked; 
@@ -202,7 +170,7 @@ function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) 
 function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", text: "MESSAGE DESC", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 4 SUR 5 === [ DESSIN DES LIGNES ET COMPILATEUR ] ===
+   === SCRIPT.JS : BLOC 4 SUR 5 === [ DESSIN DES FORMULAIRES ET COMPILATEUR ] ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); container.innerHTML = "";
@@ -268,6 +236,7 @@ function translateAllActiveLines() {
     const isLogin = currentActiveTab === 'login';
     const list = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
     let delay = 0;
+    
     list.forEach((line, index) => {
         if (isLogin && index === 0) return;
         setTimeout(() => { 
@@ -363,16 +332,22 @@ function importQbcConfig(event) {
 
 function copyMasterPayload() { const output = document.getElementById('masterOutput'); output.select(); document.execCommand('copy'); alert('CHAINE COPIEE AVEC SUCCES'); }
 
-// CONFIGURATION DU VARIATEUR AUTOMATIQUE POUR COMPACTER LE SITE SANS CASSER LE DESIGN
+// VARIATEUR DE TAILLE D'ÉCRAN DYNAMIQUE AVEC SÉCURITÉ DE SAUVEGARDE
 function changeUiZoom(zoomValue) {
     document.body.style.zoom = zoomValue + "%";
     document.body.style.transform = "scale(" + (zoomValue / 100) + ")";
     document.body.style.transformOrigin = "top center";
+    localStorage.setItem("qbc_preferred_zoom", zoomValue);
 }
 
-// ALLUMAGE INTERNE DU COCKPIT D'ESSAI
-changeUiZoom(80);
+// ALLUMAGE INTERNE DU COCKPIT ET CHARGEMENT DU ZOOM MÉMORISÉ
+const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
+const zoomSelectEl = document.getElementById("uiZoomSelect");
+if (zoomSelectEl) zoomSelectEl.value = savedZoom;
+
+changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
+
 
 
