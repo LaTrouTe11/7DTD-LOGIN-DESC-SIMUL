@@ -329,8 +329,15 @@ function updateLineBorderStyle(isDesc, i, style) {
 
 function processAndCompileQBC() {
     const isLogin = currentActiveTab === 'login'; 
-    if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase)[0];
+    
+    // FIX DE SÉCURITÉ MAÎTRE : Réalignement de l'ID d'instance par défaut pour éviter le plantage
+    if (!qbcDatabase[activeServerId]) {
+        activeServerId = Object.keys(qbcDatabase)[0] || '7dtd_core';
+    }
+    
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+    if (!currentLines) return; // Sécurité anti-disparition des grilles
+    
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; 
     const limit = isLogin ? 3500 : 4000; 
     let masterPayload = "";
@@ -357,7 +364,7 @@ function processAndCompileQBC() {
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
-            if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end;
+            if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + fullEN;
             if (line.style_en && line.style_en.u) fullEN = "[u]" + fullEN + "[/u]"; 
             if (line.style_en && line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
             
@@ -377,7 +384,7 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    // CORRECTION ET RENDU NET DU PAYLOAD POUR APERÇU ET TEXTAREA SANS CONFLIT
+    // RENDU LIQUIDE DU COCKPIT GRAPHIQUE
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
@@ -399,6 +406,7 @@ function processAndCompileQBC() {
     }
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
+
 
 /* ==========================================================================
    === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
