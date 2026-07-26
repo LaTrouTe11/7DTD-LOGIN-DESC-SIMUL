@@ -202,11 +202,13 @@ function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 
 
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); container.innerHTML = "";
-    if (isGlobalEnglish) container.classList.add('eng-global-active'); else container.classList.remove('eng-global-active');
     
     currentLines.forEach((line, index) => {
-        const div = document.createElement('div'); const isEng = line.show_english || isGlobalEnglish;
-        div.className = "line-item" + (line.border_double ? " has-double-border" : "") + (isEng ? " show-english" : "");
+        const div = document.createElement('div'); 
+        // On détermine si l'anglais doit être visible (soit via la coche individuelle, soit via la coche globale)
+        const isEngVisible = line.show_english || isGlobalEnglish;
+        
+        div.className = "line-item" + (line.border_double ? " has-double-border" : "");
         
         let symSel = `<select class="line-select" style="width:100px;" onchange="updateLineSymbol(${isDesc}, ${index}, this.value)">`;
         symbolPalette.forEach(s => symSel += `<option value="${s.char}" ${s.char === line.symbol ? "selected" : ""}>${s.name}</option>`); symSel += `</select>`;
@@ -218,9 +220,11 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         let toolsFR = `<button type="button" class="style-btn ${line.style_fr.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'u')">U</button><button type="button" class="style-btn ${line.style_fr.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'b')">B</button>`;
         let toolsEN = `<button type="button" class="style-btn ${line.style_en.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'u')">U</button><button type="button" class="style-btn ${line.style_en.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'b')">B</button>`;
         
+        // CORRECTION INTERRUPTEUR : On applique un style inline direct (block ou none) pour écraser le blocage du CSS
         let enRow = ""; 
         if (isDesc || index > 0) { 
-            enRow = `<div class="eng-input-box" style="width:100%;"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #4b5563; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Saisir la traduction anglaise ici..." />${toolsEN}</div></div>`; 
+            const displayStyle = isEngVisible ? "display: block !important;" : "display: none !important;";
+            enRow = `<div class="eng-input-box" style="width:100%; ${displayStyle}"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #4b5563; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Saisir la traduction anglaise ici..." />${toolsEN}</div></div>`; 
         }
         
         let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
@@ -230,6 +234,7 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         container.appendChild(div);
     }); processAndCompileQBC();
 }
+
 /* ==========================================================================
    === SCRIPT.JS : BLOC 5 SUR 5 === [ COMPILATEUR FINAL ET GESTION JSON ] ===
    ========================================================================== */
