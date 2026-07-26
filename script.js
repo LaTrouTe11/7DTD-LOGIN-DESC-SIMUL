@@ -70,25 +70,25 @@ function autoTranslateLine(isDesc, index) {
         cleanText = rawText.substring(prefix.length).trim();
     }
     
-    // MASQUAGE DE SÉCURITÉ : Protection des symboles / et : pour forcer Google à lire toute la ligne
+    // MASQUAGE DE SÉCURITÉ : Protection des symboles / et : pour forcer l'API à lire toute la phrase
     let textToTranslate = cleanText.trim();
     textToTranslate = textToTranslate.replace(/\//g, "SLASHTOKEN ").replace(/:/g, " COLONTOKEN");
     
-    const oldScript = document.getElementById("qbcInvisibleTranslator");
-    if (oldScript) oldScript.remove();
+    // APPEL DE L'API INTERNATIONALE MUTUALISÉE ET GRATUITE MYMEMORY POUR LES LONGS PARAGRAPHES
+    const apiUrl = "https://translated.net" + encodeURIComponent(textToTranslate) + "&langpair=fr|en";
     
-    // Réception du texte de Google décodé au format TextMeshPro
-    window.qbcGoogleCallback = function(data) {
-        try {
-            if (data && data[0] && data[0][0] && data[0][0][0]) {
-                let translatedText = data[0][0][0];
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.responseData && data.responseData.translatedText) {
+                let translatedText = data.responseData.translatedText;
                 
-                // RESTAURATION DES SYMBOLES D'ORIGINE
+                // RESTAURATION DES SYMBOLES D'ORIGINE APRÈS TRADUCTION COMPLÈTE
                 translatedText = translatedText.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
                 translatedText = translatedText.replace(/\/ /g, "/").replace(/ \//g, "/");
                 translatedText = translatedText.replace(/ :/g, " :").replace(/: /g, ": ");
                 
-                // Éradication automatique des accents anglais majuscules (É -> E, À -> A)
+                // ÉRADICATION AUTOMATIQUE DES ACCENTS ANGLAIS MAJUSCULES (É -> E, À -> A)
                 translatedText = translatedText.replace(/[ÉÈÊË]/g, "E").replace(/[ÀÂÄ]/g, "A").replace(/[ÔÖ]/g, "O");
                 
                 // Réassemblage final de ta phrase complète mise à jour !
@@ -97,23 +97,18 @@ function autoTranslateLine(isDesc, index) {
                 
                 if (isDesc) renderDescFormLines(); else renderFormLines();
             }
-        } catch(e) {
+        })
+        .catch(err => {
+            // Sécurité si panne internet : recopie la chaîne française brute par défaut
             line.text_en = prefix + cleanText;
             if (isDesc) renderDescFormLines(); else renderFormLines();
-        }
-        delete window.qbcGoogleCallback;
-    };
-    
-    // CORRECTIONS DE L'ADRESSE INFRASTRUCTURE GOOGLE INTERNATIONALE COMPLÈTE
-    const scriptEl = document.createElement("script");
-    scriptEl.id = "qbcInvisibleTranslator";
-    scriptEl.src = "https://googleapis.com" + encodeURIComponent(textToTranslate);
-    document.body.appendChild(scriptEl);
+        });
 }
 
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
+
 
 
 /* ==========================================================================
