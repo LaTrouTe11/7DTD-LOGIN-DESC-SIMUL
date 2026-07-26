@@ -11,16 +11,16 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
     let textePropre = texteATraduire.trim();
     if (textePropre === "" || textePropre === "...") return;
 
-    // COUVRE-SYMBOLE : On protège / et : pour forcer Google à traduire l'entièreté des rajouts de mots
+    // COUVRE-SYMBOLE : On protège / et : pour force Google à traduire l'entièreté des rajouts de mots
     textePropre = textePropre.replace(/\//g, "SLASHTOKEN ").replace(/:/g, " COLONTOKEN");
 
-    // L'URL OFFICIELLE ET BRUTE DE L'INFRASTRUCTURE MONDIALE GOOGLE TRANSLATE
+    // L'URL OFFICIELLE DE L'API GOOGLE TRANSLATE BRUTE
     const urlMoteurGoogle = "https://googleapis.com" + encodeURIComponent(textePropre);
 
     fetch(urlMoteurGoogle)
         .then(reponse => reponse.json())
         .then(donnees => {
-            // Décompression chirurgicale de la première ligne de texte traduite dans l'arbre JSON de Google
+            // EXTRACTION CHIURGICALE EXACTE : On va chercher le premier texte pur dans la matrice de Google
             if (donnees && donnees[0] && donnees[0][0] && donnees[0][0][0]) {
                 let texteTraduit = donnees[0][0][0];
 
@@ -34,7 +34,7 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
                                            .replace(/[ÀÂÄàâä]/g, "A")
                                            .replace(/[ÔÖôö]/g, "O");
 
-                // Enregistrement chirurgical uniquement sur la ligne désirée !
+                // Enregistrement de la vraie phrase anglaise de Google dans votre zone EN
                 line.text_en = prefixe + texteTraduit;
                 line.show_english = true;
 
@@ -43,8 +43,7 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
             }
         })
         .catch(erreur => {
-            // RECOURS SÉCURISÉ : Si Google sature temporairement, ON N'ÉCRASE PLUS l'ancienne case anglaise !
-            // Le script refuse de remplacer ton texte anglais actuel par du français.
+            // RECOURS DE SÉCURITÉ : Si une micro-coupure survient, ON N'ÉCRASE PLUS l'anglais existant
             console.error("Temporisation réseau Google sur la ligne " + (index + 1), erreur);
         });
 }
