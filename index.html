@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- FIX CONSOLE : Empêche Chrome de chercher une favicon et d'afficher une erreur 404 -->
     <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- EN-TÊTE DE COMMANDE ET MODULES DE RESTAURATION DES FLUX JSON -->
     <div class="header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
         <div>
             <h1 style="color: #fbbf24; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">7DTD LOGIN+DESC SIMUL</h1>
@@ -36,6 +38,7 @@
         </div>
     </div>
 
+    <!-- COCKPIT CENTRAL ET COMPARTIMENT DES ONGLETS LOGIN & DESCRIPTION -->
     <div class="workspace-grid" id="mainMatrixContainer">
         <div class="card" id="editorContainerCard">
             <button type="button" class="btn-action" id="toggleCollapseBtn" style="position: absolute; top: 18px; right: 20px; background-color: #111827; border-color: #3f3f46; color: #fbbf24; font-size: 11px; z-index: 10;" onclick="toggleEditorCollapse()">[-] RÉDUIRE LE COCKPIT</button>
@@ -46,6 +49,7 @@
             </div>
 
             <div id="collapsibleWorkspacePanel" class="collapsible-panel">
+                <!-- ONGLET 1 : MATRICE DES LIGNES LOGIN -->
                 <div id="content-login" class="tab-content active">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
@@ -60,12 +64,15 @@
                     
                     <div id="linesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
                     
-                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" class="btn-action" onclick="addNewLine()">➕ AJOUTER EN FIN DE LISTE</button>
+                        <!-- BOUTON CIBLÉ SUR L'ONGLET LOGIN POUR ÉVITER LES CONFLITS -->
+                        <button type="button" class="btn-action" style="background-color: #2563eb; border-color: #3b82f6; color: #fff; font-weight: bold;" onclick="translateAllActiveLines()">♻️ CORRIGER TOUT L'ONGLET LOGIN</button>
                         <div id="alertBox" class="alert-banner">⚠️ DÉPASSEMENT CAPITAL DU LIEN : LE SERVEUR COUPERA LE MOTD !</div>
                     </div>
                 </div>
 
+                <!-- ONGLET 2 : MATRICE DES DESCRIPTIONS PROTÉGÉES -->
                 <div id="content-desc" class="tab-content">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
@@ -80,14 +87,17 @@
                     
                     <div id="descLinesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
                     
-                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" class="btn-action" onclick="addNewDescLine()">➕ AJOUTER EN FIN DE LISTE</button>
+                        <!-- BOUTON CIBLÉ SUR L'ONGLET DESCRIPTION POUR ÉVITER LES CONFLITS -->
+                        <button type="button" class="btn-action" style="background-color: #2563eb; border-color: #3b82f6; color: #fff; font-weight: bold;" onclick="translateAllActiveLines()">♻️ CORRIGER TOUT L'ONGLET DESCRIPTION</button>
                         <div id="descAlertBox" class="alert-banner">⚠️ EXPA-MÉMOIRE : VOTRE DESCRIPTION SURPASSE LE QUOTA DÉFINI !</div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- VISUALISATION EN TEMPS RÉEL ET SORTIE DU PAYLOAD TEXTMESHPRO -->
         <div class="card" id="previewContainerCard">
             <h3 style="font-size: 12px; color: #a1a1aa; margin: 0 0 12px 0; text-transform: uppercase; font-weight: bold;">📺 APERÇU FILTRÉ GRAPHIQUE (DANS LE COCKPIT DE CHARGEMENT 7DTD) :</h3>
             <div id="preview" class="preview-box" style="margin-bottom: 25px;"></div>
@@ -102,6 +112,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 

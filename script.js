@@ -261,17 +261,26 @@ function updateLineBorderStyle(isDesc, i, style) {
     if (isDesc) renderDescFormLines(); else renderFormLines();
 }
 
+// FONCTION MAÎTRE INTELLIGENTE : Traduit uniquement l'onglet en cours de visionnage
 function translateAllActiveLines() {
-    const isLogin = currentActiveTab === 'login';
+    const isLogin = (currentActiveTab === 'login');
     const list = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+    const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive;
+    
     let delay = 0;
+    
     list.forEach((line, index) => {
-        if (line.show_english || isLoginEnglishActive || isDescEnglishActive) {
-            setTimeout(() => { autoTranslateLine(!isLogin, index); }, delay);
-            delay += 400; 
+        // Le radar vérifie si la ligne EN est ouverte (individuellement ou globalement via l'onglet actif)
+        if (line.show_english || isGlobalEnglish) {
+            setTimeout(() => { 
+                // Passe true si c'est une description (isDesc), false si c'est un login
+                autoTranslateLine(!isLogin, index); 
+            }, delay);
+            delay += 400; // Tempo de protection anti-spam Google
         }
     });
 }
+
 
 function processAndCompileQBC() {
     const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase);
