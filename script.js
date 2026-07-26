@@ -1,12 +1,12 @@
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 1 SUR 5 === [ VARIABLE D'ÉTAT ET MATRICE DE BASE ] ===
+   === SCRIPT.JS : BLOC 1 SUR 6 === [ VARIABLES D'ÉTAT & BASE DE DONNÉES ] ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
-// Registre enrichi : Intégration des propriétés d'icônes et couleurs dédiées pour l'anglais
+// Registre de la base de données d'origine complète (Propriétés FR et EN séparées)
 let qbcDatabase = {
     '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
@@ -42,10 +42,10 @@ const symbolPalette = [
     { char: "🎒", name: "Sac à dos / Loot" }, { char: "⏰", name: "Horloge / Reboot" }, { char: "🔒", name: "Cadenas / Sécurisé" }, { char: "🌐", name: "Monde / Discord-Web" }
 ];
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 2 SUR 5 === [ COPIER / COLLER CHIRURGICAL PAR LIGNE ] ===
+   === SCRIPT.JS : BLOC 2 SUR 6 === [ COPIER / COLLER CHIRURGICAL PAR LIGNE ] ===
    ========================================================================== */
 
-// Fonction A : Copie instantanément le texte FR de la ligne cliquée dans le presse-papiers Windows
+// Fonction A : Copie le texte FR de la ligne cliquée dans le presse-papiers Windows
 function qbcCopierLigneFrançaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
     if (!list || !list[index]) return;
@@ -53,10 +53,10 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     let texteFR = list[index].text ? list[index].text.trim() : "";
     if (texteFR === "") return;
 
-    // Extraction propre pour ne pas envoyer le "1-" ou "2-" chez Google
+    // Nettoyage propre pour ne pas envoyer le "1-" ou "2-" chez Google Translate
     const numMatch = texteFR.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
-        texteFR = texteFR.substring(numMatch[0].length).trim();
+        texteFR = texteFR.substring(numMatch.length).trim();
     }
 
     const dummy = document.createElement("textarea");
@@ -67,7 +67,7 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     dummy.remove();
 }
 
-// Fonction B : Récupère ce que tu as copié et l'injecte directement dans la case EN de la ligne cliquée
+// Fonction B : Récupère la traduction du presse-papiers et l'injecte dans la case EN de la ligne
 function qbcCollerLigneAnglaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
     if (!list || !list[index]) return;
@@ -77,7 +77,7 @@ function qbcCollerLigneAnglaise(isDesc, index) {
             list[index].text_en = texteCopie.trim();
             list[index].show_english = true;
             
-            // Sauvegarde et rafraîchissement immédiat de la grille
+            // Sauvegarde de secours et rafraîchissement
             saveToLocalStorage();
             if (isDesc) renderDescFormLines(); else renderFormLines();
         }
@@ -90,24 +90,25 @@ function toggleEditorCollapse() {
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 3 SUR 5 === [ COMMUTATEURS ET ENREGISTREURS ANGLAIS ] ===
+   === SCRIPT.JS : BLOC 3 SUR 6 === [ COMMUTATEURS GLOBAUX ET INSTANCES ] ===
    ========================================================================== */
 function toggleLoginEnglish(checked) { 
     isLoginEnglishActive = checked; 
-    const lines = qbcDatabase[activeServerId].loginLines;
+    const lines = qbcDatabase[activeServerId]?.loginLines || [];
     lines.forEach(line => { line.show_english = checked; });
     renderFormLines(); 
 }
 
 function toggleDescEnglish(checked) { 
     isDescEnglishActive = checked; 
-    const lines = qbcDatabase[activeServerId].descLines;
+    const lines = qbcDatabase[activeServerId]?.descLines || [];
     lines.forEach(line => { line.show_english = checked; });
     renderDescFormLines(); 
 }
 
 function toggleLineEnglishIndividual(isDesc, i) { 
-    const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines; 
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
+    if (!list || !list[i]) return;
     list[i].show_english = !list[i].show_english; 
     
     if (!list[i].show_english) {
@@ -125,13 +126,15 @@ function toggleLineEnglishIndividual(isDesc, i) {
 }
 
 function toggleLineDoubleBorder(isDesc, i) { 
-    const l = isDesc ? qbcDatabase[activeServerId].descLines[i] : qbcDatabase[activeServerId].loginLines[i]; 
+    const l = isDesc ? qbcDatabase[activeServerId]?.descLines[i] : qbcDatabase[activeServerId]?.loginLines[i]; 
+    if (!l) return;
     l.border_double = !l.border_double; 
     if (isDesc) renderDescFormLines(); else renderFormLines(); 
 }
 
 function moveLine(isDesc, i, d) { 
-    const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines; 
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
+    if (!list) return;
     const t = i + d; 
     if (t < 0 || t >= list.length) return; 
     const tmp = list[i]; 
@@ -141,15 +144,17 @@ function moveLine(isDesc, i, d) {
 }
 
 function insertLineAt(isDesc, i) { 
-    const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines; 
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
+    if (!list) return;
     list.splice(i, 0, { symbol: "•", symbol_start: "", symbol_en_start: "", symbol_en_end: "", text: "MESSAGE ÉDITABLE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); 
     if (isDesc) renderDescFormLines(); else renderFormLines(); 
 }
 
 function toggleLineStyle(isDesc, i, lang, k) { 
-    const l = isDesc ? qbcDatabase[activeServerId].descLines[i] : qbcDatabase[activeServerId].loginLines[i]; 
+    const l = isDesc ? qbcDatabase[activeServerId]?.descLines[i] : qbcDatabase[activeServerId]?.loginLines[i]; 
+    if (!l) return;
     const o = lang === 'fr' ? l.style_fr : l.style_en; 
-    o[k] = !o[k]; 
+    if (o) o[k] = !o[k]; 
     if (isDesc) renderDescFormLines(); else renderFormLines(); 
 }
 
@@ -161,16 +166,61 @@ function createNewServerInstance() {
     document.getElementById('serverSelect').appendChild(opt); 
     document.getElementById('serverSelect').value = id; changeServerInstance(id);
 }
+/* ==========================================================================
+   === SCRIPT.JS : BLOC 4 SUR 6 === [ ENREGISTREURS ET ACTIONS DE MATRICE ] ===
+   ========================================================================== */
+function updateLineSymbolStart(isDesc, i, value) { 
+    if (isDesc) qbcDatabase[activeServerId].descLines[i].symbol_start = value; 
+    else qbcDatabase[activeServerId].loginLines[i].symbol_start = value; 
+    saveToLocalStorage(); 
+    processAndCompileQBC(); 
+}
 
-// NOUVEAUX ENREGISTREURS ET ACTIONS POUR LES REGLAGES DE LA LIGNE ENGLAISE
-function updateLineSymbolStart(isDesc, i, value) { if (isDesc) qbcDatabase[activeServerId].descLines[i].symbol_start = value; else qbcDatabase[activeServerId].loginLines[i].symbol_start = value; saveToLocalStorage(); processAndCompileQBC(); }
-function updateLineSymbolEnStart(isDesc, i, value) { if (isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_start = value; else qbcDatabase[activeServerId].loginLines[i].symbol_en_start = value; saveToLocalStorage(); processAndCompileQBC(); }
-function updateLineSymbolEnEnd(isDesc, i, value) { if (isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_end = value; else qbcDatabase[activeServerId].loginLines[i].symbol_en_end = value; saveToLocalStorage(); processAndCompileQBC(); }
-function updateLineColorEn(isDesc, i, hex) { if (isDesc) qbcDatabase[activeServerId].descLines[i].color_en = hex; else qbcDatabase[activeServerId].loginLines[i].color_en = hex; saveToLocalStorage(); if (isDesc) renderDescFormLines(); else renderFormLines(); }
+function updateLineSymbolEnStart(isDesc, i, value) { 
+    if (isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_start = value; 
+    else qbcDatabase[activeServerId].loginLines[i].symbol_en_start = value; 
+    saveToLocalStorage(); 
+    processAndCompileQBC(); 
+}
 
-function editCurrentServerName() { const n = prompt("NOUVEAU NOM :", qbcDatabase[activeServerId].name); if (!n || n.trim() === "") return; qbcDatabase[activeServerId].name = n.toUpperCase(); document.getElementById('serverSelect').options[document.getElementById('serverSelect').selectedIndex].innerText = n.toUpperCase(); processAndCompileQBC(); }
-function changeServerInstance(id) { activeServerId = id; if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); }
-function switchTab(t) { currentActiveTab = t; document.getElementById('tab-login-btn').classList.toggle('active', t==='login'); document.getElementById('tab-desc-btn').classList.toggle('active', t==='desc'); document.getElementById('tab-google-btn').classList.toggle('active', t==='google'); document.getElementById('content-login').classList.toggle('active', t==='login'); document.getElementById('content-desc').classList.toggle('active', t==='desc'); document.getElementById('content-google').classList.toggle('active', t==='google'); if (t==='login') renderFormLines(); else if (t==='desc') renderDescFormLines(); }
+function updateLineSymbolEnEnd(isDesc, i, value) { 
+    if (isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_end = value; 
+    else qbcDatabase[activeServerId].loginLines[i].symbol_en_end = value; 
+    saveToLocalStorage(); 
+    processAndCompileQBC(); 
+}
+
+function updateLineColorEn(isDesc, i, hex) { 
+    if (isDesc) qbcDatabase[activeServerId].descLines[i].color_en = hex; 
+    else qbcDatabase[activeServerId].loginLines[i].color_en = hex; 
+    saveToLocalStorage(); 
+    if (isDesc) renderDescFormLines(); else renderFormLines(); 
+}
+
+function editCurrentServerName() { 
+    const n = prompt("NOUVEAU NOM :", qbcDatabase[activeServerId].name); 
+    if (!n || n.trim() === "") return; 
+    qbcDatabase[activeServerId].name = n.toUpperCase(); 
+    document.getElementById('serverSelect').options[document.getElementById('serverSelect').selectedIndex].innerText = n.toUpperCase(); 
+    processAndCompileQBC(); 
+}
+
+function changeServerInstance(id) { 
+    activeServerId = id; 
+    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); 
+}
+
+function switchTab(t) { 
+    currentActiveTab = t; 
+    document.getElementById('tab-login-btn').classList.toggle('active', t==='login'); 
+    document.getElementById('tab-desc-btn').classList.toggle('active', t==='desc'); 
+    document.getElementById('tab-google-btn').classList.toggle('active', t==='google'); 
+    document.getElementById('content-login').classList.toggle('active', t==='login'); 
+    document.getElementById('content-desc').classList.toggle('active', t==='desc'); 
+    document.getElementById('content-google').classList.toggle('active', t==='google'); 
+    if (t==='login') renderFormLines(); else if (t==='desc') renderDescFormLines(); 
+}
+
 function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; processAndCompileQBC(); }
 function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
 function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); processAndCompileQBC(); }
@@ -180,23 +230,25 @@ function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) 
 function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", symbol_en_start: "", symbol_en_end: "", text: "MESSAGE DESC", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 4 SUR 5 — PARTIE A === [ RENDU GRAPHIQUE DES LIGNES ] ===
+   === SCRIPT.JS : BLOC 5 SUR 6 — PARTIE A === [ RENDU GRAPHIQUE DES LIGNES ] ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
-    const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); container.innerHTML = "";
+    const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); 
+    if (!container) return;
+    container.innerHTML = "";
     
     currentLines.forEach((line, index) => {
         const div = document.createElement('div'); 
         const isEngVisible = line.show_english || isGlobalEnglish;
         div.className = "line-item" + (line.border_style && line.border_style !== "none" ? " has-double-border" : "");
         
-        // --- SÉCURITÉ DE RENTRÉE POUR LES COMPATIBILITÉS JSON ---
+        // --- INITIALISATIONS DE SÉCURITÉ CONTRE LE BUG DES LIGNES ---
         if (line.symbol_start === undefined) line.symbol_start = "";
         if (line.symbol_en_start === undefined) line.symbol_en_start = "";
         if (line.symbol_en_end === undefined) line.symbol_en_end = "";
         if (line.color_en === undefined) line.color_en = line.color || "ffffff";
         
-        // 1. SÉLECTEURS POUR LA CONFIGURATION FRANÇAISE
+        // 1. BLOC SÉLECTEURS CONFIGURATION FRANÇAISE
         let symStartSel = `<select class="line-select" style="width:105px;" onchange="updateLineSymbolStart(${isDesc}, ${index}, this.value)">`;
         symStartSel += `<option value="" disabled style="color:#fbbf24; font-weight:bold;">FR Début :</option>`;
         symbolPalette.forEach(s => symStartSel += `<option value="${s.char}" ${s.char === line.symbol_start ? "selected" : ""}>${s.name}</option>`); symStartSel += `</select>`;
@@ -208,7 +260,7 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         let colSel = `<select class="line-select" style="width:90px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
         colorPalette.forEach(c => colSel += `<option value="${c.hex}" ${c.hex === line.color ? "selected" : ""}>FR ${c.name}</option>`); colSel += `</select>`;
         
-        // 2. SÉLECTEURS SPÉCIFIQUES POUR LA CONFIGURATION ANGLAISE (AVANT / APRÈS / COULEUR COCHÉE)
+        // 2. BLOC SÉLECTEURS CONFIGURATION ANGLAISE
         let symEnStartSel = `<select class="line-select" style="width:105px;" onchange="updateLineSymbolEnStart(${isDesc}, ${index}, this.value)">`;
         symEnStartSel += `<option value="" disabled style="color:#38bdf8; font-weight:bold;">EN Avant :</option>`;
         symbolPalette.forEach(s => symEnStartSel += `<option value="${s.char}" ${s.char === line.symbol_en_start ? "selected" : ""}>${s.name}</option>`); symEnStartSel += `</select>`;
@@ -249,21 +301,23 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         
         div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563; font-weight:bold;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn} ${borderSel}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
         container.appendChild(div);
-    }); processAndCompileQBC();
+    }); 
 }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 4 SUR 5 — PARTIE B === [ ENCODAGE DES PAYLOADS CROISÉS ] ===
+   === SCRIPT.JS : BLOC 5 SUR 6 — PARTIE B === [ ENCODAGE DES PAYLOADS CROISÉS ] ===
    ========================================================================== */
 function renderFormLines() { 
     const toggleEl = document.getElementById('loginEnglishToggle');
     const isGlobalEng = toggleEl ? toggleEl.checked : false;
-    buildFormRows(false, qbcDatabase[activeServerId].loginLines, isGlobalEng); 
+    const lines = qbcDatabase[activeServerId]?.loginLines || [];
+    buildFormRows(false, lines, isGlobalEng); 
 }
 
 function renderDescFormLines() { 
     const toggleEl = document.getElementById('descEnglishToggle');
     const isGlobalEng = toggleEl ? toggleEl.checked : false;
-    buildFormRows(true, qbcDatabase[activeServerId].descLines, isGlobalEng); 
+    const lines = qbcDatabase[activeServerId]?.descLines || [];
+    buildFormRows(true, lines, isGlobalEng); 
 }
 
 function updateLineBorderStyle(isDesc, i, style) {
@@ -281,27 +335,25 @@ function processAndCompileQBC() {
     currentLines.forEach((line, index) => {
         let textFR = line.text ? line.text.trim() : ""; let textEN = line.text_en ? line.text_en.trim() : "";
         
-        // Initialisation de sécurité pour les anciennes données JSON
         if (line.symbol_start === undefined) line.symbol_start = "";
         if (line.symbol_en_start === undefined) line.symbol_en_start = "";
         if (line.symbol_en_end === undefined) line.symbol_en_end = "";
         if (line.color_en === undefined) line.color_en = line.color || "ffffff";
 
-        // --- COMPILATION DU BLOC FRANÇAIS (Souverain) ---
+        // --- COMPILATION DU BLOC FRANÇAIS ---
         let fullFR = textFR;
         if (line.symbol_start && line.symbol_start.trim() !== "") fullFR = line.symbol_start + " " + fullFR;
         if (line.symbol && line.symbol.trim() !== "") fullFR = fullFR + " " + line.symbol;
         if (line.style_fr?.u) fullFR = "[u]" + fullFR + "[/u]"; if (line.style_fr?.b) fullFR = "[b]" + fullFR + "[/b]";
         let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; const isEnglishActive = line.show_english || isGlobalEnglish;
         
-        // --- COMPILATION DU BLOC ANGLAIS AVEC SES PROPRES ICÔNES ET COULEUR DÉDIÉE ---
+        // --- COMPILATION DU BLOC ANGLAIS CROISÉ ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
             if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end;
             if (line.style_en?.u) fullEN = "[u]" + fullEN + "[/u]"; if (line.style_en?.b) fullEN = "[b]" + fullEN + "[/b]";
             
-            // Soudure du texte anglais avec son code couleur dédié (ex: [00ffff] mon texte [-])
             masterPayload += chunkFR + " | [" + line.color_en + "]" + fullEN + "[-]";
         } else { 
             masterPayload += chunkFR; 
@@ -318,14 +370,15 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    document.getElementById('masterOutput').value = masterPayload; 
+    const outEl = document.getElementById('masterOutput'); if (outEl) outEl.value = masterPayload; 
     let htmlContent = masterPayload.replace(/\\n/g, '\n').replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>').replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
-    document.getElementById('preview').innerHTML = htmlContent; const total = masterPayload.length;
+    const prevEl = document.getElementById('preview'); if (prevEl) prevEl.innerHTML = htmlContent; const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter'), alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
-    counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; alertEl.style.display = total > limit ? "block" : "none";
+    if (counterEl) { counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; }
+    if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 5 SUR 5 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
+   === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
    ========================================================================== */
 function saveToLocalStorage() { 
     localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); 
@@ -339,7 +392,7 @@ function loadFromLocalStorage() {
             const serverIds = Object.keys(qbcDatabase);
             const selectEl = document.getElementById('serverSelect'); selectEl.innerHTML = "";
             serverIds.forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.innerText = qbcDatabase[id].name || id.toUpperCase(); selectEl.appendChild(opt); });
-            activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds; selectEl.value = activeServerId;
+            activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; selectEl.value = activeServerId;
             document.getElementById('qbcTimeTrackerText').innerText = "💾 RESTAURATION AUTOMATIQUE DE TON TRAVAIL ACTIVE !";
         } catch(e) { console.error("Erreur LocalStorage"); }
     }
@@ -376,7 +429,7 @@ function importQbcConfig(event) {
             });
             const oldId = activeServerId; const selectEl = document.getElementById('serverSelect'); selectEl.innerHTML = "";
             serverIds.forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.innerText = parsedData[id].name || id.toUpperCase(); selectEl.appendChild(opt); });
-            qbcDatabase = parsedData; activeServerId = serverIds.includes(oldId) ? oldId : serverIds; selectEl.value = activeServerId;
+            qbcDatabase = parsedData; activeServerId = serverIds.includes(oldId) ? oldId : serverIds[0]; selectEl.value = activeServerId;
             
             saveToLocalStorage(); 
             const d = new Date();
@@ -391,7 +444,6 @@ function importQbcConfig(event) {
 
 function copyMasterPayload() { const output = document.getElementById('masterOutput'); output.select(); document.execCommand('copy'); alert('CHAINE COPIEE AVEC SUCCES'); }
 
-// VARIATEUR DE TAILLE D'ÉCRAN DYNAMIQUE AVEC SÉCURITÉ DE SAUVEGARDE
 function changeUiZoom(zoomValue) {
     document.body.style.zoom = zoomValue + "%";
     document.body.style.transform = "scale(" + (zoomValue / 100) + ")";
@@ -399,7 +451,6 @@ function changeUiZoom(zoomValue) {
     localStorage.setItem("qbc_preferred_zoom", zoomValue);
 }
 
-// ALLUMAGE INTERNE DU COCKPIT ET CHARGEMENT DU ZOOM MÉMORISÉ
 const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
 const zoomSelectEl = document.getElementById("uiZoomSelect");
 if (zoomSelectEl) zoomSelectEl.value = savedZoom;
