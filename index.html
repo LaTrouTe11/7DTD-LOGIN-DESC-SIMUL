@@ -52,7 +52,7 @@
         </div>
     </div>
 
-    <!-- COCKPIT CENTRAL ET COMPARTIMENT DES ONGLETS LOGIN & DESCRIPTION -->
+    <!-- COCKPIT CENTRAL ET COMPARTIMENT DES ONGLETS LOGIN, DESCRIPTION & GOOGLE -->
     <div class="workspace-grid" id="mainMatrixContainer">
         <div class="card" id="editorContainerCard">
             <button type="button" class="btn-action" id="toggleCollapseBtn" style="position: absolute; top: 18px; right: 20px; background-color: #111827; border-color: #3f3f46; color: #fbbf24; font-size: 11px; z-index: 10;" onclick="toggleEditorCollapse()">[-] RÉDUIRE LE COCKPIT</button>
@@ -60,6 +60,7 @@
             <div class="tab-container">
                 <button class="tab-btn active" id="tab-login-btn" onclick="switchTab('login')">📟 LOGIN TEXT SERVER</button>
                 <button class="tab-btn" id="tab-desc-btn" onclick="switchTab('desc')">🌐 DESCRIPTION SERVER</button>
+                <button class="tab-btn" id="tab-google-btn" style="color: #38bdf8; border-color: #2563eb;" onclick="switchTab('google')">🌍 GOOGLE TRADUCTION</button>
             </div>
 
             <div id="collapsibleWorkspacePanel" class="collapsible-panel">
@@ -75,10 +76,8 @@
                         </div>
                         <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalCharCounter">TOTAL : 0 / 3500 CHARS</div>
                     </div>
-                    
                     <div id="linesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
-                    
-                    <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
                         <button type="button" class="btn-action" onclick="addNewLine()">➕ AJOUTER EN FIN DE LISTE</button>
                         <div id="alertBox" class="alert-banner">⚠️ DÉPASSEMENT CAPITAL DU LIEN : LE SERVEUR COUPERA LE MOTD !</div>
                     </div>
@@ -95,12 +94,24 @@
                         </div>
                         <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalDescCharCounter">TOTAL : 0 / 4000 CHARS</div>
                     </div>
-                    
                     <div id="descLinesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
-                    
-                    <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
                         <button type="button" class="btn-action" onclick="addNewDescLine()">➕ AJOUTER EN FIN DE LISTE</button>
                         <div id="descAlertBox" class="alert-banner">⚠️ EXPA-MÉMOIRE : VOTRE DESCRIPTION SURPASSE LE QUOTA DÉFINI !</div>
+                    </div>
+                </div>
+
+                <!-- ONGLET 3 : INTÉGRATION SOUVERAINE DE GOOGLE TRANSLATE SANS BLOCAGE -->
+                <div id="content-google" class="tab-content">
+                    <h2 style="font-size: 12px; margin: 0 0 10px 0; color: #38bdf8; text-transform: uppercase; font-weight: 900;">🌍 COCKPIT EXTRACTEUR DE TRADUCTION DE MASSE SANS SCRIPT</h2>
+                    
+                    <!-- LA VRAIE INTERFACE GOOGLE TRANSLATE WEB EMBARQUÉE SÉCURISÉE -->
+                    <iframe src="https://google.com" style="width: 100%; height: 500px; border: 1px solid #2563eb; background: #fff; border-radius: 4px; margin-bottom: 15px;"></iframe>
+                    
+                    <!-- BOUTONS MAGIQUES DE COPIE EN BLOC POUR LE COPIER-COLLER RAPIDE -->
+                    <div style="display: flex; gap: 15px; background: #09090b; padding: 15px; border: 1px dashed #27272a; border-radius: 4px;">
+                        <button type="button" class="btn-action" style="background-color: #10b981; border-color: #34d399; color: #fff; flex-grow: 1; padding: 12px;" onclick="copierToutLeTexteFrançais('login')">📋 COPIER TOUT LE FR DU LOGIN D'UN COUP</button>
+                        <button type="button" class="btn-action" style="background-color: #0284c7; border-color: #38bdf8; color: #fff; flex-grow: 1; padding: 12px;" onclick="copierToutLeTexteFrançais('desc')">📋 COPIER TOUT LE FR DE LA DESCRIPTION D'UN COUP</button>
                     </div>
                 </div>
             </div>
@@ -117,11 +128,11 @@
         </div>
     </div>
 
-    <!-- APPEL EXCLUSIF DU FLUX APPLICATIF LOGIQUE EXTERNE SANS BLOCAGE -->
-    <script src="traducteur.js"></script>
+    <!-- APPEL EXCLUSIF DU FLUX APPLICATIF LOGIQUE EXTERNE -->
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 

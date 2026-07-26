@@ -1,12 +1,12 @@
 /* ==========================================================================
    === SCRIPT.JS : BLOC 1 SUR 5 === [ VARIABLE D'ÉTAT ET MATRICE DE BASE ] ===
-   ========================================================================= */
+   ========================================================================== */
 let currentActiveTab = 'login';
-let activeServerId = '7dtd_core'; // CORRECTION CRITIQUE : Plus de tirets bloquants
+let activeServerId = '7dtd_core';
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
-// Registre de la base de données d'origine complète (700 lignes préservées)
+// Base de données d'origine (Restauration automatique par LocalStorage au démarrage)
 let qbcDatabase = {
     '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
@@ -41,45 +41,38 @@ const symbolPalette = [
     { char: "⭐", name: "Étoile / Important" }, { char: "👑", name: "Couronne / VIP-Admin" }, { char: "☠️", name: "Tête de mort / Mort" },
     { char: "🎒", name: "Sac à dos / Loot" }, { char: "⏰", name: "Horloge / Reboot" }, { char: "🔒", name: "Cadenas / Sécurisé" }, { char: "🌐", name: "Monde / Discord-Web" }
 ];
-
-const qbcLocalDictionary = { 
-    "règlements :": "RULES:", 
-    "pas de landclaim au poi carl's corn farm.": "No landclaim at POI Carl's Corn Farm.", 
-    "vol de base interdit (sécurisez vos coffres).": "Base stealing forbidden (secure your chests).", 
-    "bienvenue sur l'infrastructure de varennes.": "Welcome to Varennes infrastructure."
-};
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 2 SUR 5 === [ PASSERELLE DE TRADUCTION ET PLIAGE ] ===
+   === SCRIPT.JS : BLOC 2 SUR 5 === [ COMPILATEURS ET COPIE DE MASSE FR ] ===
    ========================================================================== */
-function autoTranslateLine(isDesc, index) {
-    const isLogin = !isDesc;
-    const linesList = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    if (!linesList || !linesList[index]) return;
-    const line = linesList[index];
-    
-    let rawText = line.text.trim(); 
-    if (rawText === "" || rawText === "...") return;
-    
-    let prefix = "";
-    let cleanText = rawText;
-    
-    // EXTRACTEUR SANS DOUBLON : Isole proprement le "1-" ou le "2-" à gauche
-    const numMatch = rawText.match(/^([0-9]+-\s*)/);
-    if (numMatch && numMatch.length > 0) {
-        prefix = numMatch[0]; // FIX CRITIQUE : Utilise la chaîne de caractères [0] au lieu du tableau brut !
-        cleanText = rawText.substring(prefix.length).trim();
-    }
-    
-    // APPEL CHIRURGICAL LIGNE PAR LIGNE : Transmet l'envoi au moteur de traducteur.js
-    if (typeof executerTraductionQBC === "function") {
-        executerTraductionQBC(isDesc, index, cleanText, prefix);
-    } else {
-        line.text_en = prefix + cleanText;
-        line.show_english = true;
-        if (isDesc) renderDescFormLines(); else renderFormLines();
-    }
-}
 
+// Compilateur chirurgical : rassemble le FR de tout un onglet pour Google Translate Web
+function copierToutLeTexteFrançais(ongletType) {
+    const list = (ongletType === 'login') ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+    if (!list || list.length === 0) { 
+        alert("Aucune ligne à extraire, patron !"); 
+        return; 
+    }
+    
+    // Filtre les numéros d'ordre (1-, 2-) pour envoyer un texte brut propre à Google
+    let blocTexteFR = list.map(line => {
+        let txt = line.text ? line.text.trim() : "";
+        const numMatch = txt.match(/^([0-9]+-\s*)/);
+        if (numMatch && numMatch.length > 0) {
+            txt = txt.substring(numMatch[0].length).trim();
+        }
+        return txt;
+    }).join("\n");
+    
+    // Système de copie sécurisé à la racine Windows
+    const dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = blocTexteFR;
+    dummy.select();
+    document.execCommand("copy");
+    dummy.remove();
+    
+    alert("🚀 EXTRACTION REUSSIE, PATRON !\nToutes les lignes FR ont été copiées d'un coup !\nFais simplement 'Ctrl + V' dans la zone de gauche de Google Traduction.");
+}
 
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
@@ -165,7 +158,18 @@ function editCurrentServerName() {
 }
 
 function changeServerInstance(id) { activeServerId = id; if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); }
-function switchTab(t) { currentActiveTab = t; document.getElementById('tab-login-btn').classList.toggle('active', t==='login'); document.getElementById('tab-desc-btn').classList.toggle('active', t==='desc'); document.getElementById('content-login').classList.toggle('active', t==='login'); document.getElementById('content-desc').classList.toggle('active', t==='desc'); if (t==='login') renderFormLines(); else renderDescFormLines(); }
+
+function switchTab(t) { 
+    currentActiveTab = t; 
+    document.getElementById('tab-login-btn').classList.toggle('active', t==='login'); 
+    document.getElementById('tab-desc-btn').classList.toggle('active', t==='desc'); 
+    document.getElementById('tab-google-btn').classList.toggle('active', t==='google'); 
+    document.getElementById('content-login').classList.toggle('active', t==='login'); 
+    document.getElementById('content-desc').classList.toggle('active', t==='desc'); 
+    document.getElementById('content-google').classList.toggle('active', t==='google'); 
+    if (t==='login') renderFormLines(); else if (t==='desc') renderDescFormLines(); 
+}
+
 function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; processAndCompileQBC(); }
 function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
 function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); processAndCompileQBC(); }
@@ -175,7 +179,7 @@ function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) 
 function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", text: "MESSAGE DESC", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 4 SUR 5 === [ DESSIN DES FORMULAIRES ET COMPILATEUR ] ===
+   === SCRIPT.JS : BLOC 4 SUR 5 === [ RENDU VISUEL ET ENCODAGE PAYLOAD ] ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); container.innerHTML = "";
@@ -211,7 +215,8 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         }
         
         let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
-        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 MANUEL</button><button type="button" class="double-line-btn" onclick="autoTranslateLine(${isDesc}, ${index})">🤖 AUTO</button>` : "";
+        // NETTOYAGE : Suppression définitive du bouton 🤖 AUTO de la ligne
+        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 MANUEL</button>` : "";
         
         div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symSel} ${colSel} ${transBtn} ${borderSel}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
         container.appendChild(div);
@@ -238,7 +243,7 @@ function updateLineBorderStyle(isDesc, i, style) {
 }
 
 function processAndCompileQBC() {
-    const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase)[0];
+    const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase);
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; const limit = isLogin ? 3500 : 4000; let masterPayload = "";
     
@@ -338,6 +343,7 @@ if (zoomSelectEl) zoomSelectEl.value = savedZoom;
 changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
+
 
 
 
