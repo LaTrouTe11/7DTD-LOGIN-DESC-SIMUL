@@ -44,7 +44,7 @@ const symbolPalette = [
    === SCRIPT.JS : BLOC 2 SUR 6 === [ COPIER / COLLER CHIRURGICAL FIABILISÉ ] ===
    ========================================================================== */
 
-// Fonction A : Copie chirurgicale du texte FR de la ligne sans bogue d'index
+// Fonction A : Copie chirurgicale du texte FR de la ligne sans aucun bogue d'index
 function qbcCopierLigneFrançaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
     if (!list || !list[index]) return;
@@ -52,7 +52,7 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     let texteFR = list[index].text ? list[index].text.trim() : "";
     if (texteFR === "") return;
 
-    // FIX RADICAL : Nettoyage universel et stable du préfixe d'ordre (1-, 2-) sans crash
+    // FIX RADICAL : Extraction et nettoyage propre sans planter la console
     const numMatch = texteFR.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
         texteFR = texteFR.substring(numMatch[0].length).trim();
@@ -66,7 +66,7 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     dummy.remove();
 }
 
-// Fonction B : Injection sécurisée du presse-papiers dans la case EN correspondante
+// Fonction B : Injection propre du presse-papiers dans la case anglaise EN correspondante
 function qbcCollerLigneAnglaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
     if (!list || !list[index]) return;
@@ -302,7 +302,7 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     }); 
 }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 5 SUR 6 — PARTIE B === [ ENCODAGE DES PAYLOADS CROISÉS ] ===
+   === SCRIPT.JS : BLOC 5 — PARTIE B === [ ENCODAGE DES PAYLOADS CROISÉS ] ===
    ========================================================================== */
 function renderFormLines() { 
     const toggleEl = document.getElementById('loginEnglishToggle');
@@ -326,9 +326,9 @@ function updateLineBorderStyle(isDesc, i, style) {
 }
 
 function processAndCompileQBC() {
-    const isLogin = (currentActiveTab === 'login'); 
+    const isLogin = currentActiveTab === 'login'; 
     
-    // CORRECTION CRITIQUE : Force l'ID d'instance pur en texte pour empêcher le crash
+    // NOUVELLE RÈGLE : Plus de blocage si activeServerId est invalide, on remet à plat
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
@@ -351,7 +351,7 @@ function processAndCompileQBC() {
         if (line.symbol_en_end === undefined) line.symbol_en_end = "";
         if (line.color_en === undefined) line.color_en = line.color || "ffffff";
 
-        // --- COMPILATION DU BLOC FRANÇAIS ---
+        // --- ENCODAGE DU BLOC FRANÇAIS ---
         let fullFR = textFR;
         if (line.symbol_start && line.symbol_start.trim() !== "") fullFR = line.symbol_start + " " + fullFR;
         if (line.symbol && line.symbol.trim() !== "") fullFR = fullFR + " " + line.symbol;
@@ -360,7 +360,7 @@ function processAndCompileQBC() {
         let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; 
         const isEnglishActive = line.show_english || isGlobalEnglish;
         
-        // --- COMPILATION DU BLOC ANGLAIS CROISÉ SANS BOUCLE INFINIE ---
+        // --- ENCODAGE DU BLOC ANGLAIS CROISÉ (CORRIGÉ SANS DUPLICATION INFINIE) ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
@@ -383,10 +383,8 @@ function processAndCompileQBC() {
         }
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
-/* ==========================================================================
-   === SCRIPT.JS : BLOC 5 — PARTIE B === [ ENVOI GRAPHIQUE & ACCOLADE ]     ===
-   ========================================================================== */
-    // ENVOI SÉCURISÉ DANS LES ÉLÉMENTS DE L'INTERRUPTEUR GRAPHIQUE HTML
+    
+    // PROPAGATION IMMÉDIATE SANS TENIR COMPTE DES LIMITES DE BLOCAGE VISUEL
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
@@ -401,15 +399,11 @@ function processAndCompileQBC() {
     const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter');
     const alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
-    
-    if (counterEl) { 
-        counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; 
-        counterEl.style.color = total > limit ? "#f87171" : "#34d399"; 
-    }
+    if (counterEl) { counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; }
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE LOCALE, IMPORTATION & ZOOM ] ===
+   === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
    ========================================================================== */
 function saveToLocalStorage() { 
     localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); 
@@ -430,8 +424,11 @@ function loadFromLocalStorage() {
                     opt.innerText = qbcDatabase[id].name || id.toUpperCase(); 
                     selectEl.appendChild(opt); 
                 });
-                // CORRECTION HISTORIQUE : Extraction d'un mot pur (String) au lieu d'un tableau complet (Array)
-                activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; 
+                
+                // NOVEAU CORRECTIF ANTI-VIDE : On extrait le premier élément du tableau de clés si activeServerId est corrompu
+                if (!serverIds.includes(activeServerId)) {
+                    activeServerId = serverIds[0];
+                }
                 selectEl.value = activeServerId;
             }
             const trackerText = document.getElementById('qbcTimeTrackerText');
@@ -487,7 +484,6 @@ function importQbcConfig(event) {
                 });
             });
             
-            const oldId = activeServerId; 
             const selectEl = document.getElementById('serverSelect'); 
             if (selectEl) {
                 selectEl.innerHTML = "";
@@ -498,8 +494,9 @@ function importQbcConfig(event) {
                     selectEl.appendChild(opt); 
                 });
                 qbcDatabase = parsedData; 
-                // CORRECTION DU CRASH D'ID ICI AUSSI
-                activeServerId = serverIds.includes(oldId) ? oldId : serverIds[0]; 
+                
+                // NOVEAU CORRECTIF ANTI-VIDE ICI AUSSI : On force une String pure et non l'objet Array complet
+                activeServerId = serverIds[0]; 
                 selectEl.value = activeServerId;
             }
             
@@ -541,3 +538,4 @@ if (zoomSelectEl) zoomSelectEl.value = savedZoom;
 changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
+
