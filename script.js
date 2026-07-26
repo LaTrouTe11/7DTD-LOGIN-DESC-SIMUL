@@ -66,7 +66,7 @@ function autoTranslateLine(isDesc, index) {
     // EXTRACTEUR SANS DOUBLON : Isole proprement le "1-" ou le "2-" à gauche
     const numMatch = rawText.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
-        prefix = numMatch[0]; 
+        prefix = numMatch[0]; // FIX CRITIQUE : Utilise la chaîne de caractères [0] au lieu du tableau brut !
         cleanText = rawText.substring(prefix.length).trim();
     }
     
@@ -79,6 +79,7 @@ function autoTranslateLine(isDesc, index) {
         if (isDesc) renderDescFormLines(); else renderFormLines();
     }
 }
+
 
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 

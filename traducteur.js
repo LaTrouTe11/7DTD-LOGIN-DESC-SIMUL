@@ -21,7 +21,7 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
     // RACCORDEMENT DU CALLBACK MAÎTRE POUR LIRE L'ARBRE DE DONNÉES DE GOOGLE
     window.qbcGoogleCallback = function(data) {
         try {
-            // Décompression chirurgicale de la matrice multi-crochets de Google Translate
+            // EXTRACTION CHIURGICALE EXACTE DU TEXTE GOOGLE DANS LA MATRICE MULTI-CROCHETS
             if (data && data[0] && data[0][0] && data[0][0][0]) {
                 let texteTraduit = data[0][0][0];
 
@@ -54,6 +54,7 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
     scriptEl.src = "https://googleapis.com" + encodeURIComponent(textePropre);
     document.body.appendChild(scriptEl);
 }
+
 
 
 
