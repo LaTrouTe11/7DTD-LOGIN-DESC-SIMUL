@@ -4,60 +4,15 @@
     <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QBC ADVANCED AUTO-TEXT METRICS STUDIO</title>
-    <style>
-        /* ==========================================================================
-           === INTERFACE CSS COMPLÈTE D'ORIGINE : APPARIEMENT ET DESIGN DU COCKPIT ===
-           ========================================================================== */
-        body { background-color: #09090b; color: #f4f4f5; font-family: monospace; padding: 20px; margin: 0; }
-        .header { border-bottom: 1px solid #27272a; padding-bottom: 10px; margin-bottom: 20px; }
-        .workspace-grid { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: 0 auto; }
-        .card { background-color: #18181b; padding: 20px; border-radius: 4px; border: 1px solid #27272a; position: relative; }
-        .input-line { background-color: #09090b; border: 1px solid #27272a; color: #fff; padding: 10px; font-family: monospace; font-size: 13px; outline: none; flex-grow: 1; width: 100%; box-sizing: border-box; }
-        .preview-box { background-color: #000; border: 1px dashed #3f3f46; padding: 25px; min-height: 250px; max-height: 450px; overflow-y: auto; white-space: pre-wrap; color: #a1a1aa; line-height: 1.7; border-radius: 2px; font-size: 13px; }
-        
-        .collapsible-panel { max-height: 2000px; overflow: hidden; transition: max-height 0.4s ease-out; }
-        .collapsible-panel.collapsed { max-height: 0px !important; }
-        
-        .tab-container { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #27272a; padding-bottom: 1px; }
-        .tab-btn { background-color: #09090b; border: 1px solid #27272a; color: #71717a; padding: 12px 24px; font-family: monospace; font-weight: bold; font-size: 12px; cursor: pointer; text-transform: uppercase; border-bottom: none; border-radius: 4px 4px 0 0; transition: all 0.2s; }
-        .tab-btn.active { background-color: #18181b; border-color: #27272a; color: #fbbf24; border-bottom: 2px solid #fbbf24; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        .line-select { background-color: #09090b; border: 1px solid #27272a; color: #fff; padding: 9px; font-family: monospace; font-size: 12px; outline: none; border-radius: 2px; cursor: pointer; }
-        .btn-action { background-color: #27272a; border: 1px solid #3f3f46; color: #e4e4e7; padding: 10px 20px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; font-size: 12px; }
-        .btn-action:hover { background-color: #3f3f46; }
-        .btn-io { background-color: #1f2937; border: 1px solid #4b5563; color: #f3f4f6; padding: 6px 14px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; text-transform: uppercase; }
-        .btn-io:hover { background-color: #374151; border-color: #6b7280; }
-        .btn-copy-master { background-color: #fbbf24; border: none; color: #000; padding: 14px 28px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
-        .style-btn { background-color: #09090b; border: 1px solid #27272a; color: #71717a; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; transition: all 0.2s; user-select: none; }
-        .style-btn.active { background-color: #2563eb; color: #fff; border-color: #3b82f6; }
-        .order-btn { background-color: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 5px 8px; font-size: 11px; cursor: pointer; border-radius: 2px; font-family: monospace; }
-        .order-btn:hover { background-color: #3f3f46; border-color: #71717a; }
-        .btn-insert-here { background-color: #065f46; border: 1px solid #059669; color: #34d399; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; border-radius: 2px; font-family: monospace; }
-        .btn-insert-here:hover { background-color: #047857; color: #fff; }
-        .double-line-btn { background-color: #111827; border: 1px solid #4b5563; color: #9ca3af; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; transition: all 0.2s; }
-        .double-line-btn.active { background-color: #d97706; border-color: #fbbf24; color: #fff; }
-        .line-item { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background-color: rgba(9, 9, 11, 0.6); padding: 14px; border-radius: 4px; border: 1px solid #222; box-sizing: border-box; }
-        .line-item.has-double-border { border-bottom: 4px double #d97706 !important; }
-        .line-controls { display: flex; align-items: center; gap: 8px; width: 100%; border-bottom: 1px dashed #27272a; padding-bottom: 6px; flex-wrap: wrap; }
-        .line-inputs-block { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .input-row { display: flex; align-items: center; gap: 10px; width: 100%; }
-        .line-number { font-size: 12px; color: #71717a; width: 85px; font-weight: bold; }
-        .char-badge-fr { font-size: 11px; font-weight: bold; background-color: #111827; color: #34d399; padding: 6px 8px; border: 1px solid #065f46; min-width: 60px; text-align: center; border-radius: 2px; }
-        .char-badge-en { font-size: 11px; font-weight: bold; background-color: #1e1b4b; color: #38bdf8; padding: 6px 8px; border: 1px solid #3730a3; min-width: 60px; text-align: center; border-radius: 2px; }
-        .alert-banner { color: #f87171; font-size: 11px; font-weight: bold; margin-top: 10px; display: none; }
-        .eng-input-box { display: none; width: 100%; }
-        .line-item.show-english .eng-input-box, .eng-global-active .eng-input-box { display: block !important; }
-    </style>
+    <title>7dtd login+desc simul</title>
+    <!-- RACCORDEMENT DE LA FEUILLE DE STYLE EXTERNE SANS CONFLIT -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- EN-TÊTE DE COMMANDE ET MODULES DE RESTAURATION DES FLUX JSON -->
     <div class="header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
         <div>
-            <h1 style="color: #fbbf24; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">7DTD-LOGIN-DESC-SIMUL</h1>
-            <p id="qbcTimeTrackerText" style="margin: 4px 0 0 0; font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold;">INFRASTRUCTURE SOUVERAINE — CONSOLE UNIQUE ET INTEGRALE</p>
+            <h1 style="color: #fbbf24; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">7DTD LOGIN+DESC SIMUL</h1>
+            <p id="qbcTimeTrackerText" style="margin: 4px 0 0 0; font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold;">PANNEAU SOUVERAIN — SYNCHRONISATION EN DIRECT DES INTERFACES</p>
         </div>
         
         <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #27272a; border-radius: 4px; background-color: #18181b;">
@@ -74,17 +29,13 @@
             </div>
             
             <div style="display: flex; gap: 6px; margin-top: 14px; border-left: 1px solid #27272a; padding-left: 12px; margin-left: 4px;">
-    <button type="button" class="btn-io" style="border-color: #ffaa00; color: #ffaa00;" onclick="exportQbcConfig()">📥 Exporter CONFIG (JSON)</button>
-    <button type="button" class="btn-io" style="border-color: #10b981; color: #10b981;" onclick="triggerJsonImport()">📤 Charger CONFIG (JSON)</button>
-    
-    <!-- UNE SEULE BALISE PROPRE ACCROCHÉE À L'ÉCOUTEUR DU SCRIPT.JS -->
-         <input type="file" id="jsonFileInput" style="display: none;" accept=".json" onchange="importQbcConfig(this)" />
-</div>
-
+                <button type="button" class="btn-io" style="border-color: #ffaa00; color: #ffaa00;" onclick="exportQbcConfig()">📥 Exporter CONFIG (JSON)</button>
+                <button type="button" class="btn-io" style="border-color: #10b981; color: #10b981;" onclick="triggerJsonImport()">📤 Charger CONFIG (JSON)</button>
+                <input type="file" id="jsonFileInput" style="display: none;" accept=".json" onchange="importQbcConfig(event)" />
+            </div>
         </div>
     </div>
 
-    <!-- COCKPIT CENTRAL ET COMPARTIMENT DES ONGLETS LOGIN & DESCRIPTION -->
     <div class="workspace-grid" id="mainMatrixContainer">
         <div class="card" id="editorContainerCard">
             <button type="button" class="btn-action" id="toggleCollapseBtn" style="position: absolute; top: 18px; right: 20px; background-color: #111827; border-color: #3f3f46; color: #fbbf24; font-size: 11px; z-index: 10;" onclick="toggleEditorCollapse()">[-] RÉDUIRE LE COCKPIT</button>
@@ -95,7 +46,6 @@
             </div>
 
             <div id="collapsibleWorkspacePanel" class="collapsible-panel">
-                <!-- ONGLET 1 : MATRICE DES LIGNES LOGIN -->
                 <div id="content-login" class="tab-content active">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
@@ -116,7 +66,6 @@
                     </div>
                 </div>
 
-                <!-- ONGLET 2 : MATRICE DES DESCRIPTIONS PROTÉGÉES -->
                 <div id="content-desc" class="tab-content">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
@@ -139,13 +88,12 @@
             </div>
         </div>
 
-        <!-- VISUALISATION EN TEMPS RÉEL ET SORTIE DU PAYLOAD TEXTMESHPRO -->
         <div class="card" id="previewContainerCard">
             <h3 style="font-size: 12px; color: #a1a1aa; margin: 0 0 12px 0; text-transform: uppercase; font-weight: bold;">📺 APERÇU FILTRÉ GRAPHIQUE (DANS LE COCKPIT DE CHARGEMENT 7DTD) :</h3>
             <div id="preview" class="preview-box" style="margin-bottom: 25px;"></div>
 
             <h3 style="font-size: 12px; color: #fbbf24; margin: 0 0 10px 0; text-transform: uppercase; font-weight: bold;">💾 PAYLOAD RÉENCODÉ MONOBLOC EN DIRECT SANS PROBLÈME :</h3>
-            <textarea id="masterOutput" rows="5" class="textarea-box" style="width: 100%; margin-bottom: 15px; background-color: #09090b; border: 1px solid #27272a; color: #a1a1aa; font-family: monospace; font-size: 12px; padding: 12px; box-sizing: border-box; resize: none;" readonly></textarea>
+            <textarea id="masterOutput" rows="5" style="width: 100%; margin-bottom: 15px; background-color: #09090b; border: 1px solid #27272a; color: #a1a1aa; font-family: monospace; font-size: 12px; padding: 12px; box-sizing: border-box; resize: none;" readonly></textarea>
             <button type="button" class="btn-copy-master" style="width: 100%;" onclick="copyMasterPayload()">📋 ASSIMILER ET COPIER LA CHAÎNE FINALE DU SERVEUR</button>
         </div>
     </div>
@@ -154,6 +102,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
