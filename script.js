@@ -63,14 +63,17 @@ function autoTranslateLine(isDesc, index) {
     let prefix = "";
     let cleanText = rawText;
     
-    // EXTRACTEUR NET SANS DOUBLE VIRGULE Parasite
+    // EXTRACTEUR NET SANS DOUBLE VIRGULE PARASITE (Préserve le 1- ou 2-)
     const numMatch = rawText.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
         prefix = numMatch.at(0); 
         cleanText = rawText.substring(prefix.length).trim();
     }
     
-    const textToTranslate = cleanText.trim();
+    // MASQUAGE DE SÉCURITÉ : On remplace / et : pour empêcher Google de couper tes ajouts (ex: haut rouge)
+    let textToTranslate = cleanText.trim();
+    textToTranslate = textToTranslate.replace(/\//g, "SLASHTOKEN ").replace(/:/g, " COLONTOKEN");
+    
     const oldScript = document.getElementById("qbcInvisibleTranslator");
     if (oldScript) oldScript.remove();
     
@@ -80,10 +83,17 @@ function autoTranslateLine(isDesc, index) {
             if (data && data && data && data) {
                 let translatedText = data;
                 
-                // Éradication automatique des accents anglais majuscules
+                // RESTAURATION DES SYMBOLES D'ORIGINE APRÈS TRADUCTION COMPLÈTE
+                translatedText = translatedText.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
+                
+                // Nettoyage des espaces automatiques générés par Google autour des symboles
+                translatedText = translatedText.replace(/\/ /g, "/").replace(/ \//g, "/");
+                translatedText = translatedText.replace(/ :/g, " :").replace(/: /g, ": ");
+                
+                // Éradication automatique des accents anglais majuscules (É -> E, À -> A)
                 translatedText = translatedText.replace(/[ÉÈÊË]/g, "E").replace(/[ÀÂÄ]/g, "A").replace(/[ÔÖ]/g, "O");
                 
-                // Réassemblage de ta phrase exacte sur mesure !
+                // Réassemblage de ta phrase exacte sur mesure au complet !
                 line.text_en = prefix + translatedText;
                 line.show_english = true;
                 
@@ -96,7 +106,7 @@ function autoTranslateLine(isDesc, index) {
         delete window.qbcGoogleCallback;
     };
     
-    // Injection du pont internet invisible pour esquiver les sécurités locales de Chrome
+    // RESTAURATION DE L'ADRESSE INFRASTRUCTURE OFFICIELLE DE GOOGLE AVEC INSCRIPTION CALLBACK
     const scriptEl = document.createElement("script");
     scriptEl.id = "qbcInvisibleTranslator";
     scriptEl.src = "https://googleapis.com" + encodeURIComponent(textToTranslate);
@@ -106,6 +116,7 @@ function autoTranslateLine(isDesc, index) {
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
+
 /* ==========================================================================
    === SCRIPT.JS : BLOC 3 SUR 4 === [ COMMUTATEURS ET AGENCEMENT DE LIGNES ] ===
    ========================================================================== */
