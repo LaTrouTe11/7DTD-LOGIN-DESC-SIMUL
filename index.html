@@ -18,15 +18,29 @@
         </div>
         
         <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #27272a; border-radius: 4px; background-color: #18181b;">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 10px; color: #a1a1aa; font-weight: bold; text-transform: uppercase;">Instance Server :</label>
-                <div style="display: flex; gap: 6px; align-items: center;">
-                    <select id="serverSelect" class="line-select" style="padding: 5px; font-size: 11px; width: 220px;" onchange="changeServerInstance(this.value)">
-                        <option value="7dtd-core">QBC FLAGGARD PVE 3.0 (CORE)</option>
-                        <option value="7dtd-projectz">QBC FLAGGARD ProjectZ 3.0</option>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                <!-- SECTEUR SÉLECTION SERVEUR -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 10px; color: #a1a1aa; font-weight: bold; text-transform: uppercase;">Instance Server :</label>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <select id="serverSelect" class="line-select" style="padding: 5px; font-size: 11px; width: 220px;" onchange="changeServerInstance(this.value)">
+                            <option value="7dtd-core">QBC FLAGGARD PVE 3.0 (CORE)</option>
+                            <option value="7dtd-projectz">QBC FLAGGARD ProjectZ 3.0</option>
+                        </select>
+                        <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #d97706; border-color: #fbbf24; color: #fff;" onclick="editCurrentServerName()">✏️ ÉDITER NOM</button>
+                        <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #0284c7; border-color: #38bdf8; color: #fff;" onclick="createNewServerInstance()">➕ AJOUTER SERVEUR</button>
+                    </div>
+                </div>
+
+                <!-- OPTION TAILLE ÉCRAN (ZOOM DYNAMIQUE) -->
+                <div style="display: flex; flex-direction: column; gap: 4px; border-left: 1px dashed #27272a; padding-left: 12px;">
+                    <label style="font-size: 10px; color: #fbbf24; font-weight: bold; text-transform: uppercase;">Taille Écran :</label>
+                    <select id="uiZoomSelect" class="line-select" style="padding: 5px; font-size: 11px; width: 130px; border-color: #fbbf24;" onchange="changeUiZoom(this.value)">
+                        <option value="100">🔍 Standard (100%)</option>
+                        <option value="90">🔍 Médium (90%)</option>
+                        <option value="80" selected>🔍 Compact (80%)</option>
+                        <option value="70">🔍 Mini (70%)</option>
                     </select>
-                    <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #d97706; border-color: #fbbf24; color: #fff;" onclick="editCurrentServerName()">✏️ ÉDITER NOM</button>
-                    <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #0284c7; border-color: #38bdf8; color: #fff;" onclick="createNewServerInstance()">➕ AJOUTER SERVEUR</button>
                 </div>
             </div>
             
@@ -66,12 +80,11 @@
                     
                     <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" class="btn-action" onclick="addNewLine()">➕ AJOUTER EN FIN DE LISTE</button>
-                        <!-- BOUTON CIBLÉ SUR L'ONGLET LOGIN POUR ÉVITER LES CONFLITS -->
+                        <!-- BOUTON SÉCURISÉ LOGIQUE ORIGINAL LOGIN -->
                         <button type="button" class="btn-action" style="background-color: #2563eb; border-color: #3b82f6; color: #fff; font-weight: bold;" onclick="translateAllActiveLines()">♻️ CORRIGER TOUT L'ONGLET LOGIN</button>
                         <div id="alertBox" class="alert-banner">⚠️ DÉPASSEMENT CAPITAL DU LIEN : LE SERVEUR COUPERA LE MOTD !</div>
                     </div>
                 </div>
-
                 <!-- ONGLET 2 : MATRICE DES DESCRIPTIONS PROTÉGÉES -->
                 <div id="content-desc" class="tab-content">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -89,7 +102,7 @@
                     
                     <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" class="btn-action" onclick="addNewDescLine()">➕ AJOUTER EN FIN DE LISTE</button>
-                        <!-- BOUTON CIBLÉ SUR L'ONGLET DESCRIPTION POUR ÉVITER LES CONFLITS -->
+                        <!-- BOUTON SÉCURISÉ LOGIQUE ORIGINAL DESCRIPTION -->
                         <button type="button" class="btn-action" style="background-color: #2563eb; border-color: #3b82f6; color: #fff; font-weight: bold;" onclick="translateAllActiveLines()">♻️ CORRIGER TOUT L'ONGLET DESCRIPTION</button>
                         <div id="descAlertBox" class="alert-banner">⚠️ EXPA-MÉMOIRE : VOTRE DESCRIPTION SURPASSE LE QUOTA DÉFINI !</div>
                     </div>
@@ -112,6 +125,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
