@@ -6,7 +6,7 @@ let activeServerId = '7dtd_core';
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
-// Registre de la base de données d'origine complète (Propriétés FR et EN séparées)
+// Base de données d'origine propre avec structures FR et EN isolées
 let qbcDatabase = {
     '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
@@ -56,7 +56,7 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     // Nettoyage propre pour ne pas envoyer le "1-" ou "2-" chez Google Translate
     const numMatch = texteFR.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
-        texteFR = texteFR.substring(numMatch.length).trim();
+        texteFR = texteFR.substring(numMatch[index].length).trim();
     }
 
     const dummy = document.createElement("textarea");
@@ -242,7 +242,7 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         const isEngVisible = line.show_english || isGlobalEnglish;
         div.className = "line-item" + (line.border_style && line.border_style !== "none" ? " has-double-border" : "");
         
-        // --- INITIALISATIONS DE SÉCURITÉ CONTRE LE BUG DES LIGNES ---
+        // --- INITIALISATIONS DE SÉCURITÉ POUR ÉVITER LES BUGS D'AFFICHAGE ---
         if (line.symbol_start === undefined) line.symbol_start = "";
         if (line.symbol_en_start === undefined) line.symbol_en_start = "";
         if (line.symbol_en_end === undefined) line.symbol_en_end = "";
@@ -260,7 +260,7 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         let colSel = `<select class="line-select" style="width:90px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
         colorPalette.forEach(c => colSel += `<option value="${c.hex}" ${c.hex === line.color ? "selected" : ""}>FR ${c.name}</option>`); colSel += `</select>`;
         
-        // 2. BLOC SÉLECTEURS CONFIGURATION ANGLAISE
+        // 2. BLOC SÉLECTEURS CONFIGURATION ANGLAISE (AVANT / APRÈS / COULEUR)
         let symEnStartSel = `<select class="line-select" style="width:105px;" onchange="updateLineSymbolEnStart(${isDesc}, ${index}, this.value)">`;
         symEnStartSel += `<option value="" disabled style="color:#38bdf8; font-weight:bold;">EN Avant :</option>`;
         symbolPalette.forEach(s => symEnStartSel += `<option value="${s.char}" ${s.char === line.symbol_en_start ? "selected" : ""}>${s.name}</option>`); symEnStartSel += `</select>`;
@@ -330,13 +330,13 @@ function updateLineBorderStyle(isDesc, i, style) {
 function processAndCompileQBC() {
     const isLogin = currentActiveTab === 'login'; 
     
-    // FIX TOTAL DU BUG : Si l'identifiant est corrompu ou absent, on force le texte pur "7dtd_core"
+    // FIX SÉCURITÉ ABSOLUE : Si la clé saute ou bugge, on force une chaîne texte pure au lieu d'un tableau
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
     
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    if (!currentLines || !Array.isArray(currentLines)) return; // Protection absolue anti-page blanche
+    if (!currentLines || !Array.isArray(currentLines)) return; // Protection anti-page blanche
     
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; 
     const limit = isLogin ? 3500 : 4000; 
@@ -347,7 +347,6 @@ function processAndCompileQBC() {
         let textFR = line.text ? line.text.trim() : ""; 
         let textEN = line.text_en ? line.text_en.trim() : "";
         
-        // Initialisation de pro si le fichier JSON importé est ancien
         if (line.symbol_start === undefined) line.symbol_start = "";
         if (line.symbol === undefined) line.symbol = "";
         if (line.symbol_en_start === undefined) line.symbol_en_start = "";
@@ -367,7 +366,7 @@ function processAndCompileQBC() {
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
-            if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end; // FIX DE TEXTE ICI
+            if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end;
             if (line.style_en && line.style_en.u) fullEN = "[u]" + fullEN + "[/u]"; 
             if (line.style_en && line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
             
@@ -387,7 +386,7 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    // ENVOI SÉCURISÉ DES CHAÎNES DANS L'INTERRUPTEUR GRAPHIQUE HTML
+    // ENVOI SÉCURISÉ DANS L'INTERRUPTEUR GRAPHIQUE HTML
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
@@ -409,9 +408,6 @@ function processAndCompileQBC() {
     }
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
-
-
-
 /* ==========================================================================
    === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
    ========================================================================== */
@@ -425,22 +421,49 @@ function loadFromLocalStorage() {
         try {
             qbcDatabase = JSON.parse(saved);
             const serverIds = Object.keys(qbcDatabase);
-            const selectEl = document.getElementById('serverSelect'); selectEl.innerHTML = "";
-            serverIds.forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.innerText = qbcDatabase[id].name || id.toUpperCase(); selectEl.appendChild(opt); });
-            activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; selectEl.value = activeServerId;
-            document.getElementById('qbcTimeTrackerText').innerText = "💾 RESTAURATION AUTOMATIQUE DE TON TRAVAIL ACTIVE !";
-        } catch(e) { console.error("Erreur LocalStorage"); }
+            const selectEl = document.getElementById('serverSelect'); 
+            if (selectEl && serverIds.length > 0) {
+                selectEl.innerHTML = "";
+                serverIds.forEach(id => { 
+                    const opt = document.createElement('option'); 
+                    opt.value = id; 
+                    opt.innerText = qbcDatabase[id].name || id.toUpperCase(); 
+                    selectEl.appendChild(opt); 
+                });
+                activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; 
+                selectEl.value = activeServerId;
+            }
+            const trackerText = document.getElementById('qbcTimeTrackerText');
+            if (trackerText) trackerText.innerText = "💾 RESTAURATION AUTOMATIQUE DE TON TRAVAIL ACTIVE !";
+        } catch(e) { console.error("Erreur LocalStorage", e); }
     }
 }
 
-function exportQbcConfig() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4)); const anchor = document.createElement('a'); anchor.setAttribute("href", dataStr); anchor.setAttribute("download", "qbc-backup.json"); document.body.appendChild(anchor); anchor.click(); anchor.remove(); }
-function triggerJsonImport() { document.getElementById('jsonFileInput').click(); }
+function exportQbcConfig() { 
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4)); 
+    const anchor = document.createElement('a'); 
+    anchor.setAttribute("href", dataStr); 
+    anchor.setAttribute("download", "qbc-backup.json"); 
+    document.body.appendChild(anchor); 
+    anchor.click(); 
+    anchor.remove(); 
+}
+
+function triggerJsonImport() { 
+    const fileInput = document.getElementById('jsonFileInput');
+    if (fileInput) fileInput.click(); 
+}
 
 function importQbcConfig(event) {
-    const files = event.target.files; if (!files || files.length === 0) return; const reader = new FileReader();
+    const files = event.target.files; 
+    if (!files || files.length === 0) return; 
+    const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const parsedData = JSON.parse(e.target.result), serverIds = Object.keys(parsedData); if (serverIds.length === 0) return;
+            const parsedData = JSON.parse(e.target.result);
+            const serverIds = Object.keys(parsedData); 
+            if (serverIds.length === 0) return;
+            
             serverIds.forEach(id => {
                 const s = parsedData[id];
                 if (s.loginLines) s.loginLines.forEach(l => { 
@@ -462,22 +485,45 @@ function importQbcConfig(event) {
                     l.show_english = !!(l.text_en && l.text_en.trim() !== ""); 
                 });
             });
-            const oldId = activeServerId; const selectEl = document.getElementById('serverSelect'); selectEl.innerHTML = "";
-            serverIds.forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.innerText = parsedData[id].name || id.toUpperCase(); selectEl.appendChild(opt); });
-            qbcDatabase = parsedData; activeServerId = serverIds.includes(oldId) ? oldId : serverIds[0]; selectEl.value = activeServerId;
+            
+            const oldId = activeServerId; 
+            const selectEl = document.getElementById('serverSelect'); 
+            if (selectEl) {
+                selectEl.innerHTML = "";
+                serverIds.forEach(id => { 
+                    const opt = document.createElement('option'); 
+                    opt.value = id; 
+                    opt.innerText = parsedData[id].name || id.toUpperCase(); 
+                    selectEl.appendChild(opt); 
+                });
+                qbcDatabase = parsedData; 
+                activeServerId = serverIds.includes(oldId) ? oldId : serverIds[0]; 
+                selectEl.value = activeServerId;
+            }
             
             saveToLocalStorage(); 
             const d = new Date();
-            document.getElementById('qbcTimeTrackerText').innerText = "[ ARCHIVE REÇUE LE : " + d.toLocaleDateString('fr-FR') + " à " + d.toLocaleTimeString('fr-FR') + " ] - " + qbcDatabase[activeServerId].name;
+            const trackerText = document.getElementById('qbcTimeTrackerText');
+            if (trackerText) {
+                trackerText.innerText = "[ ARCHIVE REÇUE LE : " + d.toLocaleDateString('fr-FR') + " à " + d.toLocaleTimeString('fr-FR') + " ] - " + qbcDatabase[activeServerId].name;
+            }
             
             if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
-            event.target.value = ''; alert("IMPORTATION REUSSIE AVEC SUCCES");
+            event.target.value = ''; 
+            alert("IMPORTATION REUSSIE AVEC SUCCES");
         } catch (err) { alert("ERREUR LECTURE JSON"); }
     }; 
-    const targetFile = files.item(0); reader.readAsText(targetFile);
+    reader.readAsText(files.item(0));
 }
 
-function copyMasterPayload() { const output = document.getElementById('masterOutput'); output.select(); document.execCommand('copy'); alert('CHAINE COPIEE AVEC SUCCES'); }
+function copyMasterPayload() { 
+    const output = document.getElementById('masterOutput'); 
+    if (output) {
+        output.select(); 
+        document.execCommand('copy'); 
+        alert('CHAINE COPIEE AVEC SUCCES'); 
+    }
+}
 
 function changeUiZoom(zoomValue) {
     document.body.style.zoom = zoomValue + "%";
