@@ -209,38 +209,58 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         const hasBorder = line.border_style && line.border_style !== "none";
         div.className = "line-item" + (hasBorder ? " has-double-border" : "");
         
-        let symSel = `<select class="line-select" style="width:100px;" onchange="updateLineSymbol(${isDesc}, ${index}, this.value)">`;
+        let symSel = `<select class="line-select" style="width:75px;" onchange="updateLineSymbol(${isDesc}, ${index}, this.value)">`;
         symbolPalette.forEach(s => symSel += `<option value="${s.char}" ${s.char === line.symbol ? "selected" : ""}>${s.name}</option>`); symSel += `</select>`;
         
-        let colSel = `<select class="line-select" style="width:90px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
+        let colSel = `<select class="line-select" style="width:75px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
         colorPalette.forEach(c => colSel += `<option value="${c.hex}" ${c.hex === line.color ? "selected" : ""}>${c.name}</option>`); colSel += `</select>`;
         
         if (!line.border_style) line.border_style = "none";
-        let borderSel = `<select class="line-select" style="width:140px; border-color: #fbbf24;" onchange="updateLineBorderStyle(${isDesc}, ${index}, this.value)">`;
-        borderSel += `<option value="none" ${line.border_style === 'none' ? 'selected' : ''}>(Pas de Ligne)</option>`;
-        borderSel += `<option value="double" ${line.border_style === 'double' ? 'selected' : ''}>═ Ligne Double</option>`;
-        borderSel += `<option value="single" ${line.border_style === 'single' ? 'selected' : ''}>─ Ligne Simple</option>`;
-        borderSel += `<option value="dash" ${line.border_style === 'dash' ? 'selected' : ''}>- Pointillés (-)</option>`;
-        borderSel += `<option value="dot" ${line.border_style === 'dot' ? 'selected' : ''}>. Pointillés (.)</option>`;
+        let borderSel = `<select class="line-select" style="width:105px; border-color: #mbbf24;" onchange="updateLineBorderStyle(${isDesc}, ${index}, this.value)">`;
+        borderSel += `<option value="none" ${line.border_style === 'none' ? 'selected' : ''}>[Pas Ligne]</option>`;
+        borderSel += `<option value="double" ${line.border_style === 'double' ? 'selected' : ''}>═ Double</option>`;
+        borderSel += `<option value="single" ${line.border_style === 'single' ? 'selected' : ''}>─ Simple</option>`;
+        borderSel += `<option value="dash" ${line.border_style === 'dash' ? 'selected' : ''}>- Tirets</option>`;
+        borderSel += `<option value="dot" ${line.border_style === 'dot' ? 'selected' : ''}>. Points</option>`;
         borderSel += `</select>`;
         
         if (!line.style_fr) line.style_fr = {u:false,b:false}; if (!line.style_en) line.style_en = {u:false,b:false};
         let toolsFR = `<button type="button" class="style-btn ${line.style_fr.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'u')">U</button><button type="button" class="style-btn ${line.style_fr.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'b')">B</button>`;
         let toolsEN = `<button type="button" class="style-btn ${line.style_en.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'u')">U</button><button type="button" class="style-btn ${line.style_en.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'b')">B</button>`;
         
-        let enRow = ""; 
+        let enField = ""; 
         if (isDesc || index > 0) { 
-            const displayStyle = isEngVisible ? "display: block !important;" : "display: none !important;";
-            enRow = `<div class="eng-input-box" style="width:100%; ${displayStyle}"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #4b5563; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Saisir la traduction anglaise ici..." />${toolsEN}</div></div>`; 
+            const displayStyle = isEngVisible ? "display: flex !important;" : "display: none !important;";
+            enField = `<div class="eng-input-box" style="align-items:center; gap:4px; flex-grow:1; ${displayStyle}"><span style="font-size:11px; color:#38bdf8; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:3px dashed #4b5563;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Translation..." />${toolsEN}</div>`; 
         }
         
-        let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
-        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 MANUEL</button><button type="button" class="double-line-btn" onclick="autoTranslateLine(${isDesc}, ${index})">🤖 AUTO</button>` : "";
+        let upDis = index === 0 ? "disabled style='opacity:0.2;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.2;'" : "";
+        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" style="padding: 3px 5px;" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐</button><button type="button" class="double-line-btn" style="padding: 3px 5px;" onclick="autoTranslateLine(${isDesc}, ${index})">🤖</button>` : "";
         
-        div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symSel} ${colSel} ${transBtn} ${borderSel}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
+        // ARCHITECTURE EN LIGNE DROITE ULTRA-FINE
+        div.innerHTML = `
+            <div class="line-controls-row">
+                <span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span>
+                <button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button>
+                <button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button>
+                <button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕</button>
+                ${symSel} ${colSel} ${transBtn} ${borderSel}
+                
+                <div style="display:flex; align-items:center; gap:4px; flex-grow:2;">
+                    <span style="font-size:11px; color:#34d399; font-weight:bold;">FR:</span>
+                    <input type="text" class="input-line" style="border-left:3px solid #${line.color};" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." />
+                    ${toolsFR}
+                </div>
+                
+                ${enField}
+                
+                <button type="button" class="btn-action" style="color:#f87171; padding: 3px 8px; height:26px;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button>
+            </div>
+        `;
         container.appendChild(div);
     }); processAndCompileQBC();
 }
+
 
 function renderFormLines() { 
     const toggleEl = document.getElementById('loginEnglishToggle');
