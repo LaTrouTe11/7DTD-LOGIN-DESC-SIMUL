@@ -10,13 +10,12 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
 
     let textePropre = texteATraduire.trim();
     
-    // INFRASTRUCTURE INTERNATIONALE MUTUALISÉE ET GRATUITE LINGVA OPEN-SOURCE
+    // INFRASTRUCTURE INTERNATIONALE MUTUALISÉE LINGVA OPEN-SOURCE
     const urlMoteur = "https://lingva.ml" + encodeURIComponent(textePropre);
 
     fetch(urlMoteur)
         .then(reponse => reponse.json())
         .then(donnees => {
-            // Extraction chirurgicale de la chaîne de caractères textuelle brute
             if (donnees && donnees.translation) {
                 let texteTraduit = donnees.translation;
 
@@ -33,7 +32,7 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
                 line.text_en = prefixe + texteTraduit;
                 line.show_english = true;
 
-                // Rafraîchissement visuel instantané
+                // Rafraîchissement visuel instantané du cockpit
                 if (isDesc) renderDescFormLines(); else renderFormLines();
             }
         })
@@ -43,6 +42,7 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
             if (isDesc) renderDescFormLines(); else renderFormLines();
         });
 }
+
 
 
 
