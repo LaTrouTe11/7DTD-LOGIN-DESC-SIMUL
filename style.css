@@ -1,0 +1,344 @@
+/* ==========================================================================
+   === ARCHITECTURE GRAPHIQUE COMPLÈTE QBC : FEUILLE DE STYLE STRUCTURELLE ===
+   ========================================================================== */
+body { 
+    background-color: #09090b; 
+    color: #f4f4f5; 
+    font-family: monospace; 
+    padding: 20px; 
+    margin: 0; 
+}
+
+.header { 
+    border-bottom: 1px solid #27272a; 
+    padding-bottom: 10px; 
+    margin-bottom: 20px; 
+}
+
+/* GRILLE PRINCIPALE VERTICALE XXL EMPILÉE */
+.workspace-grid { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+    width: 100%; 
+    max-width: 1400px; 
+    margin: 0 auto; 
+}
+
+.card { 
+    background-color: #18181b; 
+    padding: 20px; 
+    border-radius: 4px; 
+    border: 1px solid #27272a; 
+    position: relative; 
+}
+
+.input-line { 
+    background-color: #09090b; 
+    border: 1px solid #27272a; 
+    color: #fff; 
+    padding: 10px; 
+    font-family: monospace; 
+    font-size: 13px; 
+    outline: none; 
+    flex-grow: 1; 
+    width: 100%; 
+    box-sizing: border-box; 
+}
+
+.preview-box { 
+    background-color: #000; 
+    border: 1px dashed #3f3f46; 
+    padding: 25px; 
+    min-height: 250px; 
+    max-height: 450px; 
+    overflow-y: auto; 
+    white-space: pre-wrap; 
+    color: #a1a1aa; 
+    line-height: 1.7; 
+    border-radius: 2px; 
+    font-size: 13px; 
+}
+
+/* SYSTÈME DE VOLET REPLIABLE SÉCURISÉ */
+.collapsible-panel { 
+    max-height: 2000px; 
+    overflow: hidden; 
+    transition: max-height 0.4s ease-out; 
+}
+
+.collapsible-panel.collapsed { 
+    max-height: 0px !important; 
+}
+
+/* DESIGN DES BOUTONS DE COMMANDE D'ONGLETS SOUDÉS */
+.tab-container { 
+    display: flex; 
+    gap: 4px; 
+    margin-bottom: 20px; 
+    border-bottom: 1px solid #27272a; 
+    padding-bottom: 1px; 
+}
+
+.tab-btn { 
+    background-color: #09090b; 
+    border: 1px solid #27272a; 
+    color: #71717a; 
+    padding: 12px 24px; 
+    font-family: monospace; 
+    font-weight: bold; 
+    font-size: 12px; 
+    cursor: pointer; 
+    text-transform: uppercase; 
+    border-bottom: none; 
+    border-radius: 4px 4px 0 0; 
+    transition: all 0.2s; 
+}
+
+.tab-btn.active { 
+    background-color: #18181b; 
+    border-color: #27272a; 
+    color: #fbbf24; 
+    border-bottom: 2px solid #fbbf24; 
+}
+
+/* SÉCURITÉ DE MASQUAGE DES PANNEAUX INACTIFS */
+.tab-content { 
+    display: none; 
+}
+
+.tab-content.active { 
+    display: block; 
+}
+
+/* SÉLECTEURS, COULEURS ET PALETTES */
+.line-select { 
+    background-color: #09090b; 
+    border: 1px solid #27272a; 
+    color: #fff; 
+    padding: 9px; 
+    font-family: monospace; 
+    font-size: 12px; 
+    outline: none; 
+    border-radius: 2px; 
+    cursor: pointer; 
+}
+
+.btn-action { 
+    background-color: #27272a; 
+    border: 1px solid #3f3f46; 
+    color: #e4e4e7; 
+    padding: 10px 20px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-family: monospace; 
+    border-radius: 2px; 
+    font-size: 12px; 
+}
+
+.btn-action:hover { 
+    background-color: #3f3f46; 
+}
+
+.btn-io { 
+    background-color: #1f2937; 
+    border: 1px solid #4b5563; 
+    color: #f3f4f6; 
+    padding: 6px 14px; 
+    font-size: 11px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-family: monospace; 
+    border-radius: 2px; 
+    text-transform: uppercase; 
+}
+
+.btn-io:hover { 
+    background-color: #374151; 
+    border-color: #6b7280; 
+}
+
+.btn-copy-master { 
+    background-color: #fbbf24; 
+    border: none; 
+    color: #000; 
+    padding: 14px 28px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-family: monospace; 
+    border-radius: 2px; 
+    font-size: 13px; 
+    letter-spacing: 0.5px; 
+    text-transform: uppercase; 
+}
+
+/* ÉDITEUR DE STYLES CHIRURGICAUX (GRAS, SOULIGNÉ) */
+.style-btn { 
+    background-color: #09090b; 
+    border: 1px solid #27272a; 
+    color: #71717a; 
+    padding: 5px 10px; 
+    font-size: 11px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-family: monospace; 
+    border-radius: 2px; 
+    transition: all 0.2s; 
+    user-select: none; 
+}
+
+.style-btn.active { 
+    background-color: #2563eb; 
+    color: #fff; 
+    border-color: #3b82f6; 
+}
+
+/* CONTRÔLES D'ORDONNANCEMENT ET DES BLOCS INSÉRÉS */
+.order-btn { 
+    background-color: #27272a; 
+    border: 1px solid #3f3f46; 
+    color: #fff; 
+    padding: 5px 8px; 
+    font-size: 11px; 
+    cursor: pointer; 
+    border-radius: 2px; 
+    font-family: monospace; 
+}
+
+.order-btn:hover { 
+    background-color: #3f3f46; 
+    border-color: #71717a; 
+}
+
+.btn-insert-here { 
+    background-color: #065f46; 
+    border: 1px solid #059669; 
+    color: #34d399; 
+    padding: 5px 10px; 
+    font-size: 11px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    border-radius: 2px; 
+    font-family: monospace; 
+}
+
+.btn-insert-here:hover { 
+    background-color: #047857; 
+    color: #fff; 
+}
+
+.double-line-btn { 
+    background-color: #111827; 
+    border: 1px solid #4b5563; 
+    color: #9ca3af; 
+    padding: 5px 10px; 
+    font-size: 11px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-family: monospace; 
+    border-radius: 2px; 
+    transition: all 0.2s; 
+}
+
+.double-line-btn.active { 
+    background-color: #d97706; 
+    border-color: #fbbf24; 
+    color: #fff; 
+}
+
+/* BLOCS APPLICATIFS DYNAMIQUES DE FORMULAIRES */
+.line-item { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+    background-color: rgba(9, 9, 11, 0.6); 
+    padding: 14px; 
+    border-radius: 4px; 
+    border: 1px solid #222; 
+    box-sizing: border-box; 
+}
+
+.line-item.has-double-border { 
+    border-bottom: 4px double #d97706 !important; 
+}
+
+.line-controls { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    width: 100%; 
+    border-bottom: 1px dashed #27272a; 
+    padding-bottom: 6px; 
+    flex-wrap: wrap; 
+}
+
+.line-inputs-block { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    width: 100%; 
+}
+
+.input-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    width: 100%; 
+}
+
+.line-number { 
+    font-size: 12px; 
+    color: #71717a; 
+    width: 85px; 
+    font-weight: bold; 
+}
+
+/* CONTRASTES DES JAUGES NUMÉRIQUES DE COMPTAGE */
+.char-badge-fr { 
+    font-size: 11px; 
+    font-weight: bold; 
+    background-color: #111827; 
+    color: #34d399; 
+    padding: 6px 8px; 
+    border: 1px solid #065f46; 
+    min-width: 60px; 
+    text-align: center; 
+    border-radius: 2px; 
+}
+
+.char-badge-en { 
+    font-size: 11px; 
+    font-weight: bold; 
+    background-color: #1e1b4b; 
+    color: #38bdf8; 
+    padding: 6px 8px; 
+    border: 1px solid #3730a3; 
+    min-width: 60px; 
+    text-align: center; 
+    border-radius: 2px; 
+}
+
+.alert-banner { 
+    color: #f87171; 
+    font-size: 11px; 
+    font-weight: bold; 
+    margin-top: 10px; 
+    display: none; 
+}
+
+/* AFFICHAGE ET DÉPLOIEMENT À 100% DES BLOCS DE TRADUCTION ANGLAISE */
+.eng-input-box { 
+    display: none; 
+    width: 100%; 
+}
+
+.line-item.show-english .eng-input-box, 
+.eng-global-active .eng-input-box { 
+    display: block !important; 
+}
+
+
+
+
+

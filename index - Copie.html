@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QBC ADVANCED AUTO-TEXT METRICS STUDIO</title>
+    <style>
+        body { background-color: #09090b; color: #f4f4f5; font-family: monospace; padding: 20px; margin: 0; }
+        .header { border-bottom: 1px solid #27272a; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* COCKPIT DE CHARGEMENT VERTICAL XXL EMPILÉ */
+        .workspace-grid { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: 0 auto; }
+        
+        .card { background-color: #18181b; padding: 20px; border-radius: 4px; border: 1px solid #27272a; position: relative; }
+        .input-line { background-color: #09090b; border: 1px solid #27272a; color: #fff; padding: 10px; font-family: monospace; font-size: 13px; outline: none; flex-grow: 1; width: 100%; box-sizing: border-box; }
+        .preview-box { background-color: #000; border: 1px dashed #3f3f46; padding: 25px; min-height: 250px; max-height: 450px; overflow-y: auto; white-space: pre-wrap; color: #a1a1aa; line-height: 1.7; border-radius: 2px; font-size: 13px; }
+        
+        /* VOLET DE PLIAGE DU COCKPIT MÉCANIQUE */
+        .collapsible-panel { max-height: 2000px; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .collapsible-panel.collapsed { max-height: 0px !important; }
+        /* SYSTÈME D'ONGLETS SOUDÉS QBC INTERNET */
+        .tab-container { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #27272a; padding-bottom: 1px; }
+        .tab-btn { background-color: #09090b; border: 1px solid #27272a; color: #71717a; padding: 12px 24px; font-family: monospace; font-weight: bold; font-size: 12px; cursor: pointer; text-transform: uppercase; border-bottom: none; border-radius: 4px 4px 0 0; transition: all 0.2s; }
+        .tab-btn.active { background-color: #18181b; border-color: #27272a; color: #fbbf24; border-bottom: 2px solid #fbbf24; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* CONTROLES ET SÉLECTEURS */
+        .line-select { background-color: #09090b; border: 1px solid #27272a; color: #fff; padding: 9px; font-family: monospace; font-size: 12px; outline: none; border-radius: 2px; cursor: pointer; }
+        .btn-action { background-color: #27272a; border: 1px solid #3f3f46; color: #e4e4e7; padding: 10px 20px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; font-size: 12px; }
+        .btn-action:hover { background-color: #3f3f46; }
+        .btn-io { background-color: #1f2937; border: 1px solid #4b5563; color: #f3f4f6; padding: 6px 14px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; text-transform: uppercase; }
+        .btn-io:hover { background-color: #374151; border-color: #6b7280; }
+        .btn-copy-master { background-color: #fbbf24; border: none; color: #000; padding: 14px 28px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
+        
+        /* COMMUTATEURS DE STYLE DE SAISIE */
+        .style-btn { background-color: #09090b; border: 1px solid #27272a; color: #71717a; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; transition: all 0.2s; user-select: none; }
+        .style-btn.active { background-color: #2563eb; color: #fff; border-color: #3b82f6; }
+        
+        /* BOUTONS NAVIGATION CHRONOLOGIQUE ET INSERTS MILIEU */
+        .order-btn { background-color: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 5px 8px; font-size: 11px; cursor: pointer; border-radius: 2px; font-family: monospace; }
+        .order-btn:hover { background-color: #3f3f46; border-color: #71717a; }
+        .btn-insert-here { background-color: #065f46; border: 1px solid #059669; color: #34d399; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; border-radius: 2px; font-family: monospace; }
+        .btn-insert-here:hover { background-color: #047857; color: #fff; }
+        
+        /* BOUTON INTERACTIF LIGNE DOUBLE COMMUNE */
+        .double-line-btn { background-color: #111827; border: 1px solid #4b5563; color: #9ca3af; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; transition: all 0.2s; }
+        .double-line-btn.active { background-color: #d97706; border-color: #fbbf24; color: #fff; }
+
+        /* STRUCTURE VERTICALE DE CHAQUE BLOC DE LIGNE */
+        .line-item { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background-color: rgba(9, 9, 11, 0.6); padding: 14px; border-radius: 4px; border: 1px solid #222; box-sizing: border-box; }
+        .line-item.has-double-border { border-bottom: 4px double #d97706 !important; }
+        .line-controls { display: flex; align-items: center; gap: 8px; width: 100%; border-bottom: 1px dashed #27272a; padding-bottom: 6px; flex-wrap: wrap; }
+        .line-inputs-block { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .input-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .line-number { font-size: 12px; color: #71717a; width: 85px; font-weight: bold; }
+        
+        /* RADARS DE COMPTAGE COMPACTS */
+        .char-badge-fr { font-size: 11px; font-weight: bold; background-color: #111827; color: #34d399; padding: 6px 8px; border: 1px solid #065f46; min-width: 60px; text-align: center; border-radius: 2px; }
+        .char-badge-en { font-size: 11px; font-weight: bold; background-color: #1e1b4b; color: #38bdf8; padding: 6px 8px; border: 1px solid #3730a3; min-width: 60px; text-align: center; border-radius: 2px; }
+        .alert-banner { color: #f87171; font-size: 11px; font-weight: bold; margin-top: 10px; display: none; }
+        
+        /* PROTECTION ET AFFICHAGE CSS INDIVIDUEL OU GLOBAL PAR CLASSE */
+        .eng-input-box { display: none; width: 100%; }
+        .line-item.show-english .eng-input-box { display: block !important; }
+    </style>
+</head>
+<body>
+
+    <!-- EN-TÊTE INFRASTRUCTURE, ÉDITION ET IMPORT/EXPORT SOUDÉ -->
+    <div class="header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
+        <div>
+            <h1 style="color: #fbbf24; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">QBC ADVANCED METRICS STUDIO</h1>
+            <p id="qbcTimeTrackerText" style="margin: 4px 0 0 0; font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold; transition: all 0.3s ease;">PANNEAU SOUVERAIN — RE-ALIGNEMENT DES FIX ET TRADUCTIONS</p>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #27272a; border-radius: 4px; background-color: #18181b;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 10px; color: #a1a1aa; font-weight: bold; text-transform: uppercase;">Instance Server :</label>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <select id="serverSelect" class="line-select" style="padding: 5px; font-size: 11px; width: 220px;" onchange="changeServerInstance(this.value)">
+                        <option value="7dtd-core">QBC FLAGGARD PVE 3.0 (CORE)</option>
+                        <option value="7dtd-projectz">QBC FLAGGARD ProjectZ 3.0</option>
+                    </select>
+                    <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #d97706; border-color: #fbbf24; color: #fff;" onclick="editCurrentServerName()">✏️ ÉDITER NOM</button>
+                    <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #0284c7; border-color: #38bdf8; color: #fff;" onclick="createNewServerInstance()">➕ AJOUTER SERVEUR</button>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 6px; margin-top: 14px; border-left: 1px solid #27272a; padding-left: 12px; margin-left: 4px;">
+                <button type="button" class="btn-io" style="border-color: #ffaa00; color: #ffaa00;" onclick="exportQbcConfig()">📥 Exporter CONFIG (JSON)</button>
+                <button type="button" class="btn-io" style="border-color: #10b981; color: #10b981;" onclick="triggerJsonImport()">📤 Charger CONFIG (JSON)</button>
+                <input type="file" id="jsonFileInput" style="display: none;" accept=".json" onchange="importQbcConfig(event)" />
+            </div>
+        </div>
+    </div>
+
+    <!-- DOUBLE GRILLE DE TRAVAIL EXTENSIBLE -->
+    <div class="workspace-grid" id="mainMatrixContainer">
+        <!-- BLOC SUPÉRIEUR : ÉDITEUR MATRIX COMPLET ET RÉTRACTABLE -->
+        <div class="card" id="editorContainerCard">
+            <button type="button" class="btn-action" id="toggleCollapseBtn" style="position: absolute; top: 18px; right: 20px; background-color: #111827; border-color: #3f3f46; color: #fbbf24; font-size: 11px; z-index: 10;" onclick="toggleEditorCollapse()">[-] RÉDUIRE LE COCKPIT</button>
+            
+            <div class="tab-container">
+                <button class="tab-btn active" id="tab-login-btn" onclick="switchTab('login')">📟 LOGIN TEXT SERVER</button>
+                <button class="tab-btn" id="tab-desc-btn" onclick="switchTab('desc')">🌐 DESCRIPTION SERVER</button>
+            </div>
+
+            <div id="collapsibleWorkspacePanel" class="collapsible-panel">
+
+                <!-- ONGLET 1 : MATRICE DES LIGNES LOGIN -->
+                <div id="content-login" class="tab-content active">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <h2 style="font-size: 12px; margin: 0; color: #fbbf24; text-transform: uppercase; font-weight: 900;">📟 MATRIX: LOGINS ÉDITABLES PAR BLOCS EMPILÉS</h2>
+                            <div style="display: flex; align-items: center; gap: 6px; background: #000; padding: 4px 8px; border: 1px solid #27272a; border-radius: 2px;">
+                                <input type="checkbox" id="loginEnglishToggle" style="width: 14px; height: 14px; cursor: pointer;" onchange="toggleLoginEnglish(this.checked)" />
+                                <label for="loginEnglishToggle" style="font-size: 10px; font-weight: bold; color: #38bdf8; cursor: pointer; text-transform: uppercase;">Option Traduction (Login)</label>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalCharCounter">TOTAL : 0 / 3500 CHARS</div>
+                    </div>
+                    
+                    <div id="linesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;">
+                        <!-- Injecté par script -->
+                    </div>
+                    
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
+                        <button type="button" class="btn-action" onclick="addNewLine()">➕ AJOUTER EN FIN DE LISTE</button>
+                        <div id="alertBox" class="alert-banner">⚠️ DÉPASSEMENT CAPITAL DU LIEN : LE SERVEUR COUPERA LE MOTD !</div>
+                    </div>
+                </div>
+                <!-- ONGLET 2 : MATRICE DES LIGNES DESCRIPTIONS -->
+                <div id="content-desc" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <h2 style="font-size: 12px; margin: 0; color: #fbbf24; text-transform: uppercase; font-weight: 900;">🌐 MATRIX: DESCRIPTIONS ÉDITABLES (8 LIGNES STANDARD)</h2>
+                            <div style="display: flex; align-items: center; gap: 6px; background: #000; padding: 4px 8px; border: 1px solid #27272a; border-radius: 2px;">
+                                <input type="checkbox" id="descEnglishToggle" style="width: 14px; height: 14px; cursor: pointer;" onchange="toggleDescEnglish(this.checked)" />
+                                <label for="descEnglishToggle" style="font-size: 10px; font-weight: bold; color: #38bdf8; cursor: pointer; text-transform: uppercase;">Option Traduction (Description)</label>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalDescCharCounter">TOTAL : 0 / 4000 CHARS</div>
+                    </div>
+                    
+                    <div id="descLinesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;">
+                        <!-- Injecté par script -->
+                    </div>
+                    
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
+                        <button type="button" class="btn-action" onclick="addNewDescLine()">➕ AJOUTER EN FIN DE LISTE</button>
+                        <div id="descAlertBox" class="alert-banner">⚠️ EXPA-MÉMOIRE : VOTRE DESCRIPTION SURPASSE LE QUOTA DÉFINI !</div>
+                    </div>
+                </div>
+
+            </div> <!-- FIN DU VOLET COLLAPSIBLE-PANEL -->
+        </div> <!-- FIN DE LA CARD DE L'ÉDITEUR DU HAUT -->
+        <!-- BLOC INFÉRIEUR : ÉCRAN PREVIEW JEU ET PAYLOAD SOUVERAIN -->
+        <div class="card" id="previewContainerCard">
+            <h3 style="font-size: 12px; color: #a1a1aa; margin: 0 0 12px 0; text-transform: uppercase; font-weight: bold;">📺 APERÇU FILTRÉ GRAPHIQUE (DANS LE COCKPIT DE CHARGEMENT 7DTD) :</h3>
+            <div id="preview" class="preview-box" style="margin-bottom: 25px;"></div>
+
+            <h3 style="font-size: 12px; color: #fbbf24; margin: 0 0 10px 0; text-transform: uppercase; font-weight: bold;">💾 PAYLOAD RÉENCODÉ MONOBLOC EN DIRECT SANS PROBLÈME :</h3>
+            <textarea id="masterOutput" rows="5" class="textarea-box" style="width: 100%; margin-bottom: 15px; background-color: #09090b; border: 1px solid #27272a; color: #a1a1aa; font-family: monospace; font-size: 12px; padding: 12px; box-sizing: border-box; resize: none;" readonly></textarea>
+            <button type="button" class="btn-copy-master" style="width: 100%;" onclick="copyMasterPayload()">📋 ASSIMILER ET COPIER LA CHAÎNE FINALE DU SERVEUR</button>
+        </div>
+
+    </div> <!-- FIN DE WORKSPACE-GRID -->
+    <script>
+        let currentActiveTab = 'login';
+        let activeServerId = '7dtd-core';
+        
+        let isLoginEnglishActive = false;
+        let isDescEnglishActive = false;
+
+        // Base de données d'usine épurée avec initialisation des états de traduction
+        let qbcDatabase = {
+            '7dtd-core': {
+                name: "QBC FLAGGARD PVE 3.0 (CORE)",
+                loginLines: [
+                    { symbol: "❤", text: "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤", text_en: "", color: "ff0000", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "☣", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "✗", text: "1- Pas de landclaim au POI Carl's Corn Farm.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "✗", text: "2- Vol de base interdit (sécurisez vos coffres).", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "⏰", text: "REBOOTS: 05:00 & 17:00 (EST/QC) | Beauharnois, CA", text_en: "", color: "F88379", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }
+                ],
+                descLines: [
+                    { symbol: "•", text: "Bienvenue sur l'infrastructure souveraine de Varennes.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Serveur PvE québécois haute performance avec mods industriels uniques.", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Hébergement physique d'élite basé au Québec à Beauharnois.", text_en: "", color: "ffaa00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Économie dynamique, Hôtel des Ventes et système de loterie actif.", text_en: "", color: "00ffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Protection renforcée et verrouillage automatique des véhicules.", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Niveau maximal débloqué avec récompenses exclusives à chaque palier.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Communauté francophone soudée et équipe d'administration active.", text_en: "", color: "ffff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "🙏", text: "Merci à l'ensemble des survivants pour leur fidélité et bon jeu !", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }
+                ]
+            },
+            '7dtd-projectz': {
+                name: "QBC FLAGGARD PROJECTZ 3.0",
+                loginLines: [
+                    { symbol: "❤", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "☣", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Pas de landclaim à Carl's Corn Farm.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "⚠️", text: "IMPORTANT: Ticket Yautja NE PAS UTILISER.", text_en: "", color: "ff3333", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "🚀", text: "/sethome [nom] | /home [nom] | /teleport friends", text_en: "", color: "ffaa00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "⏰", text: "REBOOTS: 05:00 & 17:00 (EST/QC) | Beauharnois, CA", text_en: "", color: "F88379", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }
+                ],
+                descLines: [
+                    { symbol: "🤖", text: "Gestion de l'instance ProjectZ 3.0 Hardcore par les GMs.", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "🔒", text: "Protection auto-lock activée sur l'infrastructure complète.", text_en: "", color: "00ffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Mods exclusifs axés sur la survie et l'exploration industrielle.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Système de quêtes narratives et événements communautaires réguliers.", text_en: "", color: "ffff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Téléportations sécurisées et lits réactifs pour tous les joueurs.", text_en: "", color: "ffaa00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Commerce inter-joueurs facilité via des commandes dédiées.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "•", text: "Redémarrages automatisés pour garantir une fluidité constante.", text_en: "", color: "F88379", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "🙏", text: "Infrastructure propulsée par la technologie QBC 2026.", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }
+                ]
+            }
+        };
+
+        const colorPalette = [
+            { hex: "ff0000", name: "Rouge" }, { hex: "00ff00", name: "Vert" }, { hex: "ffff00", name: "Jaune" },
+            { hex: "00ffff", name: "Cyan" }, { hex: "ffaa00", name: "Orange" }, { hex: "F88379", name: "Rose" }, { hex: "ffffff", name: "Blanc" }
+        ];
+
+        const symbolPalette = [
+            { char: "", name: "(Aucun)" }, { char: "•", name: "• Point" }, { char: "❤", name: "❤ Coeur" },
+            { char: "☣", name: "☣ Bio" }, { char: "⚠️", name: "⚠️ Alerte" }, { char: "🎁", name: "🎁 Kit" },
+            { char: "🚀", name: "🚀 TP" }, { char: "💰", name: "💰 Éco" }, { char: "👑", name: "👑 Rank" },
+            { char: "🔒", name: "🔒 Lock" }, { char: "🤖", name: "🤖 Drone" }, { char: "⏰", name: "⏰ Clock" },
+            { char: "✗", name: "✗ Croix" }
+        ];
+
+        function toggleEditorCollapse() {
+            const panel = document.getElementById('collapsibleWorkspacePanel');
+            const btn = document.getElementById('toggleCollapseBtn');
+            if (panel.classList.contains('collapsed')) {
+                panel.classList.remove('collapsed');
+                btn.innerText = "[-] RÉDUIRE LE COCKPIT";
+                btn.style.color = "#fbbf24";
+            } else {
+                panel.classList.add('collapsed');
+                btn.innerText = "[+] OUVRIR LE COCKPIT";
+                btn.style.color = "#34d399";
+            }
+        }
+
+        function toggleLoginEnglish(checked) { isLoginEnglishActive = checked; renderFormLines(); }
+        function toggleDescEnglish(checked) { isDescEnglishActive = checked; renderDescFormLines(); }
+
+        function toggleLineEnglishIndividual(isDesc, index) {
+            const isLogin = !isDesc;
+            const line = isLogin ? qbcDatabase[activeServerId].loginLines[index] : qbcDatabase[activeServerId].descLines[index];
+            line.show_english = !line.show_english;
+            if (isLogin) renderFormLines(); else renderDescFormLines();
+        }
+
+        function toggleLineDoubleBorder(isDesc, index) {
+            const isLogin = !isDesc;
+            const line = isLogin ? qbcDatabase[activeServerId].loginLines[index] : qbcDatabase[activeServerId].descLines[index];
+            line.border_double = !line.border_double;
+            if (isLogin) renderFormLines(); else renderDescFormLines();
+        }
+
+        function moveLine(isDesc, index, direction) {
+            const isLogin = !isDesc;
+            const linesList = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= linesList.length) return;
+            const temp = linesList[index];
+            linesList[index] = linesList[targetIndex];
+            linesList[targetIndex] = temp;
+            if (isLogin) renderFormLines(); else renderDescFormLines();
+        }
+
+        function insertLineAt(isDesc, index) {
+            const isLogin = !isDesc;
+            const linesList = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+            const newLineObj = { 
+                symbol: "•", text: "LIGNE INSÉRÉE À MODIFIER", text_en: "", color: "ffffff", border_double: false, show_english: false,
+                style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} 
+            };
+            linesList.splice(index, 0, newLineObj);
+            if (isLogin) renderFormLines(); else renderDescFormLines();
+        }
+        function createNewServerInstance() {
+            const rawName = prompt("Entrez le NOM de votre nouveau serveur 7DTD :", "QBC MON SERVEUR MODDÉ");
+            if (!rawName || rawName.trim() === "") return;
+            const newId = "7dtd-" + Math.random().toString(36).substring(2, 7);
+            qbcDatabase[newId] = {
+                name: rawName.trim().toUpperCase(),
+                loginLines: [
+                    { symbol: "❤", text: "BIENVENUE SUR " + rawName.trim().toUpperCase(), text_en: "", color: "ff0000", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} },
+                    { symbol: "☣", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }
+                ],
+                descLines: [
+                    { symbol: "•", text: "Nouvelle instance de jeu configurée via le panel QBC.", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }
+                ]
+            };
+            const selectEl = document.getElementById('serverSelect');
+            const option = document.createElement('option');
+            option.value = newId; option.innerText = rawName.trim().toUpperCase(); selectEl.appendChild(option);
+            selectEl.value = newId; changeServerInstance(newId);
+        }
+
+        function editCurrentServerName() {
+            const currentInstance = qbcDatabase[activeServerId];
+            const rawNewName = prompt("Entrez le NOUVEAU NOM pour cette instance de serveur :", currentInstance.name);
+            if (!rawNewName || rawNewName.trim() === "") return;
+            qbcDatabase[activeServerId].name = rawNewName.trim().toUpperCase();
+            const selectEl = document.getElementById('serverSelect');
+            selectEl.options[selectEl.selectedIndex].innerText = rawNewName.trim().toUpperCase();
+            processAndCompileQBC();
+        }
+
+        function changeServerInstance(serverId) {
+            activeServerId = serverId;
+            if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+        }
+
+        function switchTab(tab) {
+            currentActiveTab = tab;
+            document.getElementById('tab-login-btn').classList.remove('active');
+            document.getElementById('tab-desc-btn').classList.remove('active');
+            document.getElementById('tab-' + tab + '-btn').classList.add('active');
+            
+            document.getElementById('content-login').classList.remove('active');
+            document.getElementById('content-desc').classList.remove('active');
+            document.getElementById('content-' + tab).classList.add('active');
+            
+            if (tab === 'login') renderFormLines(); else renderDescFormLines();
+        }
+
+        function toggleLineStyle(isDesc, index, lang, styleKey) {
+            const isLogin = !isDesc;
+            const line = isLogin ? qbcDatabase[activeServerId].loginLines[index] : qbcDatabase[activeServerId].descLines[index];
+            const targetStyle = lang === 'fr' ? line.style_fr : line.style_en;
+            targetStyle[styleKey] = !targetStyle[styleKey];
+            if (isLogin) renderFormLines(); else renderDescFormLines();
+        }
+
+        function updateLineSymbol(i, v) { qbcDatabase[activeServerId].loginLines[i].symbol = v; processAndCompileQBC(); }
+        function updateDescLineSymbol(i, v) { qbcDatabase[activeServerId].descLines[i].symbol = v; processAndCompileQBC(); }
+        function updateLineColor(i, h) { qbcDatabase[activeServerId].loginLines[i].color = h; renderFormLines(); }
+        function updateDescLineColor(i, h) { qbcDatabase[activeServerId].descLines[i].color = h; renderDescFormLines(); }
+        function renderFormLines() {
+            const container = document.getElementById('linesContainer');
+            container.innerHTML = "";
+            const currentLines = qbcDatabase[activeServerId].loginLines;
+
+            currentLines.forEach((line, index) => {
+                const div = document.createElement('div');
+                
+                // Alignement par classe : la ligne s'affiche si le bouton individuel ou l'option globale est cochée
+                const isLineEnglishDisplayed = line.show_english || isLoginEnglishActive;
+                div.className = "line-item" + (line.border_double ? " has-double-border" : "") + (isLineEnglishDisplayed ? " show-english" : "");
+
+                let symbolHtml = `<select class="line-select" style="width: 100px;" onchange="updateLineSymbol(${index}, this.value)">`;
+                symbolPalette.forEach(sym => { symbolHtml += `<option value="${sym.char}" ${sym.char === line.symbol ? "selected" : ""}>${sym.name}</option>`; });
+                symbolHtml += `</select>`;
+
+                let colorHtml = `<select class="line-select" style="width: 90px;" onchange="updateLineColor(${index}, this.value)">`;
+                colorPalette.forEach(opt => { colorHtml += `<option value="${opt.hex}" ${opt.hex === line.color ? "selected" : ""}>${opt.name}</option>`; });
+                colorHtml += `</select>`;
+
+                let textFR = line.text;
+                let textEN = line.text_en || '';
+
+                let fullFR = line.symbol ? line.symbol + " " + textFR : textFR;
+                if(line.style_fr.u) fullFR = "[u]" + fullFR + "[/u]";
+                if(line.style_fr.b) fullFR = "[b]" + fullFR + "[/b]";
+                if(line.style_fr.i) fullFR = "[i]" + fullFR + "[/i]";
+                if(line.style_fr.s) fullFR = "[s]" + fullFR + "[/s]";
+                
+                let frSize = (`[${line.color}]${fullFR}[-]`).length;
+                if (line.border_double) {
+                    frSize += (`\\n[${line.color}]════════════════════════════════════════════════════════════════[-]`).length;
+                }
+
+                let fullEN = line.symbol ? line.symbol + " " + textEN : textEN;
+                if(line.style_en.u) fullEN = "[u]" + fullEN + "[/u]";
+                if(line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
+                if(line.style_en.i) fullEN = "[i]" + fullEN + "[/i]";
+                if(line.style_en.s) fullEN = "[s]" + fullEN + "[/s]";
+                let enSize = (`[${line.color}]${fullEN}[-]`).length;
+
+                let styleToolsFR = `
+                    <button type="button" class="style-btn u-btn ${line.style_fr.u ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'fr', 'u')">U</button>
+                    <button type="button" class="style-btn b-btn ${line.style_fr.b ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'fr', 'b')">B</button>
+                    <button type="button" class="style-btn i-btn ${line.style_fr.i ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'fr', 'i')">I</button>
+                    <button type="button" class="style-btn s-btn ${line.style_fr.s ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'fr', 's')">S</button>
+                `;
+
+                let styleToolsEN = `
+                    <button type="button" class="style-btn u-btn ${line.style_en.u ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'en', 'u')">U</button>
+                    <button type="button" class="style-btn b-btn ${line.style_en.b ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'en', 'b')">B</button>
+                    <button type="button" class="style-btn i-btn ${line.style_en.i ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'en', 'i')">I</button>
+                    <button type="button" class="style-btn s-btn ${line.style_en.s ? 'active' : ''}" onclick="toggleLineStyle(false, ${index}, 'en', 's')">S</button>
+                `;
+
+                let englishRowHtml = `
+                    <div class="eng-input-box">
+                        <div class="input-row" style="margin-top: 4px;">
+                            <span style="font-size: 11px; font-weight: bold; color: #38bdf8; width: 30px;">EN :</span>
+                            <input type="text" class="input-line" style="border-left: 4px dashed #4b5563;" value="${textEN}" oninput="updateLineTextEN(${index}, this.value)" placeholder="(Saisir la traduction anglaise ici...)" />
+                            ${styleToolsEN}
+                            <span class="char-badge-en">${enSize} EN</span>
+                        </div>
+                    </div>
+                `;
+
+                let moveUpDisabled = index === 0 ? "disabled style='opacity:0.3; cursor:not-allowed;'" : "";
+                let moveDownDisabled = index === currentLines.length - 1 ? "disabled style='opacity:0.3; cursor:not-allowed;'" : "";
+                
+                let translateBtnHtml = index === 0 ? "" : `
+                    <button type="button" class="double-line-btn ${line.show_english ? 'active' : ''}" style="border-color: #38bdf8; color: #38bdf8;" onclick="toggleLineEnglishIndividual(false, ${index})">🌐 TRADUIRE CETTE LIGNE</button>
+                `;
+
+                div.innerHTML = `
+                    <div class="line-controls">
+                        <span class="line-number">${index === 0 ? "Titre L.1" : "Login L." + (index + 1)}</span>
+                        <button type="button" class="order-btn" ${moveUpDisabled} onclick="moveLine(false, ${index}, -1)">🔼</button>
+                        <button type="button" class="order-btn" ${moveDownDisabled} onclick="moveLine(false, ${index}, 1)">🔽</button>
+                        <button type="button" class="btn-insert-here" onclick="insertLineAt(false, ${index + 1})">➕ INSÉRER ICI</button>
+                        ${symbolHtml}
+                        ${colorHtml}
+                        ${translateBtnHtml}
+                        <button type="button" class="double-line-btn ${line.border_double ? 'active' : ''}" style="margin-left: auto;" onclick="toggleLineDoubleBorder(false, ${index})">═ LIGNE DOUBLE</button>
+                        <button type="button" class="btn-action" style="padding: 4px 10px; color: #f87171;" onclick="removeLine(${index})">❌ Supprimer</button>
+                    </div>
+                    
+                    <div class="line-inputs-block">
+                        <div class="input-row">
+                            <span style="font-size: 11px; font-weight: bold; color: #34d399; width: 30px;">FR :</span>
+                            <input type="text" class="input-line" style="border-left: 4px solid #${line.color};" value="${textFR}" oninput="updateLineTextFR(${index}, this.value)" placeholder="Saisissez le texte français..." />
+                            ${styleToolsFR}
+                            <span class="char-badge-fr">${frSize} FR</span>
+                        </div>
+                        ${englishRowHtml}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            processAndCompileQBC();
+        }
+        function renderDescFormLines() {
+            const container = document.getElementById('descLinesContainer');
+            container.innerHTML = "";
+            const currentLines = qbcDatabase[activeServerId].descLines;
+
+            currentLines.forEach((line, index) => {
+                const div = document.createElement('div');
+                
+                // Alignement par classe : la ligne s'affiche si le bouton individuel ou l'option globale est cochée
+                const isDescEnglishDisplayed = line.show_english || isDescEnglishActive;
+                div.className = "line-item" + (line.border_double ? " has-double-border" : "") + (isDescEnglishDisplayed ? " show-english" : "");
+
+                let symbolHtml = `<select class="line-select" style="width: 100px;" onchange="updateDescLineSymbol(${index}, this.value)">`;
+                symbolPalette.forEach(sym => { symbolHtml += `<option value="${sym.char}" ${sym.char === line.symbol ? "selected" : ""}>${sym.name}</option>`; });
+                symbolHtml += `</select>`;
+
+                let colorHtml = `<select class="line-select" style="width: 90px;" onchange="updateDescLineColor(${index}, this.value)">`;
+                colorPalette.forEach(opt => { colorHtml += `<option value="${opt.hex}" ${opt.hex === line.color ? "selected" : ""}>${opt.name}</option>`; });
+                colorHtml += `</select>`;
+
+                let textFR = line.text;
+                let textEN = line.text_en || '';
+
+                let fullFR = line.symbol ? line.symbol + " " + textFR : textFR;
+                if(line.style_fr.u) fullFR = "[u]" + fullFR + "[/u]";
+                if(line.style_fr.b) fullFR = "[b]" + fullFR + "[/b]";
+                if(line.style_fr.i) fullFR = "[i]" + fullFR + "[/i]";
+                if(line.style_fr.s) fullFR = "[s]" + fullFR + "[/s]";
+                
+                let frSize = (`[${line.color}]${fullFR}[-]`).length;
+                if (line.border_double) {
+                    frSize += (`\\n[${line.color}]════════════════════════════════════════════════════════════════[-]`).length;
+                }
+
+                let fullEN = line.symbol ? line.symbol + " " + textEN : textEN;
+                if(line.style_en.u) fullEN = "[u]" + fullEN + "[/u]";
+                if(line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
+                if(line.style_en.i) fullEN = "[i]" + fullEN + "[/i]";
+                if(line.style_en.s) fullEN = "[s]" + fullEN + "[/s]";
+                let enSize = (`[${line.color}]${fullEN}[-]`).length;
+
+                let styleToolsFR = `
+                    <button type="button" class="style-btn u-btn ${line.style_fr.u ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'fr', 'u')">U</button>
+                    <button type="button" class="style-btn b-btn ${line.style_fr.b ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'fr', 'b')">B</button>
+                    <button type="button" class="style-btn i-btn ${line.style_fr.i ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'fr', 'i')">I</button>
+                    <button type="button" class="style-btn s-btn ${line.style_fr.s ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'fr', 's')">S</button>
+                `;
+
+                let styleToolsEN = `
+                    <button type="button" class="style-btn u-btn ${line.style_en.u ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'en', 'u')">U</button>
+                    <button type="button" class="style-btn b-btn ${line.style_en.b ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'en', 'b')">B</button>
+                    <button type="button" class="style-btn i-btn ${line.style_en.i ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'en', 'i')">I</button>
+                    <button type="button" class="style-btn s-btn ${line.style_en.s ? 'active' : ''}" onclick="toggleLineStyle(true, ${index}, 'en', 's')">S</button>
+                `;
+
+                let englishRowHtml = `
+                    <div class="eng-input-box">
+                        <div class="input-row" style="margin-top: 4px;">
+                            <span style="font-size: 11px; font-weight: bold; color: #38bdf8; width: 30px;">EN :</span>
+                            <input type="text" class="input-line" style="border-left: 4px dashed #4b5563;" value="${textEN}" oninput="updateDescLineTextEN(${index}, this.value)" placeholder="(Saisir la description anglaise ici...)" />
+                            ${styleToolsEN}
+                            <span class="char-badge-en">${enSize} EN</span>
+                        </div>
+                    </div>
+                `;
+
+                let moveUpDisabled = index === 0 ? "disabled style='opacity:0.3; cursor:not-allowed;'" : "";
+                let moveDownDisabled = index === currentLines.length - 1 ? "disabled style='opacity:0.3; cursor:not-allowed;'" : "";
+                
+                let translateBtnHtml = `
+                    <button type="button" class="double-line-btn ${line.show_english ? 'active' : ''}" style="border-color: #38bdf8; color: #38bdf8;" onclick="toggleLineEnglishIndividual(true, ${index})">🌐 TRADUIRE CETTE LIGNE</button>
+                `;
+
+                div.innerHTML = `
+                    <div class="line-controls">
+                        <span class="line-number">Web L.${index + 1}</span>
+                        <button type="button" class="order-btn" ${moveUpDisabled} onclick="moveLine(true, ${index}, -1)">🔼</button>
+                        <button type="button" class="order-btn" ${moveDownDisabled} onclick="moveLine(true, ${index}, 1)">🔽</button>
+                        <button type="button" class="btn-insert-here" onclick="insertLineAt(true, ${index + 1})">➕ INSÉRER ICI</button>
+                        ${symbolHtml}
+                        ${colorHtml}
+                        ${translateBtnHtml}
+                        <button type="button" class="double-line-btn ${line.border_double ? 'active' : ''}" style="margin-left: auto;" onclick="toggleLineDoubleBorder(true, ${index})">═ LIGNE DOUBLE</button>
+                        <button type="button" class="btn-action" style="padding: 4px 10px; color: #f87171;" onclick="removeDescLine(${index})">❌ Supprimer</button>
+                    </div>
+                    
+                    <div class="line-inputs-block">
+                        <div class="input-row">
+                            <span style="font-size: 11px; font-weight: bold; color: #34d399; width: 30px;">FR :</span>
+                            <input type="text" class="input-line" style="border-left: 4px solid #${line.color};" value="${textFR}" oninput="updateDescLineTextFR(${index}, this.value)" placeholder="Saisissez la description française..." />
+                            ${styleToolsFR}
+                            <span class="char-badge-fr">${frSize} FR</span>
+                        </div>
+                        ${englishRowHtml}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            processAndCompileQBC();
+        }
+
+        function updateLineTextFR(i, v) { qbcDatabase[activeServerId].loginLines[i].text = v; processAndCompileQBC(); }
+        function updateLineTextEN(i, v) { qbcDatabase[activeServerId].loginLines[i].text_en = v; processAndCompileQBC(); }
+        function updateDescLineTextFR(i, v) { qbcDatabase[activeServerId].descLines[i].text = v; processAndCompileQBC(); }
+        function updateDescLineTextEN(i, v) { qbcDatabase[activeServerId].descLines[i].text_en = v; processAndCompileQBC(); }
+
+        function addNewLine() { 
+            qbcDatabase[activeServerId].loginLines.push({ 
+                symbol: "•", text: "NOUVEAU MESSAGE À MODIFIER", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }); 
+            renderFormLines(); 
+        }
+        function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); renderFormLines(); }
+        
+        function addNewDescLine() { 
+            qbcDatabase[activeServerId].descLines.push({ 
+                symbol: "•", text: "NOUVELLE DESCRIPTION À MODIFIER", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false,i:false,s:false}, style_en: {u:false,b:false,i:false,s:false} }); 
+            renderDescFormLines(); 
+        }
+        function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); renderDescFormLines(); }
+               function processAndCompileQBC() {
+            const isLogin = currentActiveTab === 'login';
+            if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase)[0];
+            
+            const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+            const isTargetGlobalEnglishActive = isLogin ? isLoginEnglishActive : isDescEnglishActive;
+            const globalLimit = isLogin ? 3500 : 4000;
+            let masterPayload = "";
+
+            currentLines.forEach((line, index) => {
+                let textFR = line.text;
+                let textEN = line.text_en || '';
+
+                if (!line.style_fr) line.style_fr = {u:false,b:false,i:false,s:false};
+                if (!line.style_en) line.style_en = {u:false,b:false,i:false,s:false};
+
+                let fullFR = line.symbol ? line.symbol + " " + textFR : textFR;
+                if(line.style_fr.u) fullFR = "[u]" + fullFR + "[/u]";
+                if(line.style_fr.b) fullFR = "[b]" + fullFR + "[/b]";
+                if(line.style_fr.i) fullFR = "[i]" + fullFR + "[/i]";
+                if(line.style_fr.s) fullFR = "[s]" + fullFR + "[/s]";
+                let chunkFR = "[" + line.color + "]" + fullFR + "[-]";
+                
+                const isEnglishActiveForThisLine = line.show_english || isTargetGlobalEnglishActive;
+
+                if (isEnglishActiveForThisLine && !(isLogin && index === 0)) {
+                    let finalEnglishText = textEN.trim() !== "" ? textEN : textFR;
+                    let fullEN = line.symbol ? line.symbol + " " + finalEnglishText : finalEnglishText;
+                    if(line.style_en.u) fullEN = "[u]" + fullEN + "[/u]";
+                    if(line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
+                    if(line.style_en.i) fullEN = "[i]" + fullEN + "[/i]";
+                    if(line.style_en.s) fullEN = "[s]" + fullEN + "[/s]";
+                    let chunkEN = " | [" + line.color + "]" + fullEN + "[-]";
+                    masterPayload += chunkFR + chunkEN;
+                    if (line.border_double) masterPayload += "\\n[" + line.color + "]════════════════════════════════════════════════════════════════[-]";
+                } else {
+                    masterPayload += chunkFR;
+                    if (line.border_double) masterPayload += "\\n[" + line.color + "]════════════════════════════════════════════════════════════════[-]";
+                }
+                if (index < currentLines.length - 1) masterPayload += "\\n";
+            });
+
+            document.getElementById('masterOutput').value = masterPayload;
+            let htmlContent = masterPayload.replace(/\\n/g, '\n');
+            htmlContent = htmlContent.replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color: #$1;">$2</span>');
+            htmlContent = htmlContent.replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>').replace(/\[i\](.*?)\[\/i\]/g, '<em>$1</em>').replace(/\[s\](.*?)\[\/s\]/g, '<del>$1</del>');
+            document.getElementById('preview').innerHTML = htmlContent;
+
+            const totalChars = masterPayload.length;
+            const counterEl = isLogin ? document.getElementById('totalCharCounter') : document.getElementById('totalDescCharCounter');
+            const alertEl = isLogin ? document.getElementById('alertBox') : document.getElementById('descAlertBox');
+            counterEl.innerText = "TOTAL : " + totalChars + " / " + globalLimit + " CHARS";
+            counterEl.style.color = totalChars > globalLimit ? "#f87171" : "#34d399";
+            alertEl.style.display = totalChars > globalLimit ? "block" : "none";
+        }
+
+        function exportQbcConfig() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "qbc-styled-auto-backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerJsonImport() { document.getElementById('jsonFileInput').click(); }
+
+        function importQbcConfig(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    const serverIds = Object.keys(parsedData);
+                    if (serverIds.length === 0) { alert("❌ Fichier JSON vide."); return; }
+
+                    serverIds.forEach(serverId => {
+                        const server = parsedData[serverId];
+                        if (server.loginLines) {
+                            server.loginLines.forEach(line => {
+                                if (line.border_double === undefined) line.border_double = false;
+                                if (!line.style_fr) line.style_fr = {u:false,b:false,i:false,s:false};
+                                if (!line.style_en) line.style_en = {u:false,b:false,i:false,s:false};
+                                if (line.text_en && line.text_en.trim() !== "") line.show_english = true;
+                                else if (line.show_english === undefined) line.show_english = false;
+                            });
+                        }
+                        if (server.descLines) {
+                            server.descLines.forEach(line => {
+                                if (line.border_double === undefined) line.border_double = false;
+                                if (!line.style_fr) line.style_fr = {u:false,b:false,i:false,s:false};
+                                if (!line.style_en) line.style_en = {u:false,b:false,i:false,s:false};
+                                if (line.text_en && line.text_en.trim() !== "") line.show_english = true;
+                                else if (line.show_english === undefined) line.show_english = false;
+                            });
+                        }
+                    });
+
+                    const oldActiveServerId = activeServerId;
+                    const selectEl = document.getElementById('serverSelect');
+                    selectEl.innerHTML = "";
+                    serverIds.forEach(id => {
+                        const option = document.createElement('option');
+                        option.value = id; option.innerText = parsedData[id].name || id.toUpperCase();
+                        selectEl.appendChild(option);
+                    });
+                    
+                    qbcDatabase = parsedData;
+                    activeServerId = serverIds.includes(oldActiveServerId) ? oldActiveServerId : serverIds[0];
+                    selectEl.value = activeServerId;
+                    
+                    const loadedServerName = qbcDatabase[activeServerId].name || "INSTANCE CHARGÉE";
+                    const now = new Date();
+                    const formattedDateTime = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} À ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+                    document.getElementById('qbcTimeTrackerText').innerText = `[ ARCHIVE ACTIVE ] : ${loadedServerName} — CHARGÉ LE ${formattedDateTime}`;
+                    document.getElementById('qbcTimeTrackerText').style.color = "#34d399";
+
+                    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+                    event.target.value = '';
+                    alert("📥 [RACCORDEMENT SÉCURISÉ] Vos configurations ont été importées et vos traductions réactivées !");
+                } catch (err) { alert("❌ Fichier illisible ou corrompu."); }
+            };
+            reader.readAsText(files[0]);
+        }
+
+        function copyMasterPayload() {
+            const output = document.getElementById('masterOutput');
+            output.select();
+            document.execCommand('copy');
+            alert('🚀 [SUCCÈS] Chaîne de code bilingue ordonnée copiée avec ses séparateurs !');
+        }
+
+        renderFormLines();
+    </script>
+</body>
+</html>

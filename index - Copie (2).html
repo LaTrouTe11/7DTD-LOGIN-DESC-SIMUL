@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QBC ADVANCED AUTO-TEXT METRICS STUDIO</title>
+    <style>
+        /* ==========================================================================
+           === COCKPIT DE CHARGEMENT ET STRATÉGIE GRAPHIQUE CSS D'ORIGINE COMPLÈTE ===
+           ========================================================================== */
+        body { background-color: #09090b; color: #f4f4f5; font-family: monospace; padding: 20px; margin: 0; }
+        .header { border-bottom: 1px solid #27272a; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* GRILLE DE TRAVAIL VERTICALE XXL EMPILÉE */
+        .workspace-grid { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: 0 auto; }
+        
+        .card { background-color: #18181b; padding: 20px; border-radius: 4px; border: 1px solid #27272a; position: relative; }
+        .input-line { background-color: #09090b; border: 1px solid #27272a; color: #fff; padding: 10px; font-family: monospace; font-size: 13px; outline: none; flex-grow: 1; width: 100%; box-sizing: border-box; }
+        .preview-box { background-color: #000; border: 1px dashed #3f3f46; padding: 25px; min-height: 250px; max-height: 450px; overflow-y: auto; white-space: pre-wrap; color: #a1a1aa; line-height: 1.7; border-radius: 2px; font-size: 13px; }
+        
+        /* VOLET DE PLIAGE DU COCKPIT MÉCANIQUE */
+        .collapsible-panel { max-height: 2000px; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .collapsible-panel.collapsed { max-height: 0px !important; }
+
+        /* SYSTÈME D'ONGLETS SOUDÉS QBC INTERNET */
+        .tab-container { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid #27272a; padding-bottom: 1px; }
+        .tab-btn { background-color: #09090b; border: 1px solid #27272a; color: #71717a; padding: 12px 24px; font-family: monospace; font-weight: bold; font-size: 12px; cursor: pointer; text-transform: uppercase; border-bottom: none; border-radius: 4px 4px 0 0; transition: all 0.2s; }
+        .tab-btn.active { background-color: #18181b; border-color: #27272a; color: #fbbf24; border-bottom: 2px solid #fbbf24; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* CONTROLES, SÉLECTEURS ET MATRICE ACTION */
+        .line-select { background-color: #09090b; border: 1px solid #27272a; color: #fff; padding: 9px; font-family: monospace; font-size: 12px; outline: none; border-radius: 2px; cursor: pointer; }
+        .btn-action { background-color: #27272a; border: 1px solid #3f3f46; color: #e4e4e7; padding: 10px 20px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; font-size: 12px; }
+        .btn-action:hover { background-color: #3f3f46; }
+        .btn-io { background-color: #1f2937; border: 1px solid #4b5563; color: #f3f4f6; padding: 6px 14px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; text-transform: uppercase; }
+        .btn-io:hover { background-color: #374151; border-color: #6b7280; }
+        .btn-copy-master { background-color: #fbbf24; border: none; color: #000; padding: 14px 28px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
+        /* ==========================================================================
+           === BLOC 2 === [ CSS : ÉDITEUR DE STYLE, BADGES ET RADARS DE COMPTAGE ]
+           ========================================================================== */
+        .style-btn { background-color: #09090b; border: 1px solid #27272a; color: #71717a; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; transition: all 0.2s; user-select: none; }
+        .style-btn.active { background-color: #2563eb; color: #fff; border-color: #3b82f6; }
+        .order-btn { background-color: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 5px 8px; font-size: 11px; cursor: pointer; border-radius: 2px; font-family: monospace; }
+        .order-btn:hover { background-color: #3f3f46; border-color: #71717a; }
+        .btn-insert-here { background-color: #065f46; border: 1px solid #059669; color: #34d399; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; border-radius: 2px; font-family: monospace; }
+        .btn-insert-here:hover { background-color: #047857; color: #fff; }
+        .double-line-btn { background-color: #111827; border: 1px solid #4b5563; color: #9ca3af; padding: 5px 10px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; border-radius: 2px; transition: all 0.2s; }
+        .double-line-btn.active { background-color: #d97706; border-color: #fbbf24; color: #fff; }
+        .line-item { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background-color: rgba(9, 9, 11, 0.6); padding: 14px; border-radius: 4px; border: 1px solid #222; box-sizing: border-box; }
+        .line-item.has-double-border { border-bottom: 4px double #d97706 !important; }
+        .line-controls { display: flex; align-items: center; gap: 8px; width: 100%; border-bottom: 1px dashed #27272a; padding-bottom: 6px; flex-wrap: wrap; }
+        .line-inputs-block { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .input-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .line-number { font-size: 12px; color: #71717a; width: 85px; font-weight: bold; }
+        .char-badge-fr { font-size: 11px; font-weight: bold; background-color: #111827; color: #34d399; padding: 6px 8px; border: 1px solid #065f46; min-width: 60px; text-align: center; border-radius: 2px; }
+        .char-badge-en { font-size: 11px; font-weight: bold; background-color: #1e1b4b; color: #38bdf8; padding: 6px 8px; border: 1px solid #3730a3; min-width: 60px; text-align: center; border-radius: 2px; }
+        .alert-banner { color: #f87171; font-size: 11px; font-weight: bold; margin-top: 10px; display: none; }
+        .eng-input-box { display: none; width: 100%; }
+        .line-item.show-english .eng-input-box, .eng-global-active .eng-input-box { display: block !important; }
+    </style>
+</head>
+<body>
+    <!-- ==========================================================================
+       === BLOC 3 === [ HTML : RECONSTRUCTION DU COCKPIT INFRASTRUCTURE ]
+       ========================================================================== */ -->
+    <div class="header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
+        <div>
+            <h1 style="color: #fbbf24; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">QBC ADVANCED METRICS STUDIO</h1>
+            <p id="qbcTimeTrackerText" style="margin: 4px 0 0 0; font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold;">PANNEAU RECONSTRUIT UNIQUE — REVIREMENT APPLICATIF SÉCURISÉ</p>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #27272a; border-radius: 4px; background-color: #18181b;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 10px; color: #a1a1aa; font-weight: bold; text-transform: uppercase;">Instance Server :</label>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <select id="serverSelect" class="line-select" style="padding: 5px; font-size: 11px; width: 220px;" onchange="changeServerInstance(this.value)">
+                        <option value="7dtd-core">QBC FLAGGARD PVE 3.0 (CORE)</option>
+                        <option value="7dtd-projectz">QBC FLAGGARD ProjectZ 3.0</option>
+                    </select>
+                    <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #d97706; border-color: #fbbf24; color: #fff;" onclick="editCurrentServerName()">✏️ ÉDITER NOM</button>
+                    <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #0284c7; border-color: #38bdf8; color: #fff;" onclick="createNewServerInstance()">➕ AJOUTER SERVEUR</button>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 6px; margin-top: 14px; border-left: 1px solid #27272a; padding-left: 12px; margin-left: 4px;">
+                <button type="button" class="btn-io" style="border-color: #ffaa00; color: #ffaa00;" onclick="exportQbcConfig()">📥 Exporter CONFIG (JSON)</button>
+                <button type="button" class="btn-io" style="border-color: #10b981; color: #10b981;" onclick="triggerJsonImport()">📤 Charger CONFIG (JSON)</button>
+                <input type="file" id="jsonFileInput" style="display: none;" accept=".json" onchange="importQbcConfig(event)" />
+            </div>
+        </div>
+    </div>
+
+    <div class="workspace-grid" id="mainMatrixContainer">
+        <div class="card" id="editorContainerCard">
+            <button type="button" class="btn-action" id="toggleCollapseBtn" style="position: absolute; top: 18px; right: 20px; background-color: #111827; border-color: #3f3f46; color: #fbbf24; font-size: 11px; z-index: 10;" onclick="toggleEditorCollapse()">[-] RÉDUIRE LE COCKPIT</button>
+            
+            <div class="tab-container">
+                <button class="tab-btn active" id="tab-login-btn" onclick="switchTab('login')">📟 LOGIN TEXT SERVER</button>
+                <button class="tab-btn" id="tab-desc-btn" onclick="switchTab('desc')">🌐 DESCRIPTION SERVER</button>
+            </div>
+
+            <div id="collapsibleWorkspacePanel" class="collapsible-panel">
+                <div id="content-login" class="tab-content active">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <h2 style="font-size: 12px; margin: 0; color: #fbbf24; text-transform: uppercase; font-weight: 900;">📟 MATRIX: LOGINS ÉDITABLES PAR BLOCS EMPILÉS</h2>
+                            <div style="display: flex; align-items: center; gap: 6px; background: #000; padding: 4px 8px; border: 1px solid #27272a; border-radius: 2px;">
+                                <input type="checkbox" id="loginEnglishToggle" style="width: 14px; height: 14px; cursor: pointer;" onchange="toggleLoginEnglish(this.checked)" />
+                                <label for="loginEnglishToggle" style="font-size: 10px; font-weight: bold; color: #38bdf8; cursor: pointer; text-transform: uppercase;">Option Traduction (Login)</label>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalCharCounter">TOTAL : 0 / 3500 CHARS</div>
+                    </div>
+                    <div id="linesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
+                        <button type="button" class="btn-action" onclick="addNewLine()">➕ AJOUTER EN FIN DE LISTE</button>
+                        <div id="alertBox" class="alert-banner">⚠️ DÉPASSEMENT CAPITAL DU LIEN : LE SERVEUR COUPERA LE MOTD !</div>
+                    </div>
+                </div>
+
+                <div id="content-desc" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <h2 style="font-size: 12px; margin: 0; color: #fbbf24; text-transform: uppercase; font-weight: 900;">🌐 MATRIX: DESCRIPTIONS ÉDITABLES</h2>
+                            <div style="display: flex; align-items: center; gap: 6px; background: #000; padding: 4px 8px; border: 1px solid #27272a; border-radius: 2px;">
+                                <input type="checkbox" id="descEnglishToggle" style="width: 14px; height: 14px; cursor: pointer;" onchange="toggleDescEnglish(this.checked)" />
+                                <label for="descEnglishToggle" style="font-size: 10px; font-weight: bold; color: #38bdf8; cursor: pointer; text-transform: uppercase;">Option Traduction (Description)</label>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalDescCharCounter">TOTAL : 0 / 4000 CHARS</div>
+                    </div>
+                    <div id="descLinesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
+                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
+                        <button type="button" class="btn-action" onclick="addNewDescLine()">➕ AJOUTER EN FIN DE LISTE</button>
+                        <div id="descAlertBox" class="alert-banner">⚠️ EXPA-MÉMOIRE : VOTRE DESCRIPTION SURPASSE LE QUOTA DÉFINI !</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="previewContainerCard">
+            <h3 style="font-size: 12px; color: #a1a1aa; margin: 0 0 12px 0; text-transform: uppercase; font-weight: bold;">📺 APERÇU FILTRÉ GRAPHIQUE (DANS LE COCKPIT DE CHARGEMENT 7DTD) :</h3>
+            <div id="preview" class="preview-box" style="margin-bottom: 25px;"></div>
+            <h3 style="font-size: 12px; color: #fbbf24; margin: 0 0 10px 0; text-transform: uppercase; font-weight: bold;">💾 PAYLOAD RÉENCODÉ MONOBLOC EN DIRECT SANS PROBLÈME :</h3>
+            <textarea id="masterOutput" rows="5" style="width: 100%; margin-bottom: 15px; background-color: #09090b; border: 1px solid #27272a; color: #a1a1aa; font-family: monospace; font-size: 12px; padding: 12px; box-sizing: border-box; resize: none;" readonly></textarea>
+            <button type="button" class="btn-copy-master" style="width: 100%;" onclick="copyMasterPayload()">📋 ASSIMILER ET COPIER LA CHAÎNE FINALE DU SERVEUR</button>
+        </div>
+    </div>
+    <script>
+        /* ==========================================================================
+           === BLOC 4 === [ SCRIPT : VARIABLES D'ÉTAT ET ARCHIVES DE BASE DONNÉES ]
+           ========================================================================== */
+        let currentActiveTab = 'login';
+        let activeServerId = '7dtd-core';
+        let isLoginEnglishActive = false;
+        let isDescEnglishActive = false;
+
+        let qbcDatabase = {
+            '7dtd-core': {
+                name: "QBC FLAGGARD PVE 3.0 (CORE)",
+                loginLines: [
+                    { symbol: "❤", text: "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤", text_en: "", color: "ff0000", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+                    { symbol: "☣", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+                    { symbol: "✗", text: "1- Pas de landclaim au POI Carl's Corn Farm.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+                    { symbol: "✗", text: "2- Vol de base interdit (sécurisez vos coffres).", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+                    { symbol: "⏰", text: "REBOOTS: 05:00 & 17:00 (EST/QC)", text_en: "", color: "F88379", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
+                ],
+                descLines: [
+                    { symbol: "•", text: "Bienvenue sur l'infrastructure de Varennes.", text_en: "", color: "00ff00", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+                    { symbol: "•", text: "Serveur PvE québécois haute performance.", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
+                ]
+            },
+            '7dtd-projectz': {
+                name: "QBC FLAGGARD PROJECTZ 3.0",
+                loginLines: [{ symbol: "❤", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }],
+                descLines: [{ symbol: "🤖", text: "Gestion ProjectZ 3.0 par les GMs.", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }]
+            }
+        };
+
+        const colorPalette = [
+            { hex: "ff0000", name: "Rouge" }, { hex: "00ff00", name: "Vert" }, { hex: "ffff00", name: "Jaune" },
+            { hex: "00ffff", name: "Cyan" }, { hex: "ffaa00", name: "Orange" }, { hex: "F88379", name: "Rose" }, { hex: "ffffff", name: "Blanc" }
+        ];
+
+        const symbolPalette = [
+            { char: "", name: "(Aucun)" }, { char: "•", name: "Point" }, { char: "❤", name: "Coeur" },
+            { char: "☣", name: "Bio" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "TP" }, { char: "✗", name: "Croix" }
+        ];
+
+        const qbcLocalDictionary = { 
+            "règlements :": "RULES:", 
+            "pas de landclaim au poi carl's corn farm.": "No landclaim at POI Carl's Corn Farm.", 
+            "vol de base interdit (sécurisez vos coffres).": "Base stealing forbidden (secure your chests).", 
+            "bienvenue sur l'infrastructure de varennes.": "Welcome to Varennes infrastructure." 
+        };
+
+        function autoTranslateLine(isDesc, index) {
+            const line = isDesc ? qbcDatabase[activeServerId].descLines[index] : qbcDatabase[activeServerId].loginLines[index];
+            let rawText = line.text.trim(); if (rawText === "") return;
+            let prefix = "", cleanText = rawText; const numMatch = rawText.match(/^([0-9]+-\s*)/);
+            if (numMatch) { prefix = numMatch; cleanText = rawText.substring(prefix.length).trim(); }
+            const key = cleanText.toLowerCase(); let trans = "";
+            if (qbcLocalDictionary[key]) trans = qbcLocalDictionary[key];
+            else if (key.includes("landclaim")) trans = "No landclaim allowed at this POI.";
+            else if (key.includes("vol de base") || key.includes("interdit")) trans = "Base stealing is strictly forbidden (secure your chests).";
+            else trans = cleanText;
+            line.text_en = prefix + trans; line.show_english = true;
+            if (isDesc) renderDescFormLines(); else renderFormLines();
+        }
+
+        function toggleEditorCollapse() { document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); }
+        function toggleLoginEnglish(c) { isLoginEnglishActive = c; renderFormLines(); }
+        function toggleDescEnglish(c) { isDescEnglishActive = c; renderDescFormLines(); }
+        function toggleLineEnglishIndividual(isDesc, i) { const l = isDesc ? qbcDatabase[activeServerId].descLines[i] : qbcDatabase[activeServerId].loginLines[i]; l.show_english = !l.show_english; if (isDesc) renderDescFormLines(); else renderFormLines(); }
+        function toggleLineDoubleBorder(isDesc, i) { const l = isDesc ? qbcDatabase[activeServerId].descLines[i] : qbcDatabase[activeServerId].loginLines[i]; l.border_double = !l.border_double; if (isDesc) renderDescFormLines(); else renderFormLines(); }
+        function moveLine(isDesc, i, d) { const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines; const t = i + d; if (t < 0 || t >= list.length) return; const tmp = list[i]; list[i] = list[t]; list[t] = tmp; if (isDesc) renderDescFormLines(); else renderFormLines(); }
+        function insertLineAt(isDesc, i) { const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines; list.splice(i, 0, { symbol: "•", text: "MESSAGE ÉDITABLE", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); if (isDesc) renderDescFormLines(); else renderFormLines(); }
+        function toggleLineStyle(isDesc, i, lang, k) { const l = isDesc ? qbcDatabase[activeServerId].descLines[i] : qbcDatabase[activeServerId].loginLines[i]; const o = lang === 'fr' ? l.style_fr : l.style_en; o[k] = !o[k]; if (isDesc) renderDescFormLines(); else renderFormLines(); }
+        /* ==========================================================================
+           === BLOC 5 === [ SCRIPT : MOTEURS DE RENDU, COMPILATEUR ET IMPORT/EXPORT ]
+           ========================================================================== */
+        function createNewServerInstance() {
+            const n = prompt("NOM SERVEUR :"); if (!n || n.trim() === "") return; const id = "7dtd-" + Math.random().toString(36).substring(2, 6);
+            qbcDatabase[id] = { name: n.toUpperCase(), loginLines: [{ symbol: "❤", text: "BIENVENUE", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }], descLines: [{ symbol: "•", text: "DESCRIPTION", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }] };
+            const opt = document.createElement('option'); opt.value = id; opt.innerText = n.toUpperCase(); document.getElementById('serverSelect').appendChild(opt); document.getElementById('serverSelect').value = id; changeServerInstance(id);
+        }
+
+        function editCurrentServerName() {
+            const n = prompt("NOUVEAU NOM :", qbcDatabase[activeServerId].name); if (!n || n.trim() === "") return; qbcDatabase[activeServerId].name = n.toUpperCase();
+            document.getElementById('serverSelect').options[document.getElementById('serverSelect').selectedIndex].innerText = n.toUpperCase(); processAndCompileQBC();
+        }
+
+        function changeServerInstance(id) { activeServerId = id; if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); }
+
+        function switchTab(t) {
+            currentActiveTab = t;
+            document.getElementById('tab-login-btn').classList.toggle('active', t==='login');
+            document.getElementById('tab-desc-btn').classList.toggle('active', t==='desc');
+            document.getElementById('content-login').classList.toggle('active', t==='login');
+            document.getElementById('content-desc').classList.toggle('active', t==='desc');
+            if (t==='login') renderFormLines(); else renderDescFormLines();
+        }
+
+        function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; processAndCompileQBC(); }
+        function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
+        function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; processAndCompileQBC(); }
+        function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } processAndCompileQBC(); }
+        function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", text: "MESSAGE LOG", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); renderFormLines(); }
+        function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); renderFormLines(); }
+        function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", text: "MESSAGE DESC", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); renderDescFormLines(); }
+        function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); renderDescFormLines(); }
+
+        function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
+            const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); container.innerHTML = "";
+            if (isGlobalEnglish) container.classList.add('eng-global-active'); else container.classList.remove('eng-global-active');
+            
+            currentLines.forEach((line, index) => {
+                const div = document.createElement('div'); const isEng = line.show_english || isGlobalEnglish;
+                div.className = "line-item" + (line.border_double ? " has-double-border" : "") + (isEng ? " show-english" : "");
+                
+                let symSel = `<select class="line-select" style="width:100px;" onchange="updateLineSymbol(${isDesc}, ${index}, this.value)">`;
+                symbolPalette.forEach(s => symSel += `<option value="${s.char}" ${s.char === line.symbol ? "selected" : ""}>${s.name}</option>`); symSel += `</select>`;
+                
+                let colSel = `<select class="line-select" style="width:90px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
+                colorPalette.forEach(c => colSel += `<option value="${c.hex}" ${c.hex === line.color ? "selected" : ""}>${c.name}</option>`); colSel += `</select>`;
+                
+                if (!line.style_fr) line.style_fr = {u:false,b:false}; if (!line.style_en) line.style_en = {u:false,b:false};
+                let toolsFR = `<button type="button" class="style-btn ${line.style_fr.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'u')">U</button><button type="button" class="style-btn ${line.style_fr.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'b')">B</button>`;
+                let toolsEN = `<button type="button" class="style-btn ${line.style_en.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'u')">U</button><button type="button" class="style-btn ${line.style_en.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'b')">B</button>`;
+                
+                let enRow = ""; 
+                if (isDesc || index > 0) { 
+                    enRow = `<div class="eng-input-box" style="width:100%;"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #4b5563; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Saisir la traduction anglaise ici..." />${toolsEN}</div></div>`; 
+                }
+                
+                let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
+                let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 MANUEL</button><button type="button" class="double-line-btn" onclick="autoTranslateLine(${isDesc}, ${index})">🤖 AUTO</button>` : "";
+                
+                div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symSel} ${colSel} ${transBtn}<button type="button" class="double-line-btn ${line.border_double?'active':''}" style="margin-left:auto;" onclick="toggleLineDoubleBorder(${isDesc}, ${index})">═ DOUBLE</button><button type="button" class="btn-action" style="color:#f87171;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
+                container.appendChild(div);
+            }); processAndCompileQBC();
+        }
+
+        function renderFormLines() { buildFormRows(false, qbcDatabase[activeServerId].loginLines, isLoginEnglishActive); }
+        function renderDescFormLines() { buildFormRows(true, qbcDatabase[activeServerId].descLines, isDescEnglishActive); }
+
+        function processAndCompileQBC() {
+            const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase);
+            const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+            const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; const limit = isLogin ? 3500 : 4000; let masterPayload = "";
+            currentLines.forEach((line, index) => {
+                let textFR = line.text, textEN = line.text_en || '', fullFR = line.symbol ? line.symbol + " " + textFR : textFR;
+                if(line.style_fr?.u) fullFR = "[u]" + fullFR + "[/u]"; if(line.style_fr?.b) fullFR = "[b]" + fullFR + "[/b]";
+                let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; const isEnglishActive = line.show_english || isGlobalEnglish;
+                if (isEnglishActive && textEN.trim() !== "" && !(isLogin && index === 0)) {
+                    let fullEN = line.symbol ? line.symbol + " " + textEN : textEN;
+                    if(line.style_en?.u) fullEN = "[u]" + fullEN + "[/u]"; if(line.style_en?.b) fullEN = "[b]" + fullEN + "[/b]";
+                    masterPayload += chunkFR + " | [" + line.color + "]" + fullEN + "[-]";
+                } else {
+                    masterPayload += chunkFR;
+                }
+                if (line.border_double) masterPayload += "\\n[" + line.color + "]════════════════════════════════════════════════════════════════[-]";
+                if (index < currentLines.length - 1) masterPayload += "\\n";
+            });
+
+            document.getElementById('masterOutput').value = masterPayload;
+            let htmlContent = masterPayload.replace(/\\n/g, '\n');
+            htmlContent = htmlContent.replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color: #$1;">$2</span>');
+            htmlContent = htmlContent.replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
+            document.getElementById('preview').innerHTML = htmlContent;
+
+            const totalChars = masterPayload.length;
+            const counterEl = isLogin ? document.getElementById('totalCharCounter') : document.getElementById('totalDescCharCounter');
+            const alertEl = isLogin ? document.getElementById('alertBox') : document.getElementById('descAlertBox');
+            counterEl.innerText = "TOTAL : " + totalChars + " / " + limit + " CHARS";
+            counterEl.style.color = totalChars > limit ? "#f87171" : "#34d399";
+            alertEl.style.display = totalChars > limit ? "block" : "none";
+        }
+
+        function exportQbcConfig() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "qbc-backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerJsonImport() { document.getElementById('jsonFileInput').click(); }
+
+        function importQbcConfig(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    const serverIds = Object.keys(parsedData);
+                    if (serverIds.length === 0) return;
+
+                    serverIds.forEach(serverId => {
+                        const server = parsedData[serverId];
+                        if (server.loginLines) {
+                            server.loginLines.forEach(line => {
+                                if (line.border_double === undefined) line.border_double = false;
+                                if (!line.style_fr) line.style_fr = {u:false,b:false};
+                                if (!line.style_en) line.style_en = {u:false,b:false};
+                                line.show_english = !!(line.text_en && line.text_en.trim() !== "");
+                            });
+                        }
+                        if (server.descLines) {
+                            server.descLines.forEach(line => {
+                                if (line.border_double === undefined) line.border_double = false;
+                                if (!line.style_fr) line.style_fr = {u:false,b:false};
+                                if (!line.style_en) line.style_en = {u:false,b:false};
+                                line.show_english = !!(line.text_en && line.text_en.trim() !== "");
+                            });
+                        }
+                    });
+
+                    const oldActiveServerId = activeServerId;
+                    const selectEl = document.getElementById('serverSelect');
+                    selectEl.innerHTML = "";
+                    serverIds.forEach(id => {
+                        const option = document.createElement('option');
+                        option.value = id; option.innerText = parsedData[id].name || id.toUpperCase();
+                        selectEl.appendChild(option);
+                    });
+                    
+                    qbcDatabase = parsedData;
+                    activeServerId = serverIds.includes(oldActiveServerId) ? oldActiveServerId : serverIds;
+                    selectEl.value = activeServerId;
+                    
+                    document.getElementById('qbcTimeTrackerText').innerText = `[ CONFIG ACTIVE ] : ${qbcDatabase[activeServerId].name}`;
+                    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+                    event.target.value = '';
+                    alert("IMPORTATION REUSSIE");
+                } catch (err) { alert("ERREUR LECTURE JSON"); }
+            };
+            reader.readAsText(files);
+        }
+
+        function copyMasterPayload() {
+            const output = document.getElementById('masterOutput');
+            output.select();
+            document.execCommand('copy');
+            alert('CHAINE COPIEE AVEC SUCCES');
+        }
+
+        renderFormLines();
+    </script>
+</body>
+</html>
+
+
+
+
+
+                   
+
+
