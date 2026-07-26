@@ -93,22 +93,50 @@ function autoTranslateLine(isDesc, index) {
 }
 
 
+function toggleEditorCollapse() { 
+    document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
+}
 
+function toggleLoginEnglish(checked) { 
+    isLoginEnglishActive = checked; 
+    
+    // ACTION EN SÉCURITÉ COMPLÈTE : Force toutes les lignes Login de la base de données
+    const lines = qbcDatabase[activeServerId].loginLines;
+    lines.forEach(line => { line.show_english = checked; });
+    
+    renderFormLines(); 
+}
 
+function toggleDescEnglish(checked) { 
+    isDescEnglishActive = checked; 
+    
+    // ACTION EN SÉCURITÉ COMPLÈTE : Force toutes les lignes Description de la base de données
+    const lines = qbcDatabase[activeServerId].descLines;
+    lines.forEach(line => { line.show_english = checked; });
+    
+    renderDescFormLines(); 
+}
 
-
-
-
-
-function toggleEditorCollapse() { document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); }
-function toggleLoginEnglish(c) { isLoginEnglishActive = c; renderFormLines(); }
-function toggleDescEnglish(c) { isDescEnglishActive = c; renderDescFormLines(); }
 /* ==========================================================================
    === SCRIPT.JS : BLOC 3 SUR 5 === [ SELECTIONNEURS ET GESTIONNAIRES DE POSITION ]
    ========================================================================== */
 function toggleLineEnglishIndividual(isDesc, i) { 
-    const l = isDesc ? qbcDatabase[activeServerId].descLines[i] : qbcDatabase[activeServerId].loginLines[i]; 
-    l.show_english = !l.show_english; 
+    const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines; 
+    list[i].show_english = !list[i].show_english; 
+    
+    // DÉTECTION CRITIQUE : Désactive la coche globale correspondante si l'utilisateur décoche une ligne
+    if (!list[i].show_english) {
+        if (isDesc) {
+            isDescEnglishActive = false;
+            const toggleEl = document.getElementById('descEnglishToggle');
+            if (toggleEl) toggleEl.checked = false;
+        } else {
+            isLoginEnglishActive = false;
+            const toggleEl = document.getElementById('loginEnglishToggle');
+            if (toggleEl) toggleEl.checked = false;
+        }
+    }
+    
     if (isDesc) renderDescFormLines(); else renderFormLines(); 
 }
 
@@ -140,6 +168,7 @@ function toggleLineStyle(isDesc, i, lang, k) {
     o[k] = !o[k]; 
     if (isDesc) renderDescFormLines(); else renderFormLines(); 
 }
+
 
 function createNewServerInstance() {
     const n = prompt("NOM SERVEUR :"); if (!n || n.trim() === "") return; 
