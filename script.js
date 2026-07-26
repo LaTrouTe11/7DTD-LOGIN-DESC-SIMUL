@@ -6,7 +6,7 @@ let activeServerId = '7dtd_core';
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
-// Base de données d'origine propre avec structures FR et EN isolées
+// Registre de la base de données d'origine propre avec structures FR et EN isolées
 let qbcDatabase = {
     '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
@@ -56,7 +56,7 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     // Nettoyage propre pour ne pas envoyer le "1-" ou "2-" chez Google Translate
     const numMatch = texteFR.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
-        texteFR = texteFR.substring(numMatch[index].length).trim();
+        texteFR = texteFR.substring(numMatch[0].length).trim();
     }
 
     const dummy = document.createElement("textarea");
@@ -330,7 +330,7 @@ function updateLineBorderStyle(isDesc, i, style) {
 function processAndCompileQBC() {
     const isLogin = currentActiveTab === 'login'; 
     
-    // FIX SÉCURITÉ ABSOLUE : Si la clé saute ou bugge, on force une chaîne texte pure au lieu d'un tableau
+    // FIX SÉCURITÉ ABSOLUE : Force une chaîne texte pure au lieu d'un tableau buggé
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
@@ -401,11 +401,7 @@ function processAndCompileQBC() {
     const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter');
     const alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
-    
-    if (counterEl) { 
-        counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; 
-        counterEl.style.color = total > limit ? "#f87171" : "#34d399"; 
-    }
+    if (counterEl) { counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; }
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
 /* ==========================================================================
@@ -430,6 +426,7 @@ function loadFromLocalStorage() {
                     opt.innerText = qbcDatabase[id].name || id.toUpperCase(); 
                     selectEl.appendChild(opt); 
                 });
+                // CORRECTION SÉCURISÉE : Sélection par chaîne de texte String pure
                 activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; 
                 selectEl.value = activeServerId;
             }
@@ -539,6 +536,7 @@ if (zoomSelectEl) zoomSelectEl.value = savedZoom;
 changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
+
 
 
 
