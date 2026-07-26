@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 1 SUR 4 === [ VARIABLE D'ÉTAT AND LOGICIEL MATRICE ] ===
+   === SCRIPT.JS : BLOC 1 SUR 4 === [ VARIABLE D'ÉTAT ET MATRICE DE BASE ] ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd-core';
@@ -49,7 +49,7 @@ const qbcLocalDictionary = {
     "bienvenue sur l'infrastructure de varennes.": "Welcome to Varennes infrastructure."
 };
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 2 SUR 4 === [ TRADUCTION UNIVERSELLE SUR MESURE ] ===
+   === SCRIPT.JS : BLOC 2 SUR 4 === [ TRADUCTION UNIVERSELLE AVEC JETONS ] ===
    ========================================================================== */
 function autoTranslateLine(isDesc, index) {
     const isLogin = !isDesc;
@@ -63,37 +63,32 @@ function autoTranslateLine(isDesc, index) {
     let prefix = "";
     let cleanText = rawText;
     
-    // EXTRACTEUR NET SANS DOUBLE VIRGULE PARASITE (Préserve le 1- ou 2-)
     const numMatch = rawText.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
         prefix = numMatch.at(0); 
         cleanText = rawText.substring(prefix.length).trim();
     }
     
-    // MASQUAGE DE SÉCURITÉ : On remplace / et : pour empêcher Google de couper tes ajouts (ex: haut rouge)
+    // MASQUAGE DE SÉCURITÉ : Protection des symboles / et : pour forcer Google à lire toute la ligne
     let textToTranslate = cleanText.trim();
     textToTranslate = textToTranslate.replace(/\//g, "SLASHTOKEN ").replace(/:/g, " COLONTOKEN");
     
     const oldScript = document.getElementById("qbcInvisibleTranslator");
     if (oldScript) oldScript.remove();
     
-    // Réception du texte de Google ré-encodé en direct
     window.qbcGoogleCallback = function(data) {
         try {
             if (data && data && data && data) {
                 let translatedText = data;
                 
-                // RESTAURATION DES SYMBOLES D'ORIGINE APRÈS TRADUCTION COMPLÈTE
+                // RESTAURATION DES SYMBOLES D'ORIGINE
                 translatedText = translatedText.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
-                
-                // Nettoyage des espaces automatiques générés par Google autour des symboles
                 translatedText = translatedText.replace(/\/ /g, "/").replace(/ \//g, "/");
                 translatedText = translatedText.replace(/ :/g, " :").replace(/: /g, ": ");
                 
-                // Éradication automatique des accents anglais majuscules (É -> E, À -> A)
+                // Éradication automatique des accents anglais majuscules
                 translatedText = translatedText.replace(/[ÉÈÊË]/g, "E").replace(/[ÀÂÄ]/g, "A").replace(/[ÔÖ]/g, "O");
                 
-                // Réassemblage de ta phrase exacte sur mesure au complet !
                 line.text_en = prefix + translatedText;
                 line.show_english = true;
                 
@@ -106,7 +101,6 @@ function autoTranslateLine(isDesc, index) {
         delete window.qbcGoogleCallback;
     };
     
-    // RESTAURATION DE L'ADRESSE INFRASTRUCTURE OFFICIELLE DE GOOGLE AVEC INSCRIPTION CALLBACK
     const scriptEl = document.createElement("script");
     scriptEl.id = "qbcInvisibleTranslator";
     scriptEl.src = "https://googleapis.com" + encodeURIComponent(textToTranslate);
@@ -116,7 +110,6 @@ function autoTranslateLine(isDesc, index) {
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
-
 /* ==========================================================================
    === SCRIPT.JS : BLOC 3 SUR 4 === [ COMMUTATEURS ET AGENCEMENT DE LIGNES ] ===
    ========================================================================== */
@@ -216,82 +209,143 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     currentLines.forEach((line, index) => {
         const div = document.createElement('div'); 
         const isEngVisible = line.show_english || isGlobalEnglish;
+        div.className = "line-item" + (line.border_style && line.border_style !== "none" ? " has-double-border" : "");
         
-        const hasBorder = line.border_style && line.border_style !== "none";
-        div.className = "line-item" + (hasBorder ? " has-double-border" : "");
-        
-        let symSel = `<select class="line-select" style="width:75px;" onchange="updateLineSymbol(${isDesc}, ${index}, this.value)">`;
+        let symSel = `<select class="line-select" style="width:100px;" onchange="updateLineSymbol(${isDesc}, ${index}, this.value)">`;
         symbolPalette.forEach(s => symSel += `<option value="${s.char}" ${s.char === line.symbol ? "selected" : ""}>${s.name}</option>`); symSel += `</select>`;
         
-        let colSel = `<select class="line-select" style="width:75px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
+        let colSel = `<select class="line-select" style="width:90px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
         colorPalette.forEach(c => colSel += `<option value="${c.hex}" ${c.hex === line.color ? "selected" : ""}>${c.name}</option>`); colSel += `</select>`;
         
         if (!line.border_style) line.border_style = "none";
-        let borderSel = `<select class="line-select" style="width:105px;" onchange="updateLineBorderStyle(${isDesc}, ${index}, this.value)">`;
-        borderSel += `<option value="none" ${line.border_style === 'none' ? 'selected' : ''}>[Pas Ligne]</option>`;
-        borderSel += `<option value="double" ${line.border_style === 'double' ? 'selected' : ''}>═ Double</option>`;
-        borderSel += `<option value="single" ${line.border_style === 'single' ? 'selected' : ''}>─ Simple</option>`;
-        borderSel += `<option value="dash" ${line.border_style === 'dash' ? 'selected' : ''}>- Tirets</option>`;
-        borderSel += `<option value="dot" ${line.border_style === 'dot' ? 'selected' : ''}>. Points</option>`;
+        let borderSel = `<select class="line-select" style="width:140px;" onchange="updateLineBorderStyle(${isDesc}, ${index}, this.value)">`;
+        borderSel += `<option value="none" ${line.border_style === 'none' ? 'selected' : ''}>(Pas de Ligne)</option>`;
+        borderSel += `<option value="double" ${line.border_style === 'double' ? 'selected' : ''}>═ Ligne Double</option>`;
+        borderSel += `<option value="single" ${line.border_style === 'single' ? 'selected' : ''}>─ Ligne Simple</option>`;
+        borderSel += `<option value="dash" ${line.border_style === 'dash' ? 'selected' : ''}>- Pointillés (-)</option>`;
+        borderSel += `<option value="dot" ${line.border_style === 'dot' ? 'selected' : ''}>. Pointillés (.)</option>`;
         borderSel += `</select>`;
         
         if (!line.style_fr) line.style_fr = {u:false,b:false}; if (!line.style_en) line.style_en = {u:false,b:false};
         let toolsFR = `<button type="button" class="style-btn ${line.style_fr.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'u')">U</button><button type="button" class="style-btn ${line.style_fr.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'fr', 'b')">B</button>`;
         let toolsEN = `<button type="button" class="style-btn ${line.style_en.u?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'u')">U</button><button type="button" class="style-btn ${line.style_en.b?'active':''}" onclick="toggleLineStyle(${isDesc}, ${index}, 'en', 'b')">B</button>`;
         
-        let upDis = index === 0 ? "disabled style='opacity:0.2;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.2;'" : "";
-        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" style="padding: 3px 5px;" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐</button><button type="button" class="double-line-btn" style="padding: 3px 5px;" onclick="autoTranslateLine(${isDesc}, ${index})">🤖</button>` : "";
-        
-        // RECONSTRUCTION DE L'ARCHITECTURE SELON L'ONGLET POUR GARANTIR UNE LISIBILITÉ TOTALE
-        if (isDesc) {
-            // --- MODE DESCRIPTION : EN EMPILEMENT VERTICAL POUR REPRENDRE 100% DE LARGEUR ---
-            const displayStyle = isEngVisible ? "display: flex !important;" : "display: none !important;";
-            
-            div.innerHTML = `
-                <div class="line-controls-row" style="margin-bottom: 6px; border-bottom: 1px dashed #27272a; padding-bottom: 4px;">
-                    <span class="line-number" style="color: #fbbf24;">${"Web L." + (index+1)}</span>
-                    <button type="button" class="order-btn" ${upDis} onclick="moveLine(true, ${index}, -1)">🔼</button>
-                    <button type="button" class="order-btn" ${downDis} onclick="moveLine(true, ${index}, 1)">🔽</button>
-                    <button type="button" class="btn-insert-here" onclick="insertLineAt(true, ${index + 1})">➕ INSÉRER</button>
-                    ${symSel} ${colSel} ${transBtn} ${borderSel}
-                    <button type="button" class="btn-action" style="color:#f87171; padding: 3px 8px; height:26px; margin-left: auto;" onclick="removeDescLine(${index})">❌</button>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
-                    <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
-                        <span style="font-size: 11px; color: #34d399; font-weight: bold; width: 25px;">FR:</span>
-                        <input type="text" class="input-line" style="border-left: 3px solid #${line.color}; flex-grow: 1;" value="${line.text}" oninput="updateLineTextFR(true, ${index}, this.value)" placeholder="Texte français..." />
-                        ${toolsFR}
-                    </div>
-                    <div class="eng-input-box" style="align-items: center; gap: 6px; width: 100%; ${displayStyle}">
-                        <span style="font-size: 11px; color: #38bdf8; font-weight: bold; width: 25px;">EN:</span>
-                        <input type="text" class="input-line" style="border-left: 3px dashed #4b5563; flex-grow: 1;" value="${line.text_en || ''}" oninput="updateLineTextEN(true, ${index}, this.value)" placeholder="English translation..." />
-                        ${toolsEN}
-                    </div>
-                </div>
-            `;
-        } else {
-            // --- MODE LOGIN : EN LIGNE DROITE COMPACTE ULTRA-FINE (CONSERVÉ) ---
-            const displayStyle = isEngVisible ? "display: flex !important;" : "display: none !important;";
-            let enField = (index > 0) ? `<div class="eng-input-box" style="align-items:center; gap:4px; flex-grow:1; ${displayStyle}"><span style="font-size:11px; color:#38bdf8; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:3px dashed #4b5563;" value="${line.text_en || ''}" oninput="updateLineTextEN(false, ${index}, this.value)" placeholder="Translation..." />${toolsEN}</div>` : "";
-            
-            div.innerHTML = `
-                <div class="line-controls-row">
-                    <span class="line-number">${index === 0 ? "Titre L.1" : "Login L." + (index+1)}</span>
-                    <button type="button" class="order-btn" ${upDis} onclick="moveLine(false, ${index}, -1)">🔼</button>
-                    <button type="button" class="order-btn" ${downDis} onclick="moveLine(false, ${index}, 1)">🔽</button>
-                    <button type="button" class="btn-insert-here" onclick="insertLineAt(false, ${index + 1})">➕</button>
-                    ${symSel} ${colSel} ${transBtn} ${borderSel}
-                    
-                    <div style="display:flex; align-items:center; gap:4px; flex-grow:2;">
-                        <span style="font-size:11px; color:#34d399; font-weight:bold;">FR:</span>
-                        <input type="text" class="input-line" style="border-left:3px solid #${line.color};" value="${line.text}" oninput="updateLineTextFR(false, ${index}, this.value)" placeholder="Texte..." />
-                        ${toolsFR}
-                    </div>
-                    ${enField}
-                    <button type="button" class="btn-action" style="color:#f87171; padding: 3px 8px; height:26px; margin-left:auto;" onclick="removeLine(${index})">❌</button>
-                </div>
-            `;
+        let enRow = ""; 
+        if (isDesc || index > 0) { 
+            const displayStyle = isEngVisible ? "display: block !important;" : "display: none !important;";
+            enRow = `<div class="eng-input-box" style="width:100%; ${displayStyle}"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #4b5563; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Saisir la traduction anglaise ici..." />${toolsEN}</div></div>`; 
         }
+        
+        let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
+        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 MANUEL</button><button type="button" class="double-line-btn" onclick="autoTranslateLine(${isDesc}, ${index})">🤖 AUTO</button>` : "";
+        
+        div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symSel} ${colSel} ${transBtn} ${borderSel}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
         container.appendChild(div);
     }); processAndCompileQBC();
 }
+
+function renderFormLines() { 
+    const toggleEl = document.getElementById('loginEnglishToggle');
+    const isGlobalEng = toggleEl ? toggleEl.checked : false;
+    buildFormRows(false, qbcDatabase[activeServerId].loginLines, isGlobalEng); 
+}
+
+function renderDescFormLines() { 
+    const toggleEl = document.getElementById('descEnglishToggle');
+    const isGlobalEng = toggleEl ? toggleEl.checked : false;
+    buildFormRows(true, qbcDatabase[activeServerId].descLines, isGlobalEng); 
+}
+
+function updateLineBorderStyle(isDesc, i, style) {
+    if (isDesc) qbcDatabase[activeServerId].descLines[i].border_style = style;
+    else qbcDatabase[activeServerId].loginLines[i].border_style = style;
+    saveToLocalStorage();
+    if (isDesc) renderDescFormLines(); else renderFormLines();
+}
+
+function translateAllActiveLines() {
+    const isLogin = currentActiveTab === 'login';
+    const list = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+    let delay = 0;
+    
+    list.forEach((line, index) => {
+        if (isLogin && index === 0) return;
+        setTimeout(() => { 
+            line.show_english = true;
+            autoTranslateLine(!isLogin, index); 
+        }, delay);
+        delay += 350; 
+    });
+}
+
+function processAndCompileQBC() {
+    const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase);
+    const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+    const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; const limit = isLogin ? 3500 : 4000; let masterPayload = "";
+    
+    currentLines.forEach((line, index) => {
+        let textFR = line.text ? line.text.trim() : ""; let textEN = line.text_en ? line.text_en.trim() : "";
+        let fullFR = textFR; if (line.symbol && line.symbol.trim() !== "") fullFR = line.symbol + " " + textFR + " " + line.symbol;
+        if(line.style_fr?.u) fullFR = "[u]" + fullFR + "[/u]"; if(line.style_fr?.b) fullFR = "[b]" + fullFR + "[/b]";
+        let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; const isEnglishActive = line.show_english || isGlobalEnglish;
+        
+        if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
+            let fullEN = textEN; if (line.symbol && line.symbol.trim() !== "") fullEN = line.symbol + " " + textEN + " " + line.symbol;
+            if(line.style_en?.u) fullEN = "[u]" + fullEN + "[/u]"; if(line.style_en?.b) fullEN = "[b]" + fullEN + "[/b]";
+            masterPayload += chunkFR + " | [" + line.color + "]" + fullEN + "[-]";
+        } else { masterPayload += chunkFR; }
+        
+        if (line.border_style && line.border_style !== "none") {
+            let lineChar = "═";
+            if (line.border_style === "single") lineChar = "─";
+            if (line.border_style === "dash") lineChar = "-";
+            if (line.border_style === "dot") lineChar = ".";
+            let separatorBlock = lineChar.repeat(64);
+            masterPayload += "\\n[" + line.color + "]" + separatorBlock + "[-]";
+        }
+        if (index < currentLines.length - 1) masterPayload += "\\n";
+    });
+    
+    document.getElementById('masterOutput').value = masterPayload; 
+    let htmlContent = masterPayload.replace(/\\n/g, '\n').replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>').replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
+    document.getElementById('preview').innerHTML = htmlContent; const total = masterPayload.length;
+    const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter'), alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
+    counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; alertEl.style.display = total > limit ? "block" : "none";
+}
+
+function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
+function loadFromLocalStorage() {
+    const saved = localStorage.getItem("qbc_matrix_data");
+    if (saved) {
+        try {
+            qbcDatabase = JSON.parse(saved);
+            const serverIds = Object.keys(qbcDatabase);
+            const selectEl = document.getElementById('serverSelect'); selectEl.innerHTML = "";
+            serverIds.forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.innerText = qbcDatabase[id].name || id.toUpperCase(); selectEl.appendChild(opt); });
+            qbcDatabase = parsedData; activeServerId = serverIds.includes(oldId) ? oldId : serverIds; selectEl.value = activeServerId;
+            
+            saveToLocalStorage(); 
+            const d = new Date();
+            document.getElementById('qbcTimeTrackerText').innerText = "[ ARCHIVE REÇUE LE : " + d.toLocaleDateString('fr-FR') + " à " + d.toLocaleTimeString('fr-FR') + " ] - " + qbcDatabase[activeServerId].name;
+            
+            if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+            event.target.value = ''; alert("IMPORTATION REUSSIE AVEC SUCCES");
+        } catch (err) { alert("ERREUR LECTURE JSON"); }
+    }; 
+    const targetFile = files.item(0); reader.readAsText(targetFile);
+}
+
+function copyMasterPayload() { const output = document.getElementById('masterOutput'); output.select(); document.execCommand('copy'); alert('CHAINE COPIEE AVEC SUCCES'); }
+
+// CONFIGURATION DU VARIATEUR AUTOMATIQUE POUR COMPACTER LE SITE SANS CASSER LE DESIGN
+function changeUiZoom(zoomValue) {
+    document.body.style.zoom = zoomValue + "%";
+    document.body.style.transform = "scale(" + (zoomValue / 100) + ")";
+    document.body.style.transformOrigin = "top center";
+}
+
+// Lancement automatique du cockpit à 80% de taille
+changeUiZoom(80);
+loadFromLocalStorage();
+renderFormLines();
+

@@ -1,32 +1,32 @@
 /* ==========================================================================
-   === STYLES ULTRA-COMPACTS COCKPIT DE CHASSE — ANTI-SCROLL INFINI ===
+   === STYLES COMPLETS D'ORIGINE RESTAURÉS — DESIGN COCKPIT LARGE ===
    ========================================================================== */
 body { 
     background-color: #09090b; 
     color: #f4f4f5; 
     font-family: monospace; 
-    padding: 10px; 
+    padding: 20px; 
     margin: 0; 
 }
 
 .header { 
     border-bottom: 1px solid #27272a; 
-    padding-bottom: 8px; 
-    margin-bottom: 12px; 
+    padding-bottom: 10px; 
+    margin-bottom: 20px; 
 }
 
 .workspace-grid { 
     display: flex; 
     flex-direction: column; 
-    gap: 12px; 
+    gap: 20px; 
     width: 100%; 
-    max-width: 100%; 
+    max-width: 1400px; 
     margin: 0 auto; 
 }
 
 .card { 
     background-color: #18181b; 
-    padding: 12px; 
+    padding: 20px; 
     border-radius: 4px; 
     border: 1px solid #27272a; 
     position: relative; 
@@ -36,31 +36,31 @@ body {
     background-color: #09090b; 
     border: 1px solid #27272a; 
     color: #fff; 
-    padding: 4px 8px; 
+    padding: 10px; 
     font-family: monospace; 
-    font-size: 12px; 
+    font-size: 13px; 
     outline: none; 
     flex-grow: 1; 
+    width: 100%; 
     box-sizing: border-box; 
-    height: 26px;
 }
 
 .preview-box { 
     background-color: #000; 
     border: 1px dashed #3f3f46; 
-    padding: 15px; 
-    min-height: 180px; 
-    max-height: 350px; 
+    padding: 25px; 
+    min-height: 250px; 
+    max-height: 450px; 
     overflow-y: auto; 
     white-space: pre-wrap; 
     color: #a1a1aa; 
-    line-height: 1.5; 
+    line-height: 1.7; 
     border-radius: 2px; 
-    font-size: 12px; 
+    font-size: 13px; 
 }
 
 .collapsible-panel { 
-    max-height: 3000px; 
+    max-height: 2000px; 
     overflow: hidden; 
     transition: max-height 0.4s ease-out; 
 }
@@ -72,18 +72,19 @@ body {
 .tab-container { 
     display: flex; 
     gap: 4px; 
-    margin-bottom: 12px; 
+    margin-bottom: 20px; 
     border-bottom: 1px solid #27272a; 
+    padding-bottom: 1px; 
 }
 
 .tab-btn { 
     background-color: #09090b; 
     border: 1px solid #27272a; 
     color: #71717a; 
-    padding: 6px 16px; 
+    padding: 12px 24px; 
     font-family: monospace; 
     font-weight: bold; 
-    font-size: 11px; 
+    font-size: 12px; 
     cursor: pointer; 
     text-transform: uppercase; 
     border-bottom: none; 
@@ -109,32 +110,31 @@ body {
     background-color: #09090b; 
     border: 1px solid #27272a; 
     color: #fff; 
-    padding: 3px 6px; 
+    padding: 9px; 
     font-family: monospace; 
-    font-size: 11px; 
+    font-size: 12px; 
     outline: none; 
     border-radius: 2px; 
     cursor: pointer; 
-    height: 26px;
 }
 
 .btn-action { 
     background-color: #27272a; 
     border: 1px solid #3f3f46; 
     color: #e4e4e7; 
-    padding: 6px 14px; 
+    padding: 10px 20px; 
     font-weight: bold; 
     cursor: pointer; 
     font-family: monospace; 
     border-radius: 2px; 
-    font-size: 11px; 
+    font-size: 12px; 
 }
 
 .btn-io { 
     background-color: #1f2937; 
     border: 1px solid #4b5563; 
     color: #f3f4f6; 
-    padding: 4px 10px; 
+    padding: 6px 14px; 
     font-size: 11px; 
     font-weight: bold; 
     cursor: pointer; 
@@ -145,11 +145,12 @@ body {
     background-color: #fbbf24; 
     border: none; 
     color: #000; 
-    padding: 10px 20px; 
+    padding: 14px 28px; 
     font-weight: bold; 
     cursor: pointer; 
     font-family: monospace; 
-    font-size: 12px; 
+    font-size: 13px; 
+    letter-spacing: 0.5px; 
     text-transform: uppercase; 
 }
 
@@ -157,12 +158,12 @@ body {
     background-color: #09090b; 
     border: 1px solid #27272a; 
     color: #71717a; 
-    padding: 3px 6px; 
-    font-size: 10px; 
+    padding: 5px 10px; 
+    font-size: 11px; 
     font-weight: bold; 
     cursor: pointer; 
-    height: 26px;
-    min-width: 24px;
+    font-family: monospace; 
+    border-radius: 2px; 
 }
 
 .style-btn.active { 
@@ -175,68 +176,70 @@ body {
     background-color: #27272a; 
     border: 1px solid #3f3f46; 
     color: #fff; 
-    padding: 3px 6px; 
-    font-size: 10px; 
-    height: 26px;
+    padding: 5px 8px; 
+    font-size: 11px; 
+    cursor: pointer; 
+    border-radius: 2px; 
+    font-family: monospace; 
 }
 
 .btn-insert-here { 
     background-color: #065f46; 
     border: 1px solid #059669; 
     color: #34d399; 
-    padding: 3px 6px; 
-    font-size: 10px; 
+    padding: 5px 10px; 
+    font-size: 11px; 
     font-weight: bold; 
-    height: 26px;
+    cursor: pointer; 
+    border-radius: 2px; 
+    font-family: monospace; 
 }
 
-.double-line-btn { 
-    background-color: #111827; 
-    border: 1px solid #4b5563; 
-    color: #9ca3af; 
-    padding: 3px 6px; 
-    font-size: 10px; 
-    font-weight: bold; 
-    height: 26px;
-}
-
-.double-line-btn.active { 
-    background-color: #d97706; 
-    border-color: #fbbf24; 
-    color: #fff; 
-}
-
-/* --- LE SECRET DU COMPACTAGE --- */
 .line-item { 
     display: flex; 
     flex-direction: column; 
-    gap: 4px; 
-    margin-bottom: 6px; /* Espace réduit au minimum entre les blocs */
-    background-color: rgba(24, 24, 27, 0.5); 
-    padding: 6px; /* Padding interne divisé par deux */
+    gap: 10px; 
+    margin-bottom: 20px; 
+    background-color: rgba(9, 9, 11, 0.6); 
+    padding: 14px; 
     border-radius: 4px; 
-    border: 1px solid #27272a; 
+    border: 1px solid #222; 
     box-sizing: border-box; 
 }
 
 .line-item.has-double-border { 
-    border-bottom: 3px double #d97706 !important; 
+    border-bottom: 4px double #d97706 !important; 
 }
 
-.line-controls-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    flex-wrap: nowrap;
+.line-controls { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    width: 100%; 
+    border-bottom: 1px dashed #27272a; 
+    padding-bottom: 6px; 
+    flex-wrap: wrap; 
+}
+
+.line-inputs-block { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    width: 100%; 
+}
+
+.input-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    width: 100%; 
 }
 
 .line-number { 
-    font-size: 11px; 
+    font-size: 12px; 
     color: #71717a; 
-    width: 70px; 
+    width: 85px; 
     font-weight: bold; 
-    white-space: nowrap;
 }
 
 .eng-input-box { 
