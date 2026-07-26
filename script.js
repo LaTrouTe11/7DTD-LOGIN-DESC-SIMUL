@@ -1,12 +1,12 @@
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 1 SUR 4 === [ VARIABLE D'ÉTAT ET MATRICE DE BASE ] ===
+   === SCRIPT.JS : BLOC 1 SUR 5 === [ INITIALISATION ET BASES DE DONNÉES ] ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd-core';
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
-// Registre de la base de données d'origine complète (700 lignes préservées)
+// Registre officiel de la base de données d'origine (700 lignes protégées)
 let qbcDatabase = {
     '7dtd-core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
@@ -49,7 +49,7 @@ const qbcLocalDictionary = {
     "bienvenue sur l'infrastructure de varennes.": "Welcome to Varennes infrastructure."
 };
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 2 SUR 4 === [ TRADUCTION UNIVERSELLE AVEC JETONS ] ===
+   === SCRIPT.JS : BLOC 2 SUR 5 === [ TRADUCTION UNIVERSELLE AVEC JETONS ] ===
    ========================================================================== */
 function autoTranslateLine(isDesc, index) {
     const isLogin = !isDesc;
@@ -111,7 +111,7 @@ function toggleEditorCollapse() {
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 3 SUR 4 === [ COMMUTATEURS ET AGENCEMENT DE LIGNES ] ===
+   === SCRIPT.JS : BLOC 3 SUR 5 === [ COMMUTATEURS ET AGENCEMENT DE LIGNES ] ===
    ========================================================================== */
 function toggleLoginEnglish(checked) { 
     isLoginEnglishActive = checked; 
@@ -201,7 +201,7 @@ function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) 
 function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", text: "MESSAGE DESC", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 4 SUR 4 === [ RENDU INTERACTIF, COMPILATEUR ET JSON ] ===
+   === SCRIPT.JS : BLOC 4 SUR 5 === [ DESSIN DES LIGNES ET COMPILATEUR ] ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); container.innerHTML = "";
@@ -267,7 +267,6 @@ function translateAllActiveLines() {
     const isLogin = currentActiveTab === 'login';
     const list = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
     let delay = 0;
-    
     list.forEach((line, index) => {
         if (isLogin && index === 0) return;
         setTimeout(() => { 
@@ -312,8 +311,13 @@ function processAndCompileQBC() {
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter'), alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
     counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; alertEl.style.display = total > limit ? "block" : "none";
 }
+/* ==========================================================================
+   === SCRIPT.JS : BLOC 5 SUR 5 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
+   ========================================================================== */
+function saveToLocalStorage() { 
+    localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); 
+}
 
-function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
 function loadFromLocalStorage() {
     const saved = localStorage.getItem("qbc_matrix_data");
     if (saved) {
@@ -322,7 +326,28 @@ function loadFromLocalStorage() {
             const serverIds = Object.keys(qbcDatabase);
             const selectEl = document.getElementById('serverSelect'); selectEl.innerHTML = "";
             serverIds.forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.innerText = qbcDatabase[id].name || id.toUpperCase(); selectEl.appendChild(opt); });
-            qbcDatabase = parsedData; activeServerId = serverIds.includes(oldId) ? oldId : serverIds; selectEl.value = activeServerId;
+            activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; selectEl.value = activeServerId;
+            document.getElementById('qbcTimeTrackerText').innerText = "💾 RESTAURATION AUTOMATIQUE DE TON TRAVAIL ACTIVE !";
+        } catch(e) { console.error("Erreur LocalStorage"); }
+    }
+}
+
+function exportQbcConfig() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4)); const anchor = document.createElement('a'); anchor.setAttribute("href", dataStr); anchor.setAttribute("download", "qbc-backup.json"); document.body.appendChild(anchor); anchor.click(); anchor.remove(); }
+function triggerJsonImport() { document.getElementById('jsonFileInput').click(); }
+
+function importQbcConfig(event) {
+    const files = event.target.files; if (!files || files.length === 0) return; const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const parsedData = JSON.parse(e.target.result), serverIds = Object.keys(parsedData); if (serverIds.length === 0) return;
+            serverIds.forEach(id => {
+                const s = parsedData[id];
+                if (s.loginLines) s.loginLines.forEach(l => { if(!l.style_fr) l.style_fr={u:false,b:false}; if(!l.style_en) l.style_en={u:false,b:false}; l.show_english = !!(l.text_en && l.text_en.trim() !== ""); });
+                if (s.descLines) s.descLines.forEach(l => { if(!l.style_fr) l.style_fr={u:false,b:false}; if(!l.style_en) l.style_en={u:false,b:false}; l.show_english = !!(l.text_en && l.text_en.trim() !== ""); });
+            });
+            const oldId = activeServerId; const selectEl = document.getElementById('serverSelect'); selectEl.innerHTML = "";
+            serverIds.forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.innerText = parsedData[id].name || id.toUpperCase(); selectEl.appendChild(opt); });
+            qbcDatabase = parsedData; activeServerId = serverIds.includes(oldId) ? oldId : serverIds[0]; selectEl.value = activeServerId;
             
             saveToLocalStorage(); 
             const d = new Date();
@@ -344,8 +369,9 @@ function changeUiZoom(zoomValue) {
     document.body.style.transformOrigin = "top center";
 }
 
-// Lancement automatique du cockpit à 80% de taille
+// ALLUMAGE INTERNE DU COCKPIT D'ESSAI
 changeUiZoom(80);
 loadFromLocalStorage();
 renderFormLines();
+
 
