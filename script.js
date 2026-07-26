@@ -63,9 +63,10 @@ function autoTranslateLine(isDesc, index) {
     let prefix = "";
     let cleanText = rawText;
     
+    // EXTRACTEUR NET SANS DOUBLE VIRGULE PARASITE
     const numMatch = rawText.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
-        prefix = numMatch.at(0); 
+        prefix = numMatch[0]; 
         cleanText = rawText.substring(prefix.length).trim();
     }
     
@@ -76,19 +77,21 @@ function autoTranslateLine(isDesc, index) {
     const oldScript = document.getElementById("qbcInvisibleTranslator");
     if (oldScript) oldScript.remove();
     
+    // Réception du texte de Google décodé au format TextMeshPro
     window.qbcGoogleCallback = function(data) {
         try {
-            if (data && data && data && data) {
-                let translatedText = data;
+            if (data && data[0] && data[0][0] && data[0][0][0]) {
+                let translatedText = data[0][0][0];
                 
                 // RESTAURATION DES SYMBOLES D'ORIGINE
                 translatedText = translatedText.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
                 translatedText = translatedText.replace(/\/ /g, "/").replace(/ \//g, "/");
                 translatedText = translatedText.replace(/ :/g, " :").replace(/: /g, ": ");
                 
-                // Éradication automatique des accents anglais majuscules
+                // Éradication automatique des accents anglais majuscules (É -> E, À -> A)
                 translatedText = translatedText.replace(/[ÉÈÊË]/g, "E").replace(/[ÀÂÄ]/g, "A").replace(/[ÔÖ]/g, "O");
                 
+                // Réassemblage final de ta phrase complète mise à jour !
                 line.text_en = prefix + translatedText;
                 line.show_english = true;
                 
@@ -101,6 +104,7 @@ function autoTranslateLine(isDesc, index) {
         delete window.qbcGoogleCallback;
     };
     
+    // RESTAURATION DE L'URL INFRASTRUCTURE GOOGLE COMPLÈTE AVEC LE SCRIPT INVISIBLE
     const scriptEl = document.createElement("script");
     scriptEl.id = "qbcInvisibleTranslator";
     scriptEl.src = "https://googleapis.com" + encodeURIComponent(textToTranslate);
@@ -110,6 +114,7 @@ function autoTranslateLine(isDesc, index) {
 function toggleEditorCollapse() { 
     document.getElementById('collapsibleWorkspacePanel').classList.toggle('collapsed'); 
 }
+
 /* ==========================================================================
    === SCRIPT.JS : BLOC 3 SUR 5 === [ COMMUTATEURS ET AGENCEMENT DE LIGNES ] ===
    ========================================================================== */
