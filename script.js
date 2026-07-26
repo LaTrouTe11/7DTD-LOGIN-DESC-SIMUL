@@ -330,23 +330,26 @@ function updateLineBorderStyle(isDesc, i, style) {
 function processAndCompileQBC() {
     const isLogin = currentActiveTab === 'login'; 
     
-    // FIX DE SÉCURITÉ MAÎTRE : Réalignement de l'ID d'instance par défaut pour éviter le plantage
-    if (!qbcDatabase[activeServerId]) {
-        activeServerId = Object.keys(qbcDatabase)[0] || '7dtd_core';
+    // FIX TOTAL DU BUG : Si l'identifiant est corrompu ou absent, on force le texte pur "7dtd_core"
+    if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
+        activeServerId = '7dtd_core';
     }
     
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    if (!currentLines) return; // Sécurité anti-disparition des grilles
+    if (!currentLines || !Array.isArray(currentLines)) return; // Protection absolue anti-page blanche
     
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; 
     const limit = isLogin ? 3500 : 4000; 
     let masterPayload = "";
     
     currentLines.forEach((line, index) => {
+        if (!line) return;
         let textFR = line.text ? line.text.trim() : ""; 
         let textEN = line.text_en ? line.text_en.trim() : "";
         
+        // Initialisation de pro si le fichier JSON importé est ancien
         if (line.symbol_start === undefined) line.symbol_start = "";
+        if (line.symbol === undefined) line.symbol = "";
         if (line.symbol_en_start === undefined) line.symbol_en_start = "";
         if (line.symbol_en_end === undefined) line.symbol_en_end = "";
         if (line.color_en === undefined) line.color_en = line.color || "ffffff";
@@ -364,7 +367,7 @@ function processAndCompileQBC() {
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
-            if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + fullEN;
+            if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end; // FIX DE TEXTE ICI
             if (line.style_en && line.style_en.u) fullEN = "[u]" + fullEN + "[/u]"; 
             if (line.style_en && line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
             
@@ -384,7 +387,7 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    // RENDU LIQUIDE DU COCKPIT GRAPHIQUE
+    // ENVOI SÉCURISÉ DES CHAÎNES DANS L'INTERRUPTEUR GRAPHIQUE HTML
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
@@ -406,6 +409,7 @@ function processAndCompileQBC() {
     }
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
+
 
 
 /* ==========================================================================
