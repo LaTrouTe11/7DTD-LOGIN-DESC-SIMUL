@@ -328,12 +328,16 @@ function updateLineBorderStyle(isDesc, i, style) {
 }
 
 function processAndCompileQBC() {
-    const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase);
+    const isLogin = currentActiveTab === 'login'; 
+    if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase)[0];
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; const limit = isLogin ? 3500 : 4000; let masterPayload = "";
+    const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; 
+    const limit = isLogin ? 3500 : 4000; 
+    let masterPayload = "";
     
     currentLines.forEach((line, index) => {
-        let textFR = line.text ? line.text.trim() : ""; let textEN = line.text_en ? line.text_en.trim() : "";
+        let textFR = line.text ? line.text.trim() : ""; 
+        let textEN = line.text_en ? line.text_en.trim() : "";
         
         if (line.symbol_start === undefined) line.symbol_start = "";
         if (line.symbol_en_start === undefined) line.symbol_en_start = "";
@@ -344,15 +348,18 @@ function processAndCompileQBC() {
         let fullFR = textFR;
         if (line.symbol_start && line.symbol_start.trim() !== "") fullFR = line.symbol_start + " " + fullFR;
         if (line.symbol && line.symbol.trim() !== "") fullFR = fullFR + " " + line.symbol;
-        if (line.style_fr?.u) fullFR = "[u]" + fullFR + "[/u]"; if (line.style_fr?.b) fullFR = "[b]" + fullFR + "[/b]";
-        let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; const isEnglishActive = line.show_english || isGlobalEnglish;
+        if (line.style_fr && line.style_fr.u) fullFR = "[u]" + fullFR + "[/u]"; 
+        if (line.style_fr && line.style_fr.b) fullFR = "[b]" + fullFR + "[/b]";
+        let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; 
+        const isEnglishActive = line.show_english || isGlobalEnglish;
         
         // --- COMPILATION DU BLOC ANGLAIS CROISÉ ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
             if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end;
-            if (line.style_en?.u) fullEN = "[u]" + fullEN + "[/u]"; if (line.style_en?.b) fullEN = "[b]" + fullEN + "[/b]";
+            if (line.style_en && line.style_en.u) fullEN = "[u]" + fullEN + "[/u]"; 
+            if (line.style_en && line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
             
             masterPayload += chunkFR + " | [" + line.color_en + "]" + fullEN + "[-]";
         } else { 
@@ -370,13 +377,29 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    const outEl = document.getElementById('masterOutput'); if (outEl) outEl.value = masterPayload; 
-    let htmlContent = masterPayload.replace(/\\n/g, '\n').replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>').replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
-    const prevEl = document.getElementById('preview'); if (prevEl) prevEl.innerHTML = htmlContent; const total = masterPayload.length;
-    const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter'), alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
-    if (counterEl) { counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; }
+    // CORRECTION ET RENDU NET DU PAYLOAD POUR APERÇU ET TEXTAREA SANS CONFLIT
+    const outEl = document.getElementById('masterOutput'); 
+    if (outEl) outEl.value = masterPayload; 
+    
+    let htmlContent = masterPayload.replace(/\\n/g, '\n')
+                                   .replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>')
+                                   .replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>')
+                                   .replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
+                                   
+    const prevEl = document.getElementById('preview'); 
+    if (prevEl) prevEl.innerHTML = htmlContent; 
+    
+    const total = masterPayload.length;
+    const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter');
+    const alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
+    
+    if (counterEl) { 
+        counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; 
+        counterEl.style.color = total > limit ? "#f87171" : "#34d399"; 
+    }
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
+
 /* ==========================================================================
    === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
    ========================================================================== */
