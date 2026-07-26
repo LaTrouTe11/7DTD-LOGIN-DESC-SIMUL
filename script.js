@@ -1,14 +1,14 @@
 /* ==========================================================================
    === SCRIPT.JS : BLOC 1 SUR 5 === [ VARIABLE D'ÉTAT ET MATRICE DE BASE ] ===
-   ========================================================================== */
+   ========================================================================= */
 let currentActiveTab = 'login';
-let activeServerId = '7dtd_core'; // CORRECTION : Underscore pour éviter le bug du token '-'
+let activeServerId = '7dtd_core'; // CORRECTION CRITIQUE : Plus de tirets bloquants
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
 // Registre de la base de données d'origine complète (700 lignes préservées)
 let qbcDatabase = {
-    '7dtd_core': { // CORRECTION SIMPLIFIÉE SANS TIRETS
+    '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
         loginLines: [
             { symbol: "❤", text: "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
@@ -22,7 +22,7 @@ let qbcDatabase = {
             { symbol: "•", text: "Serveur PvE québécois haute performance.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
         ]
     },
-    '7dtd_projectz': { // CORRECTION SIMPLIFIÉE SANS TIRETS
+    '7dtd_projectz': {
         name: "QBC FLAGGARD PROJECTZ 3.0",
         loginLines: [{ symbol: "❤", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }],
         descLines: [{ symbol: "🤖", text: "Gestion ProjectZ 3.0 par les GMs.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }]
@@ -48,7 +48,6 @@ const qbcLocalDictionary = {
     "vol de base interdit (sécurisez vos coffres).": "Base stealing forbidden (secure your chests).", 
     "bienvenue sur l'infrastructure de varennes.": "Welcome to Varennes infrastructure."
 };
-
 /* ==========================================================================
    === SCRIPT.JS : BLOC 2 SUR 5 === [ PASSERELLE DE TRADUCTION ET PLIAGE ] ===
    ========================================================================== */
@@ -71,11 +70,10 @@ function autoTranslateLine(isDesc, index) {
         cleanText = rawText.substring(prefix.length).trim();
     }
     
-    // APPEL MAÎTRE : Transmet la tâche au moteur réseau de votre fichier traducteur.js
+    // APPEL CHIRURGICAL LIGNE PAR LIGNE : Transmet l'envoi au moteur de traducteur.js
     if (typeof executerTraductionQBC === "function") {
         executerTraductionQBC(isDesc, index, cleanText, prefix);
     } else {
-        // Option de secours si traducteur.js n'est pas encore prêt
         line.text_en = prefix + cleanText;
         line.show_english = true;
         if (isDesc) renderDescFormLines(); else renderFormLines();
@@ -151,7 +149,7 @@ function toggleLineStyle(isDesc, i, lang, k) {
 
 function createNewServerInstance() {
     const n = prompt("NOM SERVEUR :"); if (!n || n.trim() === "") return; 
-    const id = "7dtd-" + Math.random().toString(36).substring(2, 6);
+    const id = "7dtd_" + Math.random().toString(36).substring(2, 6);
     qbcDatabase[id] = { name: n.toUpperCase(), loginLines: [{ symbol: "❤", text: "BIENVENUE", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }], descLines: [{ symbol: "•", text: "DESCRIPTION", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }] };
     const opt = document.createElement('option'); opt.value = id; opt.innerText = n.toUpperCase(); 
     document.getElementById('serverSelect').appendChild(opt); 
@@ -238,23 +236,8 @@ function updateLineBorderStyle(isDesc, i, style) {
     if (isDesc) renderDescFormLines(); else renderFormLines();
 }
 
-function translateAllActiveLines() {
-    const isLogin = currentActiveTab === 'login';
-    const list = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    let delay = 0;
-    
-    list.forEach((line, index) => {
-        if (isLogin && index === 0) return;
-        setTimeout(() => { 
-            line.show_english = true;
-            autoTranslateLine(!isLogin, index); 
-        }, delay);
-        delay += 350; 
-    });
-}
-
 function processAndCompileQBC() {
-    const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase);
+    const isLogin = currentActiveTab === 'login'; if (!qbcDatabase[activeServerId]) activeServerId = Object.keys(qbcDatabase)[0];
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; const limit = isLogin ? 3500 : 4000; let masterPayload = "";
     
@@ -354,6 +337,7 @@ if (zoomSelectEl) zoomSelectEl.value = savedZoom;
 changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
+
 
 
 

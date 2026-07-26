@@ -32,7 +32,6 @@
                     </div>
                 </div>
 
-
                 <!-- OPTION TAILLE ÉCRAN (ZOOM DYNAMIQUE) -->
                 <div style="display: flex; flex-direction: column; gap: 4px; border-left: 1px dashed #27272a; padding-left: 12px;">
                     <label style="font-size: 10px; color: #fbbf24; font-weight: bold; text-transform: uppercase;">Taille Écran :</label>
@@ -81,8 +80,6 @@
                     
                     <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" class="btn-action" onclick="addNewLine()">➕ AJOUTER EN FIN DE LISTE</button>
-                        <!-- BOUTON SÉCURISÉ LOGIQUE ORIGINAL LOGIN -->
-                        <button type="button" class="btn-action" style="background-color: #2563eb; border-color: #3b82f6; color: #fff; font-weight: bold;" onclick="translateAllActiveLines()">♻️ CORRIGER TOUT L'ONGLET LOGIN</button>
                         <div id="alertBox" class="alert-banner">⚠️ DÉPASSEMENT CAPITAL DU LIEN : LE SERVEUR COUPERA LE MOTD !</div>
                     </div>
                 </div>
@@ -103,8 +100,6 @@
                     
                     <div style="border-top: 1px solid #27272a; padding-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" class="btn-action" onclick="addNewDescLine()">➕ AJOUTER EN FIN DE LISTE</button>
-                        <!-- BOUTON SÉCURISÉ LOGIQUE ORIGINAL DESCRIPTION -->
-                        <button type="button" class="btn-action" style="background-color: #2563eb; border-color: #3b82f6; color: #fff; font-weight: bold;" onclick="translateAllActiveLines()">♻️ CORRIGER TOUT L'ONGLET DESCRIPTION</button>
                         <div id="descAlertBox" class="alert-banner">⚠️ EXPA-MÉMOIRE : VOTRE DESCRIPTION SURPASSE LE QUOTA DÉFINI !</div>
                     </div>
                 </div>
@@ -122,11 +117,12 @@
         </div>
     </div>
 
-    <!-- APPEL EXCLUSIF DU FLUX APPLICATIF LOGIQUE EXTERNE -->
+    <!-- APPEL EXCLUSIF DU FLUX APPLICATIF LOGIQUE EXTERNE SANS BLOCAGE -->
+    <script src="traducteur.js"></script>
     <script src="script.js"></script>
-	<script src="traducteur.js"></script
 </body>
 </html>
+
 
 
 
