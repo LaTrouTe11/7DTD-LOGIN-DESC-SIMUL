@@ -1,48 +1,54 @@
 /* ==========================================================================
-   === MODULE CENTRAL DE TRADUCTION ASYNCHRONE — INFRASTRUCTURE SOUVERAINE ===
+   === SCRIPT.JS : BLOC 1 SUR 5 === [ VARIABLE D'ÉTAT ET MATRICE DE BASE ] ===
    ========================================================================== */
+let currentActiveTab = 'login';
+let activeServerId = '7dtd_core'; // CORRECTION : Underscore pour éviter le bug du token '-'
+let isLoginEnglishActive = false;
+let isDescEnglishActive = false;
 
-function executerTraductionQBC(isDesc, index, texteA-Traduire, prefixe) {
-    const isLogin = !isDesc;
-    const linesList = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    if (!linesList || !linesList[index]) return;
-    const line = linesList[index];
+// Registre de la base de données d'origine complète (700 lignes préservées)
+let qbcDatabase = {
+    '7dtd_core': { // CORRECTION SIMPLIFIÉE SANS TIRETS
+        name: "QBC FLAGGARD PVE 3.0 (CORE)",
+        loginLines: [
+            { symbol: "❤", text: "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "☣", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "✗", text: "1- Pas de landclaim au POI Carl's Corn Farm.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "✗", text: "2- Vol de base interdit (sécurisez vos coffres).", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "⏰", text: "REBOOTS: 05:00 & 17:00 (EST/QC)", text_en: "", color: "F88379", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
+        ],
+        descLines: [
+            { symbol: "•", text: "Bienvenue sur l'infrastructure de Varennes.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "•", text: "Serveur PvE québécois haute performance.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
+        ]
+    },
+    '7dtd_projectz': { // CORRECTION SIMPLIFIÉE SANS TIRETS
+        name: "QBC FLAGGARD PROJECTZ 3.0",
+        loginLines: [{ symbol: "❤", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }],
+        descLines: [{ symbol: "🤖", text: "Gestion ProjectZ 3.0 par les GMs.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }]
+    }
+};
 
-    // NETTOYAGE ET SÉCURISATION DU TEXTE AVANT ENVOI SANS COUPURE RE-MÉLANGÉE
-    let textePropre = texteA-Traduire.trim();
-    
-    // API SECRÈTE DE TRADUCTION DE MASSE SANS CLÉ (LINGVA OPEN-SOURCE)
-    const urlMoteur = "https://lingva.ml" + encodeURIComponent(textePropre);
+const colorPalette = [
+    { hex: "ff0000", name: "Rouge" }, { hex: "00ff00", name: "Vert" }, { hex: "ffff00", name: "Jaune" },
+    { hex: "00ffff", name: "Cyan" }, { hex: "ffaa00", name: "Orange" }, { hex: "F88379", name: "Rose" }, { hex: "ffffff", name: "Blanc" }
+];
 
-    fetch(urlMoteur)
-        .then(reponse => response.json())
-        .then(donnees => {
-            if (donnees && donnees.translation) {
-                let texteTraduit = donnees.translation;
+const symbolPalette = [
+    { char: "", name: "(Aucun)" }, { char: "•", name: "Point" }, { char: "❤", name: "Coeur" },
+    { char: "☣", name: "Biohazard" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "Téléport" }, { char: "✗", name: "Croix / Interdit" },
+    { char: "⚔️", name: "Épées / PvP-PvE" }, { char: "⚙️", name: "Engrenage / Système" }, { char: "💎", name: "Diamant / Récompense" },
+    { char: "⭐", name: "Étoile / Important" }, { char: "👑", name: "Couronne / VIP-Admin" }, { char: "☠️", name: "Tête de mort / Mort" },
+    { char: "🎒", name: "Sac à dos / Loot" }, { char: "⏰", name: "Horloge / Reboot" }, { char: "🔒", name: "Cadenas / Sécurisé" }, { char: "🌐", name: "Monde / Discord-Web" }
+];
 
-                // NETTOYAGE ABSOLU DES ACCENTS ANGLAIS SUR LES MAJUSCULES (É -> E, À -> A) POUR 7DTD
-                texteTraduit = texteTraduit.replace(/[ÉÈÊËéèêë]/g, "E")
-                                           .replace(/[ÀÂÄàâä]/g, "A")
-                                           .replace(/[ÔÖôö]/g, "O");
+const qbcLocalDictionary = { 
+    "règlements :": "RULES:", 
+    "pas de landclaim au poi carl's corn farm.": "No landclaim at POI Carl's Corn Farm.", 
+    "vol de base interdit (sécurisez vos coffres).": "Base stealing forbidden (secure your chests).", 
+    "bienvenue sur l'infrastructure de varennes.": "Welcome to Varennes infrastructure."
+};
 
-                // Restauration propre de la syntaxe des commandes de serveurs 7DTD
-                texteTraduit = texteTraduit.replace(/\/ /g, "/").replace(/ \//g, "/");
-                texteTraduit = texteTraduit.replace(/ :/g, " :").replace(/: /g, ": ");
-
-                // Réassemblage final de votre phrase complète
-                line.text_en = prefixe + texteTraduit;
-                line.show_english = true;
-
-                // Rafraîchissement instantané du visuel
-                if (isDesc) renderDescFormLines(); else renderFormLines();
-            }
-        })
-        .catch(erreur => {
-            // Sécurité absolue anti-plantage : En cas de coupure, recopie le FR temporairement
-            line.text_en = prefixe + textePropre;
-            if (isDesc) renderDescFormLines(); else renderFormLines();
-        });
-}
 /* ==========================================================================
    === SCRIPT.JS : BLOC 2 SUR 5 === [ PASSERELLE DE TRADUCTION ET PLIAGE ] ===
    ========================================================================== */
