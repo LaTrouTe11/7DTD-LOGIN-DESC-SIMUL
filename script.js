@@ -179,12 +179,45 @@ function changeServerInstance(id) { activeServerId = id; if (currentActiveTab ==
 function switchTab(t) { currentActiveTab = t; document.getElementById('tab-login-btn').classList.toggle('active', t==='login'); document.getElementById('tab-desc-btn').classList.toggle('active', t==='desc'); document.getElementById('content-login').classList.toggle('active', t==='login'); document.getElementById('content-desc').classList.toggle('active', t==='desc'); if (t==='login') renderFormLines(); else renderDescFormLines(); }
 function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; processAndCompileQBC(); }
 function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
-function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; processAndCompileQBC(); }
-function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } processAndCompileQBC(); }
+function updateLineTextFR(isDesc, i, v) { 
+    if (isDesc) {
+        qbcDatabase[activeServerId].descLines[i].text = v; 
+    } else {
+        qbcDatabase[activeServerId].loginLines[i].text = v; 
+    }
+    
+    // CORRECTION AVANCÉE EN LIVE : Si la ligne affiche l'anglais ou que la traduction globale est activée,
+    // on relance la fonction de traduction universelle pour s'adapter instantanément pendant que vous tapez !
+    const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
+    if (list[i].show_english || isLoginEnglishActive || isDescEnglishActive) {
+        autoTranslateLine(isDesc, i);
+    } else {
+        processAndCompileQBC(); 
+    }
+}
+
+function updateLineTextEN(isDesc, i, v) { 
+    if (isDesc) {
+        qbcDatabase[activeServerId].descLines[i].text_en = v; 
+    } else {
+        qbcDatabase[activeServerId].loginLines[i].text_en = v; 
+    }
+    
+    if (v.trim() !== "") { 
+        if (isDesc) {
+            qbcDatabase[activeServerId].descLines[i].show_english = true; 
+        } else {
+            qbcDatabase[activeServerId].loginLines[i].show_english = true; 
+        }
+    } 
+    processAndCompileQBC(); 
+}
+
 function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", text: "MESSAGE LOG", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); renderFormLines(); }
 function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); renderFormLines(); }
 function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", text: "MESSAGE DESC", text_en: "", color: "ffffff", border_double: false, show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); renderDescFormLines(); }
+
 /* ==========================================================================
    === SCRIPT.JS : BLOC 4 SUR 4 === [ RENDU INTERACTIF, COMPILATEUR ET JSON ] ===
    ========================================================================== */
