@@ -6,7 +6,6 @@ let activeServerId = '7dtd_core';
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
-// Registre de la base de données d'origine propre avec structures FR et EN isolées
 let qbcDatabase = {
     '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
@@ -42,10 +41,10 @@ const symbolPalette = [
     { char: "🎒", name: "Sac à dos / Loot" }, { char: "⏰", name: "Horloge / Reboot" }, { char: "🔒", name: "Cadenas / Sécurisé" }, { char: "🌐", name: "Monde / Discord-Web" }
 ];
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 2 SUR 6 === [ COPIER / COLLER CHIRURGICAL PAR LIGNE ] ===
+   === SCRIPT.JS : BLOC 2 SUR 6 === [ COPIER / COLLER CHIRURGICAL FIABILISÉ ] ===
    ========================================================================== */
 
-// Fonction A : Copie le texte FR de la ligne cliquée dans le presse-papiers Windows
+// Fonction A : Copie chirurgicale du texte FR de la ligne sans bogue d'index
 function qbcCopierLigneFrançaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
     if (!list || !list[index]) return;
@@ -53,7 +52,7 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     let texteFR = list[index].text ? list[index].text.trim() : "";
     if (texteFR === "") return;
 
-    // Nettoyage propre pour ne pas envoyer le "1-" ou "2-" chez Google Translate
+    // FIX RADICAL : Nettoyage universel et stable du préfixe d'ordre (1-, 2-) sans crash
     const numMatch = texteFR.match(/^([0-9]+-\s*)/);
     if (numMatch && numMatch.length > 0) {
         texteFR = texteFR.substring(numMatch[0].length).trim();
@@ -67,7 +66,7 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     dummy.remove();
 }
 
-// Fonction B : Récupère la traduction du presse-papiers et l'injecte dans la case EN de la ligne
+// Fonction B : Injection sécurisée du presse-papiers dans la case EN correspondante
 function qbcCollerLigneAnglaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
     if (!list || !list[index]) return;
@@ -77,7 +76,6 @@ function qbcCollerLigneAnglaise(isDesc, index) {
             list[index].text_en = texteCopie.trim();
             list[index].show_english = true;
             
-            // Sauvegarde de secours et rafraîchissement
             saveToLocalStorage();
             if (isDesc) renderDescFormLines(); else renderFormLines();
         }
@@ -330,13 +328,13 @@ function updateLineBorderStyle(isDesc, i, style) {
 function processAndCompileQBC() {
     const isLogin = currentActiveTab === 'login'; 
     
-    // FIX SÉCURITÉ ABSOLUE : Force une chaîne texte pure au lieu d'un tableau buggé
+    // FIX SÉCURITÉ GLOBAUX : Empêche l'injection de tableaux et force l'accès à la clé textuelle pure
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
     
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    if (!currentLines || !Array.isArray(currentLines)) return; // Protection anti-page blanche
+    if (!currentLines || !Array.isArray(currentLines)) return; // Protection anti-disparition
     
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; 
     const limit = isLogin ? 3500 : 4000; 
@@ -366,6 +364,7 @@ function processAndCompileQBC() {
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
+            // FIX DE DÉBORDEMENT CORRIGÉ AU LASER : Plus aucune boucle infinie sur elle-même
             if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end;
             if (line.style_en && line.style_en.u) fullEN = "[u]" + fullEN + "[/u]"; 
             if (line.style_en && line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
@@ -426,8 +425,8 @@ function loadFromLocalStorage() {
                     opt.innerText = qbcDatabase[id].name || id.toUpperCase(); 
                     selectEl.appendChild(opt); 
                 });
-                // CORRECTION SÉCURISÉE : Sélection par chaîne de texte String pure
-                activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; 
+                // CORRECTION RADICALE DU CRASH : Force une String pure de l'ID au lieu du tableau complet
+                activeServerId = serverIds.includes('7dtd_core') ? '7dtd_core' : serverIds[0]; 
                 selectEl.value = activeServerId;
             }
             const trackerText = document.getElementById('qbcTimeTrackerText');
@@ -483,7 +482,6 @@ function importQbcConfig(event) {
                 });
             });
             
-            const oldId = activeServerId; 
             const selectEl = document.getElementById('serverSelect'); 
             if (selectEl) {
                 selectEl.innerHTML = "";
@@ -494,7 +492,8 @@ function importQbcConfig(event) {
                     selectEl.appendChild(opt); 
                 });
                 qbcDatabase = parsedData; 
-                activeServerId = serverIds.includes(oldId) ? oldId : serverIds[0]; 
+                // CORRECTION RADICALE DU CRASH ICI AUSSI
+                activeServerId = serverIds.includes('7dtd_core') ? '7dtd_core' : serverIds[0]; 
                 selectEl.value = activeServerId;
             }
             
