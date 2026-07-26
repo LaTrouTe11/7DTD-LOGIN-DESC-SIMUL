@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === MODULE CENTRAL DE TRADUCTION INDIVIDUELLE GOOGLE — INJECTION SANS CORS ===
+   === MODULE CENTRAL DE TRADUCTION INDIVIDUELLE SOUVERAINE — INSTANCE B     ===
    ========================================================================== */
 
 function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
@@ -18,12 +18,15 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
     const oldScript = document.getElementById("qbcInvisibleTranslator");
     if (oldScript) oldScript.remove();
 
-    // RACCORDEMENT DU CALLBACK MAÎTRE POUR LIRE L'ARBRE DE DONNÉES DE GOOGLE
-    window.qbcGoogleCallback = function(data) {
-        try {
-            // EXTRACTION CHIURGICALE EXACTE DU TEXTE GOOGLE DANS LA MATRICE MULTI-CROCHETS
-            if (data && data[0] && data[0][0] && data[0][0][0]) {
-                let texteTraduit = data[0][0][0];
+    // UTILISATION DE L'INFRASTRUCTURE ANONYME DE LINGVA (ÉVITE LE BAN D'IP DE GOOGLE)
+    const urlMoteurAlternative = "https://lingva.ml" + encodeURIComponent(textePropre);
+
+    fetch(urlMoteurAlternative)
+        .then(reponse => reponse.json())
+        .then(donnees => {
+            // Extraction directe de la chaîne textuelle nettoyée
+            if (donnees && donnees.translation) {
+                let texteTraduit = donnees.translation;
 
                 // RESTAURATION STRICTE DES SYMBOLES ET DES ENTRAÎNEMENTS 7DTD
                 texteTraduit = texteTraduit.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
@@ -42,17 +45,11 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
                 // Rafraîchissement graphique de l'onglet actif
                 if (isDesc) renderDescFormLines(); else renderFormLines();
             }
-        } catch(e) {
-            console.error("Erreur de décodage Google", e);
-        }
-        delete window.qbcGoogleCallback;
-    };
-
-    // INJECTION DU PONT INVISIBLE POUR PASSER AU-TRAVERS DU FILTRE CHROME SANS ERREUR CORS
-    const scriptEl = document.createElement("script");
-    scriptEl.id = "qbcInvisibleTranslator";
-    scriptEl.src = "https://googleapis.com" + encodeURIComponent(textePropre);
-    document.body.appendChild(scriptEl);
+        })
+        .catch(erreur => {
+            // En cas de micro-coupure internet, on préserve l'ancienne valeur sans l'effacer
+            console.error("Temporisation réseau active sur la ligne " + (index + 1), erreur);
+        });
 }
 
 
