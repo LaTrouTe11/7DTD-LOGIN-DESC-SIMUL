@@ -11,21 +11,21 @@ let qbcDatabase = {
     '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
         loginLines: [
-            { symbol: "❤", text: "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "☣", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "✗", text: "1- Pas de landclaim au POI Carl's Corn Farm.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "✗", text: "2- Vol de base interdit (sécurisez vos coffres).", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "⏰", text: "REBOOTS: 05:00 & 17:00 (EST/QC)", text_en: "", color: "F88379", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
+            { symbol: "❤", symbol_start: "", text: "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "☣", symbol_start: "", text: "RÈGLEMENTS :", text_en: "", color: "ffff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "✗", symbol_start: "", text: "1- Pas de landclaim au POI Carl's Corn Farm.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "✗", symbol_start: "", text: "2- Vol de base interdit (sécurisez vos coffres).", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "⏰", symbol_start: "", text: "REBOOTS: 05:00 & 17:00 (EST/QC)", text_en: "", color: "F88379", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
         ],
         descLines: [
-            { symbol: "•", text: "Bienvenue sur l'infrastructure de Varennes.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
-            { symbol: "•", text: "Serveur PvE québécois haute performance.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
+            { symbol: "•", symbol_start: "", text: "Bienvenue sur l'infrastructure de Varennes.", text_en: "", color: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
+            { symbol: "•", symbol_start: "", text: "Serveur PvE québécois haute performance.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
         ]
     },
     '7dtd_projectz': {
         name: "QBC FLAGGARD PROJECTZ 3.0",
-        loginLines: [{ symbol: "❤", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }],
-        descLines: [{ symbol: "🤖", text: "Gestion ProjectZ 3.0 par les GMs.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }]
+        loginLines: [{ symbol: "❤", symbol_start: "", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }],
+        descLines: [{ symbol: "🤖", symbol_start: "", text: "Gestion ProjectZ 3.0 par les GMs.", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }]
     }
 };
 
@@ -142,7 +142,7 @@ function moveLine(isDesc, i, d) {
 
 function insertLineAt(isDesc, i) { 
     const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines; 
-    list.splice(i, 0, { symbol: "•", text: "MESSAGE ÉDITABLE", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); 
+    list.splice(i, 0, { symbol: "•", symbol_start: "", text: "MESSAGE ÉDITABLE", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); 
     if (isDesc) renderDescFormLines(); else renderFormLines(); 
 }
 
@@ -156,10 +156,18 @@ function toggleLineStyle(isDesc, i, lang, k) {
 function createNewServerInstance() {
     const n = prompt("NOM SERVEUR :"); if (!n || n.trim() === "") return; 
     const id = "7dtd_" + Math.random().toString(36).substring(2, 6);
-    qbcDatabase[id] = { name: n.toUpperCase(), loginLines: [{ symbol: "❤", text: "BIENVENUE", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }], descLines: [{ symbol: "•", text: "DESCRIPTION", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }] };
+    qbcDatabase[id] = { name: n.toUpperCase(), loginLines: [{ symbol: "❤", symbol_start: "", text: "BIENVENUE", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }], descLines: [{ symbol: "•", symbol_start: "", text: "DESCRIPTION", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }] };
     const opt = document.createElement('option'); opt.value = id; opt.innerText = n.toUpperCase(); 
     document.getElementById('serverSelect').appendChild(opt); 
     document.getElementById('serverSelect').value = id; changeServerInstance(id);
+}
+
+// ACTION DU MENU DÉROULANT : Enregistrement de l'icône de début indépendante
+function updateLineSymbolStart(isDesc, i, value) {
+    if (isDesc) qbcDatabase[activeServerId].descLines[i].symbol_start = value;
+    else qbcDatabase[activeServerId].loginLines[i].symbol_start = value;
+    saveToLocalStorage();
+    processAndCompileQBC();
 }
 
 function editCurrentServerName() {
@@ -186,12 +194,12 @@ function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId]
 function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
 function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); processAndCompileQBC(); }
 function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } saveToLocalStorage(); processAndCompileQBC(); }
-function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", text: "MESSAGE LOG", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderFormLines(); }
+function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", symbol_start: "", text: "MESSAGE LOG", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderFormLines(); }
 function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); renderFormLines(); }
-function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", text: "MESSAGE DESC", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderDescFormLines(); }
+function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", text: "MESSAGE DESC", text_en: "", color: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }); saveToLocalStorage(); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 4 SUR 5 === [ RENDU VISUEL ET ENCODAGE PAYLOAD ] ===
+   === SCRIPT.JS : BLOC 4 SUR 5 — PARTIE A === [ DESSIN DES FORMULAIRES ] ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); container.innerHTML = "";
@@ -201,14 +209,24 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         const isEngVisible = line.show_english || isGlobalEnglish;
         div.className = "line-item" + (line.border_style && line.border_style !== "none" ? " has-double-border" : "");
         
+        // Sécurité : Initialise la variable au cas où le fichier JSON importé est ancien
+        if (line.symbol_start === undefined) line.symbol_start = "";
+        
+        // NOUVEAU SÉLECTEUR INDÉPENDANT : SYMBOLE AU DÉBUT UNIQUEMENT
+        let symStartSel = `<select class="line-select" style="width:105px;" onchange="updateLineSymbolStart(${isDesc}, ${index}, this.value)">`;
+        symStartSel += `<option value="" disabled style="color:#fbbf24; font-weight:bold;">⭐ Symb. Début :</option>`;
+        symbolPalette.forEach(s => symStartSel += `<option value="${s.char}" ${s.char === line.symbol_start ? "selected" : ""}>${s.name}</option>`); symStartSel += `</select>`;
+        
+        // SÉLECTEUR D'ORIGINE : MET MAINTENANT LE SYMBOLE À LA FIN DE LA PHRASE
         let symSel = `<select class="line-select" style="width:100px;" onchange="updateLineSymbol(${isDesc}, ${index}, this.value)">`;
+        symSel += `<option value="" disabled style="color:#38bdf8; font-weight:bold;">⭐ Symb. Fin :</option>`;
         symbolPalette.forEach(s => symSel += `<option value="${s.char}" ${s.char === line.symbol ? "selected" : ""}>${s.name}</option>`); symSel += `</select>`;
         
         let colSel = `<select class="line-select" style="width:90px;" onchange="updateLineColor(${isDesc}, ${index}, this.value)">`;
         colorPalette.forEach(c => colSel += `<option value="${c.hex}" ${c.hex === line.color ? "selected" : ""}>${c.name}</option>`); colSel += `</select>`;
         
         if (!line.border_style) line.border_style = "none";
-        let borderSel = `<select class="line-select" style="width:140px;" onchange="updateLineBorderStyle(${isDesc}, ${index}, this.value)">`;
+        let borderSel = `<select class="line-select" style="width:130px;" onchange="updateLineBorderStyle(${isDesc}, ${index}, this.value)">`;
         borderSel += `<option value="none" ${line.border_style === 'none' ? 'selected' : ''}>(Pas de Ligne)</option>`;
         borderSel += `<option value="double" ${line.border_style === 'double' ? 'selected' : ''}>═ Ligne Double</option>`;
         borderSel += `<option value="single" ${line.border_style === 'single' ? 'selected' : ''}>─ Ligne Simple</option>`;
@@ -228,18 +246,20 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         
         let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
         
-        // CORRECTION INTERFACE : Boutons de transfert direct individuels sans icône automatique réseau
+        // AFFICHAGE ULTRA COMPACT DES BOUTONS INDIVIDUELS
         let transBtn = (isDesc || index > 0) ? `
-            <button type="button" class="double-line-btn" style="background:#10b981; border-color:#34d399; color:#fff; padding:3px 6px;" title="Copier le Français de cette ligne" onclick="qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 COPIER FR</button>
-            <button type="button" class="double-line-btn" style="background:#0284c7; border-color:#38bdf8; color:#fff; padding:3px 6px;" title="Coller la Traduction Anglaise ici" onclick="qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 COLLER EN</button>
-            <button type="button" class="double-line-btn ${line.show_english?'active':''}" style="padding:3px 6px;" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 VOIR EN</button>
+            <button type="button" class="double-line-btn" style="background:#10b981; border-color:#34d399; color:#fff; padding:2px 4px; font-size:10px; min-width:45px;" title="Copier le Français" onclick="qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 FR</button>
+            <button type="button" class="double-line-btn" style="background:#0284c7; border-color:#38bdf8; color:#fff; padding:2px 4px; font-size:10px; min-width:45px;" title="Coller l'Anglais" onclick="qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 EN</button>
+            <button type="button" class="double-line-btn ${line.show_english?'active':''}" style="padding:2px 4px; font-size:10px;" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 EN</button>
         ` : "";
         
-        div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symSel} ${colSel} ${transBtn} ${borderSel}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
+        div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symStartSel} ${symSel} ${colSel} ${transBtn} ${borderSel}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
         container.appendChild(div);
     }); processAndCompileQBC();
 }
-
+/* ==========================================================================
+   === SCRIPT.JS : BLOC 4 SUR 5 — PARTIE B === [ ENCODAGE DU PAYLOAD 7DTD ] ===
+   ========================================================================== */
 function renderFormLines() { 
     const toggleEl = document.getElementById('loginEnglishToggle');
     const isGlobalEng = toggleEl ? toggleEl.checked : false;
@@ -266,12 +286,20 @@ function processAndCompileQBC() {
     
     currentLines.forEach((line, index) => {
         let textFR = line.text ? line.text.trim() : ""; let textEN = line.text_en ? line.text_en.trim() : "";
-        let fullFR = textFR; if (line.symbol && line.symbol.trim() !== "") fullFR = line.symbol + " " + textFR + " " + line.symbol;
+        if (line.symbol_start === undefined) line.symbol_start = "";
+
+        // --- COMPILATION DU BLOC FRANÇAIS (Début distinct + Fin d'origine) ---
+        let fullFR = textFR;
+        if (line.symbol_start && line.symbol_start.trim() !== "") fullFR = line.symbol_start + " " + fullFR;
+        if (line.symbol && line.symbol.trim() !== "") fullFR = fullFR + " " + line.symbol;
         if(line.style_fr?.u) fullFR = "[u]" + fullFR + "[/u]"; if(line.style_fr?.b) fullFR = "[b]" + fullFR + "[/b]";
         let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; const isEnglishActive = line.show_english || isGlobalEnglish;
         
+        // --- COMPILATION DU BLOC ANGLAIS (Début distinct + Fin d'origine) ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
-            let fullEN = textEN; if (line.symbol && line.symbol.trim() !== "") fullEN = line.symbol + " " + textEN + " " + line.symbol;
+            let fullEN = textEN;
+            if (line.symbol_start && line.symbol_start.trim() !== "") fullEN = line.symbol_start + " " + fullEN;
+            if (line.symbol && line.symbol.trim() !== "") fullEN = fullEN + " " + line.symbol;
             if(line.style_en?.u) fullEN = "[u]" + fullEN + "[/u]"; if(line.style_en?.b) fullEN = "[b]" + fullEN + "[/b]";
             masterPayload += chunkFR + " | [" + line.color + "]" + fullEN + "[-]";
         } else { masterPayload += chunkFR; }
@@ -360,6 +388,7 @@ if (zoomSelectEl) zoomSelectEl.value = savedZoom;
 changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
+
 
 
 
