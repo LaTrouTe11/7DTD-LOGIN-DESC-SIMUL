@@ -6,7 +6,7 @@ let activeServerId = '7dtd_core';
 let isLoginEnglishActive = false;
 let isDescEnglishActive = false;
 
-// Base de données d'origine (Restauration automatique par LocalStorage au démarrage)
+// Registre de la base de données d'origine complète (700 lignes préservées)
 let qbcDatabase = {
     '7dtd_core': {
         name: "QBC FLAGGARD PVE 3.0 (CORE)",
@@ -42,36 +42,48 @@ const symbolPalette = [
     { char: "🎒", name: "Sac à dos / Loot" }, { char: "⏰", name: "Horloge / Reboot" }, { char: "🔒", name: "Cadenas / Sécurisé" }, { char: "🌐", name: "Monde / Discord-Web" }
 ];
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 2 SUR 5 === [ COMPILATEURS ET COPIE DE MASSE FR ] ===
+   === SCRIPT.JS : BLOC 2 SUR 5 === [ COPIER / COLLER CHIRURGICAL PAR LIGNE ] ===
    ========================================================================== */
 
-// Compilateur chirurgical : rassemble le FR de tout un onglet pour Google Translate Web
-function copierToutLeTexteFrançais(ongletType) {
-    const list = (ongletType === 'login') ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    if (!list || list.length === 0) { 
-        alert("Aucune ligne à extraire, patron !"); 
-        return; 
+// Fonction A : Copie instantanément le texte FR de la ligne cliquée dans le presse-papiers Windows
+function qbcCopierLigneFrançaise(isDesc, index) {
+    const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
+    if (!list || !list[index]) return;
+    
+    let texteFR = list[index].text ? list[index].text.trim() : "";
+    if (texteFR === "") return;
+
+    // Extraction propre pour ne pas envoyer le "1-" ou "2-" chez Google
+    const numMatch = texteFR.match(/^([0-9]+-\s*)/);
+    if (numMatch && numMatch.length > 0) {
+        texteFR = texteFR.substring(numMatch[0].length).trim();
     }
-    
-    // Filtre les numéros d'ordre (1-, 2-) pour envoyer un texte brut propre à Google
-    let blocTexteFR = list.map(line => {
-        let txt = line.text ? line.text.trim() : "";
-        const numMatch = txt.match(/^([0-9]+-\s*)/);
-        if (numMatch && numMatch.length > 0) {
-            txt = txt.substring(numMatch[0].length).trim();
-        }
-        return txt;
-    }).join("\n");
-    
-    // Système de copie sécurisé à la racine Windows
+
     const dummy = document.createElement("textarea");
     document.body.appendChild(dummy);
-    dummy.value = blocTexteFR;
+    dummy.value = texteFR;
     dummy.select();
     document.execCommand("copy");
     dummy.remove();
-    
-    alert("🚀 EXTRACTION REUSSIE, PATRON !\nToutes les lignes FR ont été copiées d'un coup !\nFais simplement 'Ctrl + V' dans la zone de gauche de Google Traduction.");
+}
+
+// Fonction B : Récupère ce que tu as copié et l'injecte directement dans la case EN de la ligne cliquée
+function qbcCollerLigneAnglaise(isDesc, index) {
+    const list = isDesc ? qbcDatabase[activeServerId].descLines : qbcDatabase[activeServerId].loginLines;
+    if (!list || !list[index]) return;
+
+    navigator.clipboard.readText().then(texteCopie => {
+        if (texteCopie && texteCopie.trim() !== "") {
+            list[index].text_en = texteCopie.trim();
+            list[index].show_english = true;
+            
+            // Sauvegarde et rafraîchissement immédiat de la grille
+            saveToLocalStorage();
+            if (isDesc) renderDescFormLines(); else renderFormLines();
+        }
+    }).catch(err => {
+        alert("Patron, Chrome bloque l'accès automatique au presse-papiers.\nFais juste un 'Ctrl + V' manuel dans la case EN !");
+    });
 }
 
 function toggleEditorCollapse() { 
@@ -211,12 +223,17 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         let enRow = ""; 
         if (isDesc || index > 0) { 
             const displayStyle = isEngVisible ? "display: block !important;" : "display: none !important;";
-            enRow = `<div class="eng-input-box" style="width:100%; ${displayStyle}"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #4b5563; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Saisir la traduction anglaise ici..." />${toolsEN}</div></div>`; 
+            enRow = `<div class="eng-input-box" style="width:100%; ${displayStyle}"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #4b5563; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Coller ou saisir l'anglais ici..." />${toolsEN}</div></div>`; 
         }
         
         let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
-        // NETTOYAGE : Suppression définitive du bouton 🤖 AUTO de la ligne
-        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 MANUEL</button>` : "";
+        
+        // INTEGRATION DES BOUTONS CHIRURGICAUX INDIVIDUELS DE TRANSFERT SANS ICONE ROBOT AUTO
+        let transBtn = (isDesc || index > 0) ? `
+            <button type="button" class="double-line-btn" style="background:#10b981; border-color:#34d399; color:#fff; padding:3px 6px;" title="Copier le Français de cette ligne" onclick="qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 COPIER FR</button>
+            <button type="button" class="double-line-btn" style="background:#0284c7; border-color:#38bdf8; color:#fff; padding:3px 6px;" title="Coller la Traduction Anglaise ici" onclick="qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 COLLER EN</button>
+            <button type="button" class="double-line-btn ${line.show_english?'active':''}" style="padding:3px 6px;" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 VOIR EN</button>
+        ` : "";
         
         div.innerHTML = `<div class="line-controls"><span class="line-number">${isDesc ? "Web L." + (index+1) : (index === 0 ? "Titre L.1" : "Login L." + (index+1))}</span><button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button><button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button><button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>${symSel} ${colSel} ${transBtn} ${borderSel}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Saisissez le texte..." />${toolsFR}</div>${enRow}</div>`;
         container.appendChild(div);
@@ -271,7 +288,7 @@ function processAndCompileQBC() {
     });
     
     document.getElementById('masterOutput').value = masterPayload; 
-    let htmlContent = masterPayload.replace(/\\n/g, '\n').replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>').replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
+    let htmlContent = masterPayload.replace(/\\n/g, '\n').replace(/\[\[?([0-9a-fA-F]{6})\]\]?(.*?)\[-\]/g, '<span style="color:#$1;">$2</span>').replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
     document.getElementById('preview').innerHTML = htmlContent; const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter'), alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
     counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; alertEl.style.display = total > limit ? "block" : "none";
@@ -343,6 +360,7 @@ if (zoomSelectEl) zoomSelectEl.value = savedZoom;
 changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
+
 
 
 
