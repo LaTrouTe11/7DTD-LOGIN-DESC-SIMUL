@@ -228,7 +228,7 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         
         let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
         
-        // INTEGRATION DES BOUTONS CHIRURGICAUX INDIVIDUELS DE TRANSFERT SANS ICONE ROBOT AUTO
+        // CORRECTION INTERFACE : Boutons de transfert direct individuels sans icône automatique réseau
         let transBtn = (isDesc || index > 0) ? `
             <button type="button" class="double-line-btn" style="background:#10b981; border-color:#34d399; color:#fff; padding:3px 6px;" title="Copier le Français de cette ligne" onclick="qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 COPIER FR</button>
             <button type="button" class="double-line-btn" style="background:#0284c7; border-color:#38bdf8; color:#fff; padding:3px 6px;" title="Coller la Traduction Anglaise ici" onclick="qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 COLLER EN</button>
@@ -288,7 +288,7 @@ function processAndCompileQBC() {
     });
     
     document.getElementById('masterOutput').value = masterPayload; 
-    let htmlContent = masterPayload.replace(/\\n/g, '\n').replace(/\[\[?([0-9a-fA-F]{6})\]\]?(.*?)\[-\]/g, '<span style="color:#$1;">$2</span>').replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
+    let htmlContent = masterPayload.replace(/\\n/g, '\n').replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>').replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>').replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
     document.getElementById('preview').innerHTML = htmlContent; const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter'), alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
     counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; alertEl.style.display = total > limit ? "block" : "none";
