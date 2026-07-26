@@ -326,15 +326,15 @@ function updateLineBorderStyle(isDesc, i, style) {
 }
 
 function processAndCompileQBC() {
-    const isLogin = currentActiveTab === 'login'; 
+    const isLogin = (currentActiveTab === 'login'); 
     
-    // FIX SÉCURITÉ GLOBAUX : Empêche l'injection de tableaux et force l'accès à la clé textuelle pure
+    // CORRECTION CRITIQUE : Force l'ID d'instance pur en texte pour empêcher le crash
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
     
     const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
-    if (!currentLines || !Array.isArray(currentLines)) return; // Protection anti-disparition
+    if (!currentLines || !Array.isArray(currentLines)) return; 
     
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; 
     const limit = isLogin ? 3500 : 4000; 
@@ -360,11 +360,10 @@ function processAndCompileQBC() {
         let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; 
         const isEnglishActive = line.show_english || isGlobalEnglish;
         
-        // --- COMPILATION DU BLOC ANGLAIS CROISÉ ---
+        // --- COMPILATION DU BLOC ANGLAIS CROISÉ SANS BOUCLE INFINIE ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
-            // FIX DE DÉBORDEMENT CORRIGÉ AU LASER : Plus aucune boucle infinie sur elle-même
             if (line.symbol_en_end && line.symbol_en_end.trim() !== "") fullEN = fullEN + " " + line.symbol_en_end;
             if (line.style_en && line.style_en.u) fullEN = "[u]" + fullEN + "[/u]"; 
             if (line.style_en && line.style_en.b) fullEN = "[b]" + fullEN + "[/b]";
@@ -384,8 +383,10 @@ function processAndCompileQBC() {
         }
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
-    
-    // ENVOI SÉCURISÉ DANS L'INTERRUPTEUR GRAPHIQUE HTML
+/* ==========================================================================
+   === SCRIPT.JS : BLOC 5 — PARTIE B === [ ENVOI GRAPHIQUE & ACCOLADE ]     ===
+   ========================================================================== */
+    // ENVOI SÉCURISÉ DANS LES ÉLÉMENTS DE L'INTERRUPTEUR GRAPHIQUE HTML
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
@@ -400,11 +401,15 @@ function processAndCompileQBC() {
     const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter');
     const alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
-    if (counterEl) { counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; counterEl.style.color = total > limit ? "#f87171" : "#34d399"; }
+    
+    if (counterEl) { 
+        counterEl.innerText = "TOTAL : " + total + " / " + limit + " CHARS"; 
+        counterEl.style.color = total > limit ? "#f87171" : "#34d399"; 
+    }
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
 /* ==========================================================================
-   === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE PERSISTANTE, ZOOM ET EXPEDITION ] ===
+   === SCRIPT.JS : BLOC 6 SUR 6 === [ MÉMOIRE LOCALE, IMPORTATION & ZOOM ] ===
    ========================================================================== */
 function saveToLocalStorage() { 
     localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); 
@@ -425,8 +430,8 @@ function loadFromLocalStorage() {
                     opt.innerText = qbcDatabase[id].name || id.toUpperCase(); 
                     selectEl.appendChild(opt); 
                 });
-                // CORRECTION RADICALE DU CRASH : Force une String pure de l'ID au lieu du tableau complet
-                activeServerId = serverIds.includes('7dtd_core') ? '7dtd_core' : serverIds[0]; 
+                // CORRECTION HISTORIQUE : Extraction d'un mot pur (String) au lieu d'un tableau complet (Array)
+                activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0]; 
                 selectEl.value = activeServerId;
             }
             const trackerText = document.getElementById('qbcTimeTrackerText');
@@ -482,6 +487,7 @@ function importQbcConfig(event) {
                 });
             });
             
+            const oldId = activeServerId; 
             const selectEl = document.getElementById('serverSelect'); 
             if (selectEl) {
                 selectEl.innerHTML = "";
@@ -492,8 +498,8 @@ function importQbcConfig(event) {
                     selectEl.appendChild(opt); 
                 });
                 qbcDatabase = parsedData; 
-                // CORRECTION RADICALE DU CRASH ICI AUSSI
-                activeServerId = serverIds.includes('7dtd_core') ? '7dtd_core' : serverIds[0]; 
+                // CORRECTION DU CRASH D'ID ICI AUSSI
+                activeServerId = serverIds.includes(oldId) ? oldId : serverIds[0]; 
                 selectEl.value = activeServerId;
             }
             
@@ -535,12 +541,3 @@ if (zoomSelectEl) zoomSelectEl.value = savedZoom;
 changeUiZoom(savedZoom);
 loadFromLocalStorage();
 renderFormLines();
-
-
-
-
-
-
-
-
-
