@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === MODULE CENTRAL DE TRADUCTION ASYNCHRONE — INFRASTRUCTURE SOUVERAINE ===
+   === MODULE CENTRAL DE TRADUCTION CHIRURGICALE GOOGLE — LIGNE PAR LIGNE ===
    ========================================================================== */
 
 function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
@@ -9,39 +9,46 @@ function executerTraductionQBC(isDesc, index, texteATraduire, prefixe) {
     const line = linesList[index];
 
     let textePropre = texteATraduire.trim();
-    
-    // INFRASTRUCTURE INTERNATIONALE MUTUALISÉE LINGVA OPEN-SOURCE
-    const urlMoteur = "https://lingva.ml" + encodeURIComponent(textePropre);
+    if (textePropre === "" || textePropre === "...") return;
 
-    fetch(urlMoteur)
+    // COUVRE-SYMBOLE : On protège / et : pour forcer Google à traduire l'entièreté des rajouts de mots
+    textePropre = textePropre.replace(/\//g, "SLASHTOKEN ").replace(/:/g, " COLONTOKEN");
+
+    // L'URL OFFICIELLE ET BRUTE DE L'INFRASTRUCTURE MONDIALE GOOGLE TRANSLATE
+    const urlMoteurGoogle = "https://googleapis.com" + encodeURIComponent(textePropre);
+
+    fetch(urlMoteurGoogle)
         .then(reponse => reponse.json())
         .then(donnees => {
-            if (donnees && donnees.translation) {
-                let texteTraduit = donnees.translation;
+            // Décompression chirurgicale de la première ligne de texte traduite dans l'arbre JSON de Google
+            if (donnees && donnees[0] && donnees[0][0] && donnees[0][0][0]) {
+                let texteTraduit = donnees[0][0][0];
 
-                // RESTAURATION NETTE DE LA SYNTAXE DES COMMANDES DE SERVEURS 7DTD
+                // RESTAURATION STRICTE DES SYMBOLES ET COMMANDES DE CHAT 7DTD
+                texteTraduit = texteTraduit.replace(/SLASHTOKEN/gi, "/").replace(/COLONTOKEN/gi, ":");
                 texteTraduit = texteTraduit.replace(/\/ /g, "/").replace(/ \//g, "/");
                 texteTraduit = texteTraduit.replace(/ :/g, " :").replace(/: /g, ": ");
 
-                // ÉRADICATION AUTOMATIQUE DES ACCENTS ANGLAIS SUR LES MAJUSCULES (É -> E, À -> A)
+                // NETTOYAGE DES ACCENTS MAJUSCULES (É -> E, À -> A) POUR TEXTMESHPRO 7DTD
                 texteTraduit = texteTraduit.replace(/[ÉÈÊËéèêë]/g, "E")
                                            .replace(/[ÀÂÄàâä]/g, "A")
                                            .replace(/[ÔÖôö]/g, "O");
 
-                // Réassemblage final de votre phrase complète
+                // Enregistrement chirurgical uniquement sur la ligne désirée !
                 line.text_en = prefixe + texteTraduit;
                 line.show_english = true;
 
-                // Rafraîchissement visuel instantané du cockpit
+                // Rafraîchissement graphique immédiat de l'onglet actif
                 if (isDesc) renderDescFormLines(); else renderFormLines();
             }
         })
         .catch(erreur => {
-            // Sécurité anti-plantage : En cas de coupure, recopie le FR par défaut
-            line.text_en = prefixe + textePropre;
-            if (isDesc) renderDescFormLines(); else renderFormLines();
+            // RECOURS SÉCURISÉ : Si Google sature temporairement, ON N'ÉCRASE PLUS l'ancienne case anglaise !
+            // Le script refuse de remplacer ton texte anglais actuel par du français.
+            console.error("Temporisation réseau Google sur la ligne " + (index + 1), erreur);
         });
 }
+
 
 
 
