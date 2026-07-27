@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 1 SUR 2 === [ VARIABLES, ONGLETS & SÉCURITÉ ] ===
+   === SCRIPT-MAIN.JS : PARTIE 1 SUR 2 === [ CORE CONFIG & INSTANCES ]     ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
@@ -25,7 +25,8 @@ const colorPalette = [
 
 const symbolPalette = [
     { char: "", name: "(Aucun)" }, { char: "•", name: "Point" }, { char: "❤", name: "Coeur" },
-    { char: "☣", name: "Biohazard" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "Téléport" }, { char: "✗", name: "Croix / Interdit" }
+    { char: "☣", name: "Biohazard" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "Téléport" }, { char: "✗", name: "Croix / Interdit" },
+    { char: "⚔️", name: "Épées" }, { char: "⚙️", name: "Système" }, { char: "💎", name: "Diamant" }, { char: "⏰", name: "Reboot" }
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -53,7 +54,7 @@ function refreshAllViews() {
     if (typeof processAndCompileQBC === "function") processAndCompileQBC();
 }
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 2 SUR 2 === [ FORMULAIRES & PERSISTANCE ]   ===
+   === SCRIPT-MAIN.JS : PARTIE 2 SUR 2 === [ BOUTONS D'ORDRE & IMPORTATION ] ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); 
@@ -95,7 +96,15 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         
         let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn" onclick="qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 FR</button><button type="button" class="double-line-btn" onclick="qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 EN</button><button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 EN</button>` : "";
         
-        div.innerHTML = `<div class="line-controls"><span class="line-number">L.${index+1}</span> ${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text || ''}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." /></div>${enRow}</div>`;
+        // RECONSTRUCTION DES BOUTONS DE COMMANDE MANQUANTS (MONTER, DESCENDRE ET INSÉRER)
+        let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
+        let lineControlsBlock = `
+            <button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button>
+            <button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button>
+            <button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>
+        `;
+
+        div.innerHTML = `<div class="line-controls"><span class="line-number">L.${index+1}</span> ${lineControlsBlock} ${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text || ''}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." /></div>${enRow}</div>`;
         container.appendChild(div);
     }); 
     if (typeof processAndCompileQBC === "function") processAndCompileQBC();
@@ -134,6 +143,28 @@ function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "�
 function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); renderFormLines(); }
 function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", text: "MESSAGE DESC", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
+
+// FIX D'IMPORTATION JSON DÉFINITIF
+function importQbcConfig(event) {
+    const files = event.target.files; if (!files || files.length === 0) return; const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const parsedData = JSON.parse(e.target.result); const serverIds = Object.keys(parsedData); if (serverIds.length === 0) return;
+            qbcDatabase = parsedData;
+            activeServerId = serverIds[0]; // FIX : Chaîne de texte pure à 100% au lieu d'un objet Array complet
+            saveToLocalStorage(); refreshAllViews(); alert("IMPORTATION REUSSIE");
+        } catch (err) { alert("ERREUR LECTURE JSON"); }
+    }; reader.readAsText(files.item(0));
+}
+
+// VARIATEUR DE TAILLE ÉCRAN INTERNE (ZOOM)
+function changeUiZoom(zoomValue) {
+    document.body.style.zoom = zoomValue + "%";
+    document.body.style.transform = "scale(" + (zoomValue / 100) + ")";
+    document.body.style.transformOrigin = "top center";
+    localStorage.setItem("qbc_preferred_zoom", zoomValue);
+}
+
 
 
 
