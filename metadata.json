@@ -1,0 +1,6 @@
+{
+  "name": "7DTD Login & Desc Simulator",
+  "description": "Control panel and TextMeshPro payload generator for 7 Days to Die servers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

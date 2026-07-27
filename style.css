@@ -1,0 +1,497 @@
+/* ==========================================================================
+   === STYLE.CSS UNIFIÉ : COCKPIT DE CONTRÔLE QBC MATRIX — COMPACT & BLINDÉ ===
+   ========================================================================== */
+:root {
+    --bg-main: #0b0f19;      /* Fond encore un peu plus sombre pour faire ressortir le reste */
+    --bg-panel: #151f32;     /* Panel bleuté doux */
+    --bg-input: #1e293b;     /* Zone de texte plus sombre pour reposer l'œil */
+    --border-color: #334155;
+    --text-color: #e2e8f0;    /* Blanc cassé (beaucoup moins agressif que le blanc pur) */
+    --accent-fr: #10b981;
+    --accent-en: #0ea5e9;
+    --accent-yellow: #f59e0b;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-color);
+    padding: 15px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased; /* Lissage de police Chrome pour une lecture ultra-douce */
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- ENTÊTE BANDEAU MAÎTRE --- */
+.matrix-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-panel);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+}
+
+.header-logo {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--accent-yellow);
+    letter-spacing: 0.5px;
+}
+
+.global-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.matrix-select {
+    background: var(--bg-input);
+    color: white;
+    border: 1px solid var(--border-color);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+}
+
+.matrix-action-btn {
+    background: #4b5563;
+    color: white;
+    border: 1px solid #6b7280;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- COMMUTATEUR D'ONGLETS --- */
+.matrix-tabs-container {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.tab-btn {
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #60a5fa;
+}
+
+/* --- FORMULAIRES ET GRILLES DE SAISIE (VITAL !) --- */
+.matrix-workspace-wrapper {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.workspace-panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 8px;
+}
+
+.add-row-btn {
+    background: #10b981;
+    color: white;
+    border: 1px solid #34d399;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- LE BLOC DE LIGNE (FIN DE L'EMPILABLE HAUT GAUCHE) --- */
+.line-item {
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100% !important;
+    position: relative !important;
+}
+
+.line-item.has-double-border {
+    border: 2px double var(--accent-yellow);
+}
+
+/* BARRE DE CONTROLE INTERNE DE LIGNE ALIGNÉE DE GAUCHE À DROITE */
+.line-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.line-number {
+    font-size: 11px;
+    font-weight: bold;
+    color: #94a3b8;
+    background: #1e293b;
+    padding: 3px 6px;
+    border-radius: 4px;
+    min-width: 45px;
+    text-align: center;
+}
+
+/* 🔼 🔽 BOUTONS DES FLÈCHES D'ORDRE EN HAUTE VISIBILITÉ ANTI-FATIGUE VISUELLE */
+.order-btn {
+    background: #334155 !important;       /* Fond gris acier bien visible */
+    border: 1px solid #475569 !important; /* Bordure nette pour détacher le bouton */
+    color: #ffffff !important;            /* Flèche blanche éclatante */
+    cursor: pointer;
+    padding: 4px 8px !important;          /* Un peu plus large pour cliquer facilement */
+    border-radius: 4px;
+    font-size: 13px !important;           /* Flèche agrandie pour une lecture immédiate */
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+/* Effet de survol pour savoir exactement où la souris se pose */
+.order-btn:hover:not([disabled]) {
+    background: #475569 !important;
+    border-color: #fbbf24 !important;    /* Bordure jaune ambre au survol */
+}
+
+/* Style quand le bouton est désactivé (première ou dernière ligne) */
+.order-btn[disabled] {
+    opacity: 0.15 !important;
+    background: #1e293b !important;
+    border-color: transparent !important;
+    cursor: not-allowed;
+}
+
+/* 🟢 STYLE BOUTON INSÉRER ÉPURÉ (PAS DE COULEUR PLEINE) */
+.btn-insert-here {
+    background: transparent !important;
+    border: 1px solid #10b981 !important; /* Bordure verte */
+    color: #34d399 !important;            /* Texte vert */
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-insert-here:hover {
+    background: rgba(16, 185, 129, 0.1) !important; /* Léger reflet vert au survol */
+}
+
+/* 🇫🇷 SÉLECTEURS RELIÉS AU FRANÇAIS (STYLE BORDURE VERTE ÉPURÉE) */
+.select-qbc-fr {
+    background: #1e293b !important;
+    color: #34d399 !important;            /* Texte vert */
+    border: 1px solid #10b981 !important; /* Bordure verte */
+    font-size: 11px;
+    padding: 4px;
+    border-radius: 4px;
+    outline: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+.select-qbc-fr option {
+    background: #151f32;
+    color: #f8fafc;
+}
+
+/* 🇬🇧 SÉLECTEURS RELIÉS À L'ANGLAIS (STYLE BORDURE BLEUE ÉPURÉE) */
+.select-qbc-en {
+    background: #1e293b !important;
+    color: #38bdf8 !important;            /* Texte bleu */
+    border: 1px solid #0ea5e9 !important; /* Bordure bleue */
+    font-size: 11px;
+    padding: 4px;
+    border-radius: 4px;
+    outline: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+.select-qbc-en option {
+    background: #151f32;
+    color: #f8fafc;
+}
+
+.line-select {
+    background: #1e293b;
+    color: white;
+    border: 1px solid var(--border-color);
+    font-size: 11px;
+    padding: 3px;
+    border-radius: 4px;
+    outline: none;
+}
+
+.double-line-btn {
+    background: #1e293b;
+    border: 1px solid var(--border-color);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.double-line-btn.active {
+    background: #3b82f6;
+    border-color: #60a5fa;
+}
+
+.btn-action {
+    background: none;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* INTEGRATION DES ENTRÉES DE TEXTE FR/EN */
+.line-inputs-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.input-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-line {
+    background: var(--bg-input);
+    color: #f1f5f9; /* Écriture très lisible */
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px; /* Légèrement plus grand pour ne pas forcer sur la vue */
+    font-weight: 500;
+    outline: none;
+    width: 100%;
+    letter-spacing: 0.3px; /* Espacement de confort pour la lecture */
+}
+
+/* Bouton Spécifique Réduire */
+.btn-toggle {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #cbd5e1 !important;
+}
+
+/* --- BOÎTES NOIRES DU BAS --- */
+.matrix-output-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.matrix-output-section-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+/* BANDEAU DES COMPTEURS GLOBAUX DU BAS */
+.matrix-metrics-bar {
+    display: flex;
+    gap: 30px;
+    background: #020617;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 12px;
+}
+
+/* PETIT COMPTEUR ADOUCI PLACÉ SUR CHAQUE LIGNE DE SAISIE */
+.line-char-badge {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #1e293b;
+    margin-left: 8px;
+}
+
+/* PETIT INTERRUPTEUR DE FOCUS POUR LES LIGNES ÉPINGLÉES */
+.focus-checkbox-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #fbbf24; /* Couleur jaune ambre */
+    background: #1e293b;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    border: 1px dashed #475569;
+}
+
+.focus-checkbox-label input {
+    cursor: pointer;
+    accent-color: #fbbf24; /* Coche jaune */
+}
+
+.output-panel {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.panel-header {
+    font-size: 12px;
+    font-weight: bold;
+    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #1e293b;
+    padding-bottom: 6px;
+}
+
+.game-preview-screen {
+    background: #000000;
+    border: 1px solid #0f172a;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 13px;
+    min-height: 120px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.raw-payload-box {
+    background: #000000;
+    color: #34d399;
+    border: 1px solid #0f172a;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    min-height: 120px;
+    resize: none;
+    outline: none;
+    width: 100%;
+}
+
+.copy-payload-btn {
+    background: #3b82f6;
+    color: white;
+    border: 1px solid #60a5fa;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- BANDEAU D'ACTIONS HAUT ET BAS --- */
+.matrix-top-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-panel);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 12px; /* Ajoute un espace de confort avant les onglets */
+}
+
+.matrix-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-panel);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.tracker-status-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #34d399;
+}
+
+.archive-action-group {
+    display: flex;
+    gap: 10px;
+}
+
+.footer-btn {
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-blue { background: #0284c7; border: 1px solid #38bdf8; }
+.btn-green { background: #16a34a; border: 1px solid #4ade80; }
+
+
+
+

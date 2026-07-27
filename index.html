@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7DTD-LOGIN-DESC-SIMUL — COCKPIT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ENTÊTE DE SÉLECTION DU COCKPIT AVEC TON NOM GITHUB -->
+    <div class="matrix-header">
+        <div id="qbcMainTitleHeader" class="header-logo" style="color: #38bdf8; font-weight: bold; letter-spacing: 0.5px;">⚙️ 7DTD-LOGIN-DESC-SIMUL — PANEL</div>
+        
+        <div class="global-controls">
+            <!-- VARIATEUR DE ZOOM JAUNE SÉCURISÉ -->
+            <div class="control-group">
+                <label for="uiZoomSelect" style="color: #fbbf24; font-weight: bold;">Taille Écran :</label>
+                <select id="uiZoomSelect" class="matrix-select" onchange="window.changeUiZoom(this.value)">
+                    <option value="60">60 % (Ultra Compact)</option>
+                    <option value="70">70 % (Très Serré)</option>
+                    <option value="80" selected>80 % (Standard QBC)</option>
+                    <option value="90">90 % (Grand Écran)</option>
+                    <option value="100">100 % (Plein Format)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="serverSelect" style="color: #34d399; font-weight: bold;">Serveur Actif :</label>
+                <select id="serverSelect" class="matrix-select" onchange="window.onServerSelectChange(this.value)"></select>
+                <button type="button" class="matrix-action-btn" onclick="window.editCurrentServerName()">✏️ RENOMMER</button>
+                <button type="button" class="matrix-action-btn" style="background:#0284c7; border-color:#38bdf8;" onclick="window.createNewServerInstance()">➕ NOUVEAU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔄 LE BANDEAU D'IMPORT/EXPORT AVEC ZONE DE TÉLÉMÉTRIE INTÉGRÉE -->
+    <div class="matrix-top-actions-bar" style="position: relative;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div id="qbcTimeTrackerText" class="tracker-status-label" style="color: #34d399; font-weight: bold;">💾 APPLICATION SYNCHRONISÉE AU SCRIPT UNIQUE !</div>
+            <!-- 📅 ZONE DE TÉLÉMÉTRIE : Affichera le nom du fichier, la date et l'heure en couleur turquoise de confort -->
+            <div id="qbcFileHistoryText" style="font-size: 11px; color: #38bdf8; font-weight: 500; display: none;"></div>
+        </div>
+        
+        <!-- 🔔 NOUVEAU : ZONE DE NOTIFICATION EN COULEUR INVISIBLE PAR DÉFAUT -->
+        <div id="qbcImportStatusAlert" style="display: none; position: absolute; left: 20px; top: 48px; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 4px; border: 1px solid #10b981; background: #064e3b; color: #34d399; z-index: 10;"></div>
+
+        <!-- 🎛️ TOUTES LES COMMANDES DE SAUVEGARDE CENTRALISÉES EN HAUT -->
+        <div class="archive-action-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="file" id="jsonFileInput" style="display: none;" onchange="window.importQbcConfig(event)">
+            
+            <!-- SECTION ENTRÉE (IMPORTATION) -->
+            <button type="button" class="footer-btn btn-blue" onclick="window.triggerJsonImport()">📥 IMPORTER JSON LOCAL</button>
+            <button type="button" class="footer-btn" style="background: #0284c7; border: 1px solid #38bdf8;" onclick="window.importQbcConfigFromGitHub()">🌐 CHARGER DEPUIS GITHUB</button>
+            
+            <!-- SECTION SORTIE (SAUVEGARDE) -->
+            <button type="button" class="footer-btn" style="background: #4b5563; border: 1px solid #6b7280;" onclick="window.exportQbcConfigLocal()">💾 EXPORTER JSON LOCAL</button>
+            <button type="button" class="footer-btn btn-green" onclick="window.exportQbcConfigToGitHub()">🚀 SAUVEGARDER VERS GITHUB</button>
+        </div>
+    </div>
+
+    <!-- COMMUTATEURS D'ONGLETS SÉCURISÉS -->
+    <div class="matrix-tabs-container">
+        <button type="button" id="tab-login-btn" class="tab-btn active" onclick="window.switchTab('login')">🔒 MESSAGE ACCUEIL (MOTD)</button>
+        <button type="button" id="tab-desc-btn" class="tab-btn" onclick="window.switchTab('desc')">🌐 DESCRIPTION WEB (SERVER LIST)</button>
+    </div>
+
+    <!-- ZONE DU WORKSPACE PRINCIPAL -->
+    <div class="matrix-workspace-wrapper">
+        <!-- FORMULAIRE ACCUEIL (LOGIN) -->
+        <div id="content-login" class="tab-content active" style="display: block;">
+            <div class="workspace-panel-title">
+                <span>📝 GRILLE DES MESSAGES DE LOGIN</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label style="font-size:11px; color:#38bdf8; font-weight:bold; cursor:pointer; margin-right:10px;">
+                        <input type="checkbox" id="loginEnglishToggle" onchange="window.toggleLoginEnglish(this.checked)"> Activer Traduction EN (Globale)
+                    </label>
+                    <button type="button" class="matrix-action-btn btn-toggle" onclick="window.togglePanelVisibility('linesContainer', this)">🔼 Réduire Panneau</button>
+                    <button type="button" class="add-row-btn" onclick="window.addNewLine()">➕ AJOUTER UNE LIGNE</button>
+                </div>
+            </div>
+            <div id="linesContainer" class="lines-matrix-holder"></div>
+        </div>
+
+        <!-- FORMULAIRE DESCRIPTION WEB (DESC) -->
+        <div id="content-desc" class="tab-content" style="display: none;">
+            <div class="workspace-panel-title">
+                <span>📝 GRILLE DES MESSAGES DE DESCRIPTION LISTE</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label style="font-size:11px; color:#38bdf8; font-weight:bold; cursor:pointer; margin-right:10px;">
+                        <input type="checkbox" id="descEnglishToggle" onchange="window.toggleDescEnglish(this.checked)"> Activer Traduction EN (Globale)
+                    </label>
+                    <button type="button" class="matrix-action-btn btn-toggle" onclick="window.togglePanelVisibility('descLinesContainer', this)">🔼 Réduire Panneau</button>
+                    <button type="button" class="add-row-btn" onclick="window.addNewDescLine()">➕ AJOUTER UNE LIGNE</button>
+                </div>
+            </div>
+            <div id="descLinesContainer" class="lines-matrix-holder"></div>
+        </div>
+    </div>
+
+    <!-- ZONE INFÉRIEURE : APERÇU ET PAYLOAD L'UN EN DESSOUS DE L'AUTRE -->
+    <div class="matrix-output-section-vertical">
+        
+        <!-- COMPTEURS DYNAMIQUES DE SÉCURITÉ -->
+        <div class="matrix-metrics-bar">
+            <span id="qbcTotalLinesCounter" style="color: #fbbf24; font-weight: bold;">LIGNES TOTALES : 0</span>
+            <span id="qbcMasterCharCounter" style="color: #34d399; font-weight: bold;">CARACTÈRES TOTAL : 0 / 3500</span>
+            <span id="qbcAlertBox" style="color: #f87171; font-weight: bold; display: none;">⚠️ ATTENTION : LIMITE DÉPASSÉE !</span>
+        </div>
+
+        <!-- FENÊTRE 1 : RENDU DU JEU -->
+        <div class="output-panel">
+            <div class="panel-header">📺 RENDU GRAPHIQUE IN-GAME (CONFORME JEU)</div>
+            <div id="preview" class="game-preview-screen"></div>
+        </div>
+
+        <!-- FENÊTRE 2 : CODE PAYLOAD -->
+        <div class="output-panel">
+            <div class="panel-header">
+                <span>📋 CODE CONFIG PAYLOAD (TEXTMESHPRO)</span>
+                <button type="button" class="copy-payload-btn" onclick="window.copyMasterPayload()">📋 COPIER TOUT LE CODE</button>
+            </div>
+            <textarea id="masterOutput" class="raw-payload-box" readonly placeholder="Le code TextMeshPro final se génère ici au fur et à mesure..."></textarea>
+        </div>
+    </div>
+
+    <!-- 💬 FENÊTRE MODALE DE SAISIE INTÉGRÉE (REMPLACE PROMPT BLOQUÉ EN IFRAME) -->
+    <div id="qbcCustomModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div style="background: #0f172a; border: 2px solid #34d399; border-radius: 8px; padding: 22px; width: 90%; max-width: 440px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); color: #f8fafc; font-family: monospace, sans-serif;">
+            <div id="qbcModalTitle" style="font-size: 13px; font-weight: bold; color: #34d399; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">NOUVEAU SERVEUR</div>
+            <input type="text" id="qbcModalInput" style="width: 100%; padding: 10px 12px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; color: #ffffff; font-size: 14px; margin-bottom: 18px; outline: none; font-family: inherit;" />
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" id="qbcModalCancelBtn" style="padding: 8px 16px; background: #475569; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">ANNULER</button>
+                <button type="button" id="qbcModalConfirmBtn" style="padding: 8px 16px; background: #059669; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">VALIDER</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIEN SOUDÉ DU SCRIPT UNIQUE -->
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   
+
+
