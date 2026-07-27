@@ -307,10 +307,25 @@ function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 
 
 function switchTab(t) { 
     currentActiveTab = t; 
-    document.getElementById('tab-login-btn')?.classList.toggle('active', t==='login'); 
-    document.getElementById('tab-desc-btn')?.classList.toggle('active', t==='desc'); 
-    if (t==='login') renderFormLines(); else if (t==='desc') renderDescFormLines(); 
+    
+    // 1. Gestion des boutons (Allume le bouton cliqué en bleu, éteint l'autre)
+    const btnLogin = document.getElementById('tab-login-btn') || document.getElementById('btnTabLogin');
+    const btnDesc = document.getElementById('tab-desc-btn') || document.getElementById('btnTabDesc');
+    
+    if (btnLogin) btnLogin.classList.toggle('active', t === 'login');
+    if (btnDesc) btnDesc.classList.toggle('active', t === 'desc');
+    
+    // 2. Gestion des conteneurs (Affiche la bonne grille, masque l'autre)
+    const containerLogin = document.getElementById('content-login') || document.getElementById('loginFormContainer');
+    const containerDesc = document.getElementById('content-desc') || document.getElementById('descFormContainer');
+    
+    if (containerLogin) containerLogin.style.display = (t === 'login') ? 'block' : 'none';
+    if (containerDesc) containerDesc.style.display = (t === 'desc') ? 'block' : 'none';
+    
+    // 3. Reconstruction immédiate des lignes à l'écran
+    if (t === 'login') renderFormLines(); else renderDescFormLines(); 
 }
+
 
 function importQbcConfig(event) {
     const files = event.target.files; if (!files || files.length === 0) return; const reader = new FileReader();
