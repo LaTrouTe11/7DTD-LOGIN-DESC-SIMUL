@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 1 === [ COMPILATEUR FR ]         ===
+   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 1 === [ COMPILATEUR FR TEXTMESH ] ===
    ========================================================================== */
 function processAndCompileQBC() {
     const isLogin = (currentActiveTab === 'login'); 
@@ -87,10 +87,14 @@ function processAndCompileQBC() {
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
 
-// Fonction de secours pour assurer la liaison synchrone avec l'interface
+// DECLARATION PROPRE POUR LE SCRIPT DE DIAGNOSTIC
 function generateMasterPayload() {
     processAndCompileQBC();
 }
+
+// SOUDURE MAÎTRESSE EN RACINE LIBRE : Totalement isolée des accolades fermées
+window.processAndCompileQBC = processAndCompileQBC;
+window.generateMasterPayload = generateMasterPayload;
 
 
 

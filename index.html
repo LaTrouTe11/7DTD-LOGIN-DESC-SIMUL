@@ -8,12 +8,12 @@
 </head>
 <body>
 
-    <!-- ENTÊTE DU COCKPIT ET SÉLECTEURS PRINCIPAUX -->
+    <!-- ENTÊTE ET SÉLECTEURS DE CONFIGURATION -->
     <div class="matrix-header">
         <div class="header-logo">⚙️ QBC MATRIX — CONTROL PANEL</div>
         
         <div class="global-controls">
-            <!-- VARIATEUR DE ZOOM JAUNE FIABILISÉ -->
+            <!-- VARIATEUR DE ZOOM CSS FIABILISÉ -->
             <div class="control-group">
                 <label for="uiZoomSelect" style="color: #fbbf24; font-weight: bold;">Taille Écran :</label>
                 <select id="uiZoomSelect" class="matrix-select" onchange="window.changeUiZoom(this.value)">
@@ -34,14 +34,14 @@
         </div>
     </div>
 
-    <!-- COMMUTATEURS D'ONGLETS SÉCURISÉS -->
+    <!-- SÉLECTEURS D'ONGLETS -->
     <div class="matrix-tabs-container">
         <button type="button" id="tab-login-btn" class="tab-btn active" onclick="window.switchTab('login')">🔒 MESSAGE ACCUEIL (MOTD)</button>
         <button type="button" id="tab-desc-btn" class="tab-btn" onclick="window.switchTab('desc')">🌐 DESCRIPTION WEB (SERVER LIST)</button>
     </div>
 
     <div class="matrix-workspace-wrapper">
-        <!-- FORMULAIRE ACCUEIL (LOGIN) -->
+        <!-- ZONE MESSAGE ACCUEIL (LOGIN) -->
         <div id="content-login" class="tab-content active">
             <div class="workspace-panel-title">
                 <span>📝 GRILLE DES MESSAGES DE LOGIN</span>
@@ -55,7 +55,7 @@
             <div id="linesContainer" class="lines-matrix-holder"></div>
         </div>
 
-        <!-- FORMULAIRE DESCRIPTION WEB (DESC) -->
+        <!-- ZONE DESCRIPTION WEB (DESC) -->
         <div id="content-desc" class="tab-content">
             <div class="workspace-panel-title">
                 <span>📝 GRILLE DES MESSAGES DE DESCRIPTION LISTE</span>
@@ -68,18 +68,16 @@
             </div>
             <div id="descLinesContainer" class="lines-matrix-holder"></div>
         </div>
-        <!-- BLOC DE CLÔTURE DU FORMULAIRE ET PANNEAUX DE SORTIE -->
     </div>
-
-    <!-- ZONE INFÉRIEURE : APERÇU JEU ET PAYLOAD TEXTMESHPRO -->
+    <!-- ZONE INFÉRIEURE : APERÇU ET PAYLOAD TEXTMESHPRO -->
     <div class="matrix-output-section">
-        <!-- COCKPIT APERÇU REÉL JEU (BOX NOIRE) -->
+        <!-- RENDU DU JEU -->
         <div class="output-panel">
             <div class="panel-header">📺 RENDU GRAPHIQUE IN-GAME (CONFORME JEU)</div>
             <div id="preview" class="game-preview-screen"></div>
         </div>
 
-        <!-- ZONE DE CODE FINAL PRÊT À COPIER (BOX NOIRE PAYLOAD) -->
+        <!-- CODE FINAL PAYLOAD -->
         <div class="output-panel">
             <div class="panel-header">
                 <span>📋 CODE CONFIG PAYLOAD (TEXTMESHPRO)</span>
@@ -89,9 +87,9 @@
         </div>
     </div>
 
-    <!-- PANNEAU DE PILOTAGE DE LA BASE DE DONNÉES JSON -->
+    <!-- PANNEAU ACTION IMPORT / EXPORT -->
     <div class="matrix-footer-actions">
-        <div id="qbcTimeTrackerText" class="tracker-status-label">💾 APPLICATION LIÉE AUX 3 SCRIPTS ET PRÊTE À L'EMPLOI !</div>
+        <div id="qbcTimeTrackerText" class="tracker-status-label">🔄 CHARGEMENT DU SYSTÈME DE DIAGNOSTIC...</div>
         
         <div class="archive-action-group">
             <input type="file" id="jsonFileInput" style="display: none;" onchange="window.importQbcConfig(event)">
@@ -100,13 +98,41 @@
         </div>
     </div>
 
-    <!-- CHARGEMENT CHRONOLOGIQUE SÉCURISÉ DES 3 SCRIPT-MODULES RELIÉS -->
+    <!-- CHARGEMENT DE TA NOUVELLE ARCHITECTURE EN 3 MODULES INDÉPENDANTS -->
     <script src="script-main.js"></script>
     <script src="script-preview.js"></script>
     <script src="script-payload.js"></script>
 
+    <!-- 🔍 LE DÉTECTEUR DE LIAISON CRITIQUE AUTOMATIQUE DE PATRON -->
+    <script>
+        window.addEventListener('load', () => {
+            let mainPret = (typeof window.renderFormLines === "function" || typeof renderFormLines === "function");
+            let previewPret = (typeof window.updateLivePreview === "function" || typeof updateLivePreview === "function" || typeof window.updatePreviewBox === "function");
+            let payloadPret = (typeof window.processAndCompileQBC === "function" || typeof processAndCompileQBC === "function");
+
+            const labelTracker = document.getElementById('qbcTimeTrackerText');
+
+            if (mainPret && previewPret && payloadPret) {
+                if(labelTracker) labelTracker.innerText = "✅ COCKPIT LIÉ : Les 3 scripts communiquent à 100 % !";
+                console.log("Liaison cockpit établie sans faute.");
+            } else {
+                let messageErreur = "❌ PANNE DE LIAISON DETECTEE ENTRE LES SCRIPTS :\n";
+                if (!mainPret) messageErreur += "• [script-main.js] Introuvable ou bloqué par une erreur.\n";
+                if (!previewPret) messageErreur += "• [script-preview.js] Introuvable ou bloqué par une erreur.\n";
+                if (!payloadPret) messageErreur += "• [script-payload.js] Introuvable ou bloqué par une erreur.\n";
+                
+                if(labelTracker) {
+                    labelTracker.innerText = "❌ ERREUR DE CHARGEMENT DE SCRIPT INTÉRIEUR !";
+                    labelTracker.style.color = "#f87171";
+                }
+                alert(messageErreur);
+            }
+        });
+    </script>
+
 </body>
 </html>
+
 
 
 

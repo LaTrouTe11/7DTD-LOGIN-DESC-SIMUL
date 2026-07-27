@@ -1,11 +1,11 @@
 /* ==========================================================================
-   === MODULE : SCRIPT-PREVIEW.JS — PARTIE 1 === [ FILTRAGE GRAPHIQUE FR ] ===
+   === MODULE : SCRIPT-PREVIEW.JS — PARTIE 1 === [ PARSER GRAPHIQUE FR ]  ===
    ========================================================================== */
-function updateLivePreview() {
+function updatePreviewBox() {
     const previewEl = document.getElementById('preview');
     if (!previewEl) return;
     
-    // Sécurité : On force l'ID string pur pour empêcher la page blanche
+    // Protection d'ID : empêche le freeze au démarrage
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
@@ -25,14 +25,13 @@ function updateLivePreview() {
         let textFR = line.text ? line.text.trim() : "";
         let textEN = line.text_en ? line.text_en.trim() : "";
         
-        // Initialisation des variables si données JSON manquantes
         if (line.symbol_start === undefined) line.symbol_start = "";
         if (line.symbol === undefined) line.symbol = "";
         if (line.symbol_en_start === undefined) line.symbol_en_start = "";
         if (line.symbol_en_end === undefined) line.symbol_en_end = "";
         if (line.color_en === undefined) line.color_en = line.color || "ffffff";
         
-        // --- RENDU DU BLOC FRANÇAIS ---
+        // --- RENDU BLOC FRANÇAIS ---
         let fullFR = textFR;
         if (line.symbol_start && line.symbol_start.trim() !== "") fullFR = line.symbol_start + " " + fullFR;
         if (line.symbol && line.symbol.trim() !== "") fullFR = fullFR + " " + line.symbol;
@@ -43,11 +42,11 @@ function updateLivePreview() {
         
         htmlContent += `<span style="color:#${line.color}; ${frStyles}">${fullFR}</span>`;
 /* ==========================================================================
-   === MODULE : SCRIPT-PREVIEW.JS — PARTIE 2 === [ FILTRAGE GRAPHIQUE EN ] ===
+   === MODULE : SCRIPT-PREVIEW.JS — PARTIE 2 === [ PARSER GRAPHIQUE EN & LIENS ] ===
    ========================================================================== */
         const isEnglishActive = line.show_english || isGlobalEnglish;
         
-        // --- RENDU DU BLOC ANGLAIS ASYMÉTRIQUE ---
+        // --- RENDU BLOC ANGLAIS ASYMÉTRIQUE ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
@@ -60,7 +59,7 @@ function updateLivePreview() {
             htmlContent += ` <span style="color:#666;">|</span> <span style="color:#${line.color_en}; ${enStyles}">${fullEN}</span>`;
         }
         
-        // --- RENDU DES BORDURES DE SÉPARATION ---
+        // --- GESTION DES LIGNES ET BORDURES DE SÉPARATION ---
         if (line.border_style && line.border_style !== "none") {
             let lineChar = "═";
             if (line.border_style === "single") lineChar = "─";
@@ -76,10 +75,14 @@ function updateLivePreview() {
     previewEl.innerHTML = htmlContent;
 }
 
-// Alias pour assurer le raccordement direct avec les interrupteurs du cockpit
+// DECLARATION PROPRE POUR LE SCRIPT DE DIAGNOSTIC
 function updateLivePreview() {
     updatePreviewBox();
 }
+
+// SOUDURE MAÎTRESSE EN RACINE LIBRE : Totalement isolée des accolades
+window.updateLivePreview = updateLivePreview;
+window.updatePreviewBox = updatePreviewBox;
 
 
 
