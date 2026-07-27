@@ -1,137 +1,113 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <!-- FIX CONSOLE : Empêche Chrome de chercher une favicon et d'afficher une erreur 404 -->
-    <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7dtd login+desc simul</title>
-    <!-- RACCORDEMENT DE LA FEUILLE DE STYLE EXTERNE SANS CONFLIT -->
+    <title>QBC MATRIX — 7DTD COCKPIT</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- EN-TÊTE DE COMMANDE ET MODULES DE RESTAURATION DES FLUX JSON -->
-    <div class="header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
-        <div>
-            <h1 style="color: #fbbf24; margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">7DTD LOGIN+DESC SIMUL</h1>
-            <p id="qbcTimeTrackerText" style="margin: 4px 0 0 0; font-size: 11px; color: #71717a; text-transform: uppercase; font-weight: bold;">PANNEAU SOUVERAIN — SYNCHRONISATION EN DIRECT DES INTERFACES</p>
-        </div>
+
+    <!-- ENTÊTE DU COCKPIT ET SÉLECTEURS PRINCIPAUX -->
+    <div class="matrix-header">
+        <div class="header-logo">⚙️ QBC MATRIX — CONTROL PANEL</div>
         
-        <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #27272a; border-radius: 4px; background-color: #18181b;">
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-                <!-- SECTEUR SÉLECTION SERVEUR -->
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 10px; color: #a1a1aa; font-weight: bold; text-transform: uppercase;">Instance Server :</label>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                        <select id="serverSelect" class="line-select" style="padding: 5px; font-size: 11px; width: 220px;" onchange="changeServerInstance(this.value)">
-                            <option value="7dtd_core">QBC FLAGGARD PVE 3.0 (CORE)</option>
-                            <option value="7dtd_projectz">QBC FLAGGARD ProjectZ 3.0</option>
-                        </select>
-                        <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #d97706; border-color: #fbbf24; color: #fff;" onclick="editCurrentServerName()">✏️ ÉDITER NOM</button>
-                        <button type="button" class="btn-action" style="padding: 5px 10px; font-size: 11px; background-color: #0284c7; border-color: #38bdf8; color: #fff;" onclick="createNewServerInstance()">➕ AJOUTER SERVEUR</button>
-                    </div>
-                </div>
-
-                <!-- OPTION TAILLE ÉCRAN (ZOOM DYNAMIQUE) -->
-                <div style="display: flex; flex-direction: column; gap: 4px; border-left: 1px dashed #27272a; padding-left: 12px;">
-                    <label style="font-size: 10px; color: #fbbf24; font-weight: bold; text-transform: uppercase;">Taille Écran :</label>
-                    <select id="uiZoomSelect" class="line-select" style="padding: 5px; font-size: 11px; width: 130px; border-color: #fbbf24;" onchange="changeUiZoom(this.value)">
-                        <option value="100">🔍 Standard (100%)</option>
-                        <option value="90">🔍 Médium (90%)</option>
-                        <option value="80" selected>🔍 Compact (80%)</option>
-                        <option value="70">🔍 Mini (70%)</option>
-                    </select>
-                </div>
+        <div class="global-controls">
+            <!-- VARIATEUR DE ZOOM JAUNE FIABILISÉ -->
+            <div class="control-group">
+                <label for="uiZoomSelect" style="color: #fbbf24; font-weight: bold;">Taille Écran :</label>
+                <select id="uiZoomSelect" class="matrix-select" onchange="window.changeUiZoom(this.value)">
+                    <option value="60">60 % (Ultra Compact)</option>
+                    <option value="70">70 % (Très Serré)</option>
+                    <option value="80" selected>80 % (Standard QBC)</option>
+                    <option value="90">90 % (Grand Écran)</option>
+                    <option value="100">100 % (Plein Format)</option>
+                </select>
             </div>
-            
-            <div style="display: flex; gap: 6px; margin-top: 14px; border-left: 1px solid #27272a; padding-left: 12px; margin-left: 4px;">
-                <button type="button" class="btn-io" style="border-color: #ffaa00; color: #ffaa00;" onclick="exportQbcConfig()">📥 Exporter CONFIG (JSON)</button>
-                <button type="button" class="btn-io" style="border-color: #10b981; color: #10b981;" onclick="triggerJsonImport()">📤 Charger CONFIG (JSON)</button>
-                <input type="file" id="jsonFileInput" style="display: none;" accept=".json" onchange="importQbcConfig(event)" />
+
+            <div class="control-group">
+                <label for="serverSelect" style="color: #34d399; font-weight: bold;">Serveur Actif :</label>
+                <select id="serverSelect" class="matrix-select"></select>
+                <button type="button" class="matrix-action-btn" onclick="window.editCurrentServerName()">✏️ RENOMMER</button>
+                <button type="button" class="matrix-action-btn" style="background:#0284c7; border-color:#38bdf8;" onclick="window.createNewServerInstance()">➕ NOUVEAU</button>
             </div>
         </div>
     </div>
 
-    <!-- COCKPIT CENTRAL ET COMPARTIMENT DES ONGLETS LOGIN, DESCRIPTION & ASSISTANT -->
-    <div class="workspace-grid" id="mainMatrixContainer">
-        <div class="card" id="editorContainerCard">
-            <button type="button" class="btn-action" id="toggleCollapseBtn" style="position: absolute; top: 18px; right: 20px; background-color: #111827; border-color: #3f3f46; color: #fbbf24; font-size: 11px; z-index: 10;" onclick="toggleEditorCollapse()">[-] RÉDUIRE LE COCKPIT</button>
-            
-            <div class="tab-container">
-                <button class="tab-btn active" id="tab-login-btn" onclick="switchTab('login')">📟 LOGIN TEXT SERVER</button>
-                <button class="tab-btn" id="tab-desc-btn" onclick="switchTab('desc')">🌐 DESCRIPTION SERVER</button>
-                <button class="tab-btn" id="tab-google-btn" style="color: #38bdf8; border-color: #2563eb;" onclick="switchTab('google')">🌍 ASSISTANT TRADUCTION</button>
-            </div>
+    <!-- COMMUTATEURS D'ONGLETS SÉCURISÉS -->
+    <div class="matrix-tabs-container">
+        <button type="button" id="tab-login-btn" class="tab-btn active" onclick="window.switchTab('login')">🔒 MESSAGE ACCUEIL (MOTD)</button>
+        <button type="button" id="tab-desc-btn" class="tab-btn" onclick="window.switchTab('desc')">🌐 DESCRIPTION WEB (SERVER LIST)</button>
+    </div>
 
-            <div id="collapsibleWorkspacePanel" class="collapsible-panel">
-                <!-- ONGLET 1 : MATRICE DES LIGNES LOGIN -->
-                <div id="content-login" class="tab-content active">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <h2 style="font-size: 12px; margin: 0; color: #fbbf24; text-transform: uppercase; font-weight: 900;">📟 MATRIX: LOGINS ÉDITABLES PAR BLOCS EMPILÉS</h2>
-                            <div style="display: flex; align-items: center; gap: 6px; background: #000; padding: 4px 8px; border: 1px solid #27272a; border-radius: 2px;">
-                                <input type="checkbox" id="loginEnglishToggle" style="width: 14px; height: 14px; cursor: pointer;" onchange="toggleLoginEnglish(this.checked)" />
-                                <label for="loginEnglishToggle" style="font-size: 10px; font-weight: bold; color: #38bdf8; cursor: pointer; text-transform: uppercase;">Option Traduction (Login)</label>
-                            </div>
-                        </div>
-                        <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalCharCounter">TOTAL : 0 / 3500 CHARS</div>
-                    </div>
-                    <div id="linesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
-                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
-                        <button type="button" class="btn-action" onclick="addNewLine()">➕ AJOUTER EN FIN DE LISTE</button>
-                        <div id="alertBox" class="alert-banner">⚠️ DÉPASSEMENT CAPITAL DU LIEN : LE SERVEUR COUPERA LE MOTD !</div>
-                    </div>
-                </div>
-                <!-- ONGLET 2 : MATRICE DES DESCRIPTIONS PROTÉGÉES -->
-                <div id="content-desc" class="tab-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <h2 style="font-size: 12px; margin: 0; color: #fbbf24; text-transform: uppercase; font-weight: 900;">🌐 MATRIX: DESCRIPTIONS ÉDITABLES POR BLOCS EMPILÉS</h2>
-                            <div style="display: flex; align-items: center; gap: 6px; background: #000; padding: 4px 8px; border: 1px solid #27272a; border-radius: 2px;">
-                                <input type="checkbox" id="descEnglishToggle" style="width: 14px; height: 14px; cursor: pointer;" onchange="toggleDescEnglish(this.checked)" />
-                                <label for="descEnglishToggle" style="font-size: 10px; font-weight: bold; color: #38bdf8; cursor: pointer; text-transform: uppercase;">Option Traduction (Description)</label>
-                            </div>
-                        </div>
-                        <div style="font-size: 12px; font-weight: bold; color: #34d399; background-color: #09090b; padding: 4px 10px; border: 1px solid #27272a;" id="totalDescCharCounter">TOTAL : 0 / 4000 CHARS</div>
-                    </div>
-                    <div id="descLinesContainer" style="max-height: 550px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;"></div>
-                    <div style="border-top: 1px solid #27272a; padding-top: 15px;">
-                        <button type="button" class="btn-action" onclick="addNewDescLine()">➕ AJOUTER EN FIN DE LISTE</button>
-                        <div id="descAlertBox" class="alert-banner">⚠️ EXPA-MÉMOIRE : VOTRE DESCRIPTION SURPASSE LE QUOTA DÉFINI !</div>
-                    </div>
-                </div>
-
-                <!-- ONGLET 3 : COCKPIT ASSISTANT DE TRADUCTION CHIRURGICALE -->
-                <div id="content-google" class="tab-content">
-                    <div style="text-align: center; padding: 40px 20px; background: #09090b; border: 1px dashed #27272a; border-radius: 4px;">
-                        <span style="font-size: 50px;">🌍</span>
-                        <h2 style="color: #38bdf8; font-size: 16px; margin: 15px 0 5px 0; font-weight: bold; text-transform: uppercase;">Assistant de Traduction Ligne par Ligne</h2>
-                        <p style="color: #71717a; font-size: 12px; margin: 0 0 20px 0;">Utilise les boutons rapides COPIER FR et COLLER EN disposés sur chaque ligne de tes grilles.</p>
-                        
-                        <!-- ROUTAGE ULTRA-FIABLE VERS L'ADRESSE OFFICIELLE COMPLÈTE DE GOOGLE TRADUCTION WEB -->
-                        <button type="button" class="btn-action" style="background-color: #2563eb; border-color: #3b82f6; color: #fff; padding: 10px 20px; font-weight: bold;" onclick="window.open('https://google.com', '_blank')">🌐 OUVRIR LE VRAI GOOGLE TRADUCTION WEB (NOUVEL ONGLET)</button>
-                    </div>
+    <div class="matrix-workspace-wrapper">
+        <!-- FORMULAIRE ACCUEIL (LOGIN) -->
+        <div id="content-login" class="tab-content active">
+            <div class="workspace-panel-title">
+                <span>📝 GRILLE DES MESSAGES DE LOGIN</span>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <label style="font-size:11px; color:#38bdf8; font-weight:bold; cursor:pointer;">
+                        <input type="checkbox" id="loginEnglishToggle" onchange="window.toggleLoginEnglish(this.checked)"> Activer Traduction EN (Globale)
+                    </label>
+                    <button type="button" class="add-row-btn" onclick="window.addNewLine()">➕ AJOUTER UNE LIGNE</button>
                 </div>
             </div>
+            <div id="linesContainer" class="lines-matrix-holder"></div>
         </div>
 
-        <!-- VISUALISATION EN TEMPS RÉEL ET SORTIE DU PAYLOAD TEXTMESHPRO -->
-        <div class="card" id="previewContainerCard">
-            <h3 style="font-size: 12px; color: #a1a1aa; margin: 0 0 12px 0; text-transform: uppercase; font-weight: bold;">📺 APERÇU FILTRÉ GRAPHIQUE (DANS LE COCKPIT DE CHARGEMENT 7DTD) :</h3>
-            <div id="preview" class="preview-box" style="margin-bottom: 25px;"></div>
+        <!-- FORMULAIRE DESCRIPTION WEB (DESC) -->
+        <div id="content-desc" class="tab-content">
+            <div class="workspace-panel-title">
+                <span>📝 GRILLE DES MESSAGES DE DESCRIPTION LISTE</span>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <label style="font-size:11px; color:#38bdf8; font-weight:bold; cursor:pointer;">
+                        <input type="checkbox" id="descEnglishToggle" onchange="window.toggleDescEnglish(this.checked)"> Activer Traduction EN (Globale)
+                    </label>
+                    <button type="button" class="add-row-btn" onclick="window.addNewDescLine()">➕ AJOUTER UNE LIGNE</button>
+                </div>
+            </div>
+            <div id="descLinesContainer" class="lines-matrix-holder"></div>
+        </div>
+        <!-- BLOC DE CLÔTURE DU FORMULAIRE ET PANNEAUX DE SORTIE -->
+    </div>
 
-            <h3 style="font-size: 12px; color: #fbbf24; margin: 0 0 10px 0; text-transform: uppercase; font-weight: bold;">💾 PAYLOAD RÉENCODÉ MONOBLOC EN DIRECT SANS PROBLÈME :</h3>
-            <textarea id="masterOutput" rows="5" style="width: 100%; margin-bottom: 15px; background-color: #09090b; border: 1px solid #27272a; color: #a1a1aa; font-family: monospace; font-size: 12px; padding: 12px; box-sizing: border-box; resize: none;" readonly></textarea>
-            <button type="button" class="btn-copy-master" style="width: 100%;" onclick="copyMasterPayload()">📋 ASSIMILER ET COPIER LA CHAÎNE FINALE DU SERVEUR</button>
+    <!-- ZONE INFÉRIEURE : APERÇU JEU ET PAYLOAD TEXTMESHPRO -->
+    <div class="matrix-output-section">
+        <!-- COCKPIT APERÇU REÉL JEU (BOX NOIRE) -->
+        <div class="output-panel">
+            <div class="panel-header">📺 RENDU GRAPHIQUE IN-GAME (CONFORME JEU)</div>
+            <div id="preview" class="game-preview-screen"></div>
+        </div>
+
+        <!-- ZONE DE CODE FINAL PRÊT À COPIER (BOX NOIRE PAYLOAD) -->
+        <div class="output-panel">
+            <div class="panel-header">
+                <span>📋 CODE CONFIG PAYLOAD (TEXTMESHPRO)</span>
+                <button type="button" class="copy-payload-btn" onclick="window.copyMasterPayload()">📋 COPIER TOUT LE CODE</button>
+            </div>
+            <textarea id="masterOutput" class="raw-payload-box" readonly placeholder="Le code TextMeshPro final se génère ici au fur et à mesure..."></textarea>
         </div>
     </div>
 
-    <!-- APPEL EXCLUSIF DU FLUX APPLICATIF LOGIQUE EXTERNE -->
+    <!-- PANNEAU DE PILOTAGE DE LA BASE DE DONNÉES JSON -->
+    <div class="matrix-footer-actions">
+        <div id="qbcTimeTrackerText" class="tracker-status-label">💾 APPLICATION LIÉE AUX 3 SCRIPTS ET PRÊTE À L'EMPLOI !</div>
+        
+        <div class="archive-action-group">
+            <input type="file" id="jsonFileInput" style="display: none;" onchange="window.importQbcConfig(event)">
+            <button type="button" class="footer-btn btn-blue" onclick="window.triggerJsonImport()">📥 IMPORTER ARCHIVE JSON</button>
+            <button type="button" class="footer-btn btn-green" onclick="window.exportQbcConfig()">💾 EXPORTER SAUVEGARDE JSON</button>
+        </div>
+    </div>
+
+    <!-- CHARGEMENT CHRONOLOGIQUE SÉCURISÉ DES 3 SCRIPT-MODULES RELIÉS -->
     <script src="script-main.js"></script>
     <script src="script-preview.js"></script>
     <script src="script-payload.js"></script>
+
 </body>
 </html>
+
 
 
 
