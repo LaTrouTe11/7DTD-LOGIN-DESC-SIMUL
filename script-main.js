@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 1 SUR 3 === [ STRUCTURE & CORE COPIER ]   ===
+   === SCRIPT-MAIN.JS : PARTIE 1 SUR 3 === [ STRUCTURE & TIMEOUT CORE ]    ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
@@ -49,6 +49,16 @@ function qbcCollerLigneAnglaise(isDesc, index) {
         }
     }).catch(err => { alert("Fais un Ctrl + V manuel dans la case EN !"); });
 }
+
+// PROTECTION ANTI-PAGE BLANCHE : On attend 200ms que Chrome charge les 3 scripts avant de dessiner la grille
+document.addEventListener("DOMContentLoaded", () => {
+    loadFromLocalStorage();
+    const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
+    changeUiZoom(savedZoom);
+    setTimeout(() => {
+        if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+    }, 200);
+});
 /* ==========================================================================
    === SCRIPT-MAIN.JS : PARTIE 2 SUR 3 === [ CONSTRUCTEUR DE LA GRILLE ]   ===
    ========================================================================== */
@@ -203,6 +213,7 @@ window.exportQbcConfig = function() {
     document.body.appendChild(anchor); anchor.click(); anchor.remove();
 };
 window.triggerJsonImport = function() { document.getElementById('jsonFileInput')?.click(); };
+
 
 
 
