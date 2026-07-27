@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 1 SUR 2 === [ CORE CONFIG & INSTANCES ]     ===
+   === SCRIPT-MAIN.JS : PARTIE 1 SUR 2 === [ CONFIGURATION & MOTEUR DE COPIE ] ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
@@ -25,36 +25,43 @@ const colorPalette = [
 
 const symbolPalette = [
     { char: "", name: "(Aucun)" }, { char: "•", name: "Point" }, { char: "❤", name: "Coeur" },
-    { char: "☣", name: "Biohazard" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "Téléport" }, { char: "✗", name: "Croix / Interdit" },
-    { char: "⚔️", name: "Épées" }, { char: "⚙️", name: "Système" }, { char: "💎", name: "Diamant" }, { char: "⏰", name: "Reboot" }
+    { char: "☣", name: "Biohazard" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "Téléport" }, { char: "✗", name: "Croix" }
 ];
+
+// COPIE DU TEXTE FR VERS LE PRESSE-PAPIERS SANS BUG D'INDEX
+function qbcCopierLigneFrançaise(isDesc, index) {
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
+    if (!list || !list[index]) return;
+    let txt = list[index].text ? list[index].text.trim() : "";
+    if (txt === "") return;
+    const numMatch = txt.match(/^([0-9]+-\s*)/);
+    if (numMatch && numMatch.length > 0) { txt = txt.substring(numMatch.length).trim(); }
+    const dummy = document.createElement("textarea"); document.body.appendChild(dummy);
+    dummy.value = txt; dummy.select(); document.execCommand("copy"); dummy.remove();
+}
+
+// INJECTION SECURISEE DE LA TRADUCTION GOOGLE DANS LA CASE ANGLAISE
+function qbcCollerLigneAnglaise(isDesc, index) {
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
+    if (!list || !list[index]) return;
+    navigator.clipboard.readText().then(texteCopie => {
+        if (texteCopie && texteCopie.trim() !== "") {
+            list[index].text_en = texteCopie.trim(); list[index].show_english = true;
+            saveToLocalStorage(); if (isDesc) renderDescFormLines(); else renderFormLines();
+        }
+    }).catch(err => { alert("Fais un Ctrl + V manuel dans la case EN !"); });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     loadFromLocalStorage();
-    if (typeof changeUiZoom === "function") {
-        const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
-        changeUiZoom(savedZoom);
-    }
+    const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
+    changeUiZoom(savedZoom);
+    const selectZoomEl = document.getElementById("uiZoomSelect");
+    if (selectZoomEl) selectZoomEl.value = savedZoom;
     if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
 });
-
-function switchTab(t) { 
-    currentActiveTab = t; 
-    document.getElementById('tab-login-btn')?.classList.toggle('active', t==='login'); 
-    document.getElementById('tab-desc-btn')?.classList.toggle('active', t==='desc'); 
-    document.getElementById('tab-google-btn')?.classList.toggle('active', t==='google'); 
-    document.getElementById('content-login')?.classList.toggle('active', t==='login'); 
-    document.getElementById('content-desc')?.classList.toggle('active', t==='desc'); 
-    document.getElementById('content-google')?.classList.toggle('active', t==='google'); 
-    if (t==='login') renderFormLines(); else if (t==='desc') renderDescFormLines(); 
-}
-
-function refreshAllViews() {
-    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
-    if (typeof processAndCompileQBC === "function") processAndCompileQBC();
-}
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 2 SUR 2 === [ BOUTONS D'ORDRE & IMPORTATION ] ===
+   === SCRIPT-MAIN.JS : PARTIE B1 === [ RENDU DYNAMIQUE DE LA GRILLE ]     ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); 
@@ -94,20 +101,19 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
             enRow = `<div class="eng-input-box" style="width:100%; ${displayStyle}"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #${line.color_en}; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Anglais..." /></div></div>`; 
         }
         
-        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn" onclick="qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 FR</button><button type="button" class="double-line-btn" onclick="qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 EN</button><button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 EN</button>` : "";
+        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn" onclick="window.qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 FR</button><button type="button" class="double-line-btn" onclick="window.qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 EN</button><button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="window.toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 EN</button>` : "";
         
-        // RECONSTRUCTION DES BOUTONS DE COMMANDE MANQUANTS (MONTER, DESCENDRE ET INSÉRER)
         let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
         let lineControlsBlock = `
-            <button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button>
-            <button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button>
-            <button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>
+            <button type="button" class="order-btn" ${upDis} onclick="window.moveLine(${isDesc}, ${index}, -1)">🔼</button>
+            <button type="button" class="order-btn" ${downDis} onclick="window.moveLine(${isDesc}, ${index}, 1)">🔽</button>
+            <button type="button" class="btn-insert-here" onclick="window.insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>
         `;
 
-        div.innerHTML = `<div class="line-controls"><span class="line-number">L.${index+1}</span> ${lineControlsBlock} ${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text || ''}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." /></div>${enRow}</div>`;
+        div.innerHTML = `<div class="line-controls"><span class="line-number">L.${index+1}</span> ${lineControlsBlock} ${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'window.removeDescLine':'window.removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text || ''}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." /></div>${enRow}</div>`;
         container.appendChild(div);
     }); 
-    if (typeof processAndCompileQBC === "function") processAndCompileQBC();
+    if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC();
 }
 
 function renderFormLines() { 
@@ -119,51 +125,85 @@ function renderDescFormLines() {
     const toggleEl = document.getElementById('descEnglishToggle');
     buildFormRows(true, qbcDatabase[activeServerId]?.descLines || [], toggleEl ? toggleEl.checked : false); 
 }
-
-function saveToLocalStorage() { 
-    localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); 
-}
-
+/* ==========================================================================
+   === SCRIPT-MAIN.JS : PARTIE B2 === [ MEMOIRE, EVENTS & LIEN DE FUSION ] ===
+   ========================================================================== */
+function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
 function loadFromLocalStorage() {
     const saved = localStorage.getItem("qbc_matrix_data");
     if (saved) {
         try {
-            qbcDatabase = JSON.parse(saved);
-            const serverIds = Object.keys(qbcDatabase);
+            qbcDatabase = JSON.parse(saved); const serverIds = Object.keys(qbcDatabase);
             if (serverIds.length > 0) activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0];
-        } catch(e) { console.error("Erreur LocalStorage", e); }
+        } catch(e) { console.error(e); }
     }
 }
 
-function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); if (typeof processAndCompileQBC === "function") processAndCompileQBC(); }
-function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } saveToLocalStorage(); if (typeof processAndCompileQBC === "function") processAndCompileQBC(); }
-function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; if (typeof processAndCompileQBC === "function") processAndCompileQBC(); }
+function toggleLineEnglishIndividual(isDesc, i) { 
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
+    if (!list || !list[i]) return;
+    list[i].show_english = !list[i].show_english; 
+    if (isDesc) renderDescFormLines(); else renderFormLines(); 
+}
+
+function moveLine(isDesc, i, d) { 
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
+    if (!list) return; const t = i + d; if (t < 0 || t >= list.length) return; 
+    const tmp = list[i]; list[i] = list[t]; list[t] = tmp; 
+    if (isDesc) renderDescFormLines(); else renderFormLines(); 
+}
+
+function insertLineAt(isDesc, i) { 
+    const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
+    if (!list) return;
+    list.splice(i, 0, { symbol: "•", symbol_start: "", text: "MESSAGE ÉDITABLE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); 
+    if (isDesc) renderDescFormLines(); else renderFormLines(); 
+}
+
+function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC(); }
+function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } saveToLocalStorage(); if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC(); }
+function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC(); }
 function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
 function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", symbol_start: "", text: "MESSAGE LOG", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderFormLines(); }
 function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); renderFormLines(); }
 function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", text: "MESSAGE DESC", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderDescFormLines(); }
 function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
 
-// FIX D'IMPORTATION JSON DÉFINITIF
+function switchTab(t) { 
+    currentActiveTab = t; 
+    document.getElementById('tab-login-btn')?.classList.toggle('active', t==='login'); 
+    document.getElementById('tab-desc-btn')?.classList.toggle('active', t==='desc'); 
+    if (t==='login') renderFormLines(); else if (t==='desc') renderDescFormLines(); 
+}
+
 function importQbcConfig(event) {
     const files = event.target.files; if (!files || files.length === 0) return; const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const parsedData = JSON.parse(e.target.result); const serverIds = Object.keys(parsedData); if (serverIds.length === 0) return;
-            qbcDatabase = parsedData;
-            activeServerId = serverIds[0]; // FIX : Chaîne de texte pure à 100% au lieu d'un objet Array complet
-            saveToLocalStorage(); refreshAllViews(); alert("IMPORTATION REUSSIE");
+            qbcDatabase = parsedData; activeServerId = serverIds[0]; saveToLocalStorage(); if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); alert("IMPORTATION REUSSIE");
         } catch (err) { alert("ERREUR LECTURE JSON"); }
     }; reader.readAsText(files.item(0));
 }
 
-// VARIATEUR DE TAILLE ÉCRAN INTERNE (ZOOM)
 function changeUiZoom(zoomValue) {
     document.body.style.zoom = zoomValue + "%";
     document.body.style.transform = "scale(" + (zoomValue / 100) + ")";
     document.body.style.transformOrigin = "top center";
     localStorage.setItem("qbc_preferred_zoom", zoomValue);
 }
+
+// LIEN DE FUSION FENÊTRE UNIVERSEL POUR DÉBLOQUER LES COPIERS/COLLERS ET LE SMARTPHONE
+window.qbcCopierLigneFrançaise = qbcCopierLigneFrançaise;
+window.qbcCollerLigneAnglaise = qbcCollerLigneAnglaise;
+window.toggleLineEnglishIndividual = toggleLineEnglishIndividual;
+window.moveLine = moveLine;
+window.insertLineAt = insertLineAt;
+window.removeLine = removeLine;
+window.removeDescLine = removeDescLine;
+window.renderFormLines = renderFormLines;
+window.renderDescFormLines = renderDescFormLines;
+window.switchTab = switchTab;
 
 
 
