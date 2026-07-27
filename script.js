@@ -286,7 +286,7 @@ function loadFromLocalStorage() {
     if (saved) {
         try {
             qbcDatabase = JSON.parse(saved); const serverIds = Object.keys(qbcDatabase);
-            if (serverIds.length > 0) activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0];
+            if (serverIds.length > 0) activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds;
         } catch(e) { console.error(e); }
     }
 }
@@ -317,7 +317,7 @@ function importQbcConfig(event) {
     reader.onload = function(e) {
         try {
             const parsedData = JSON.parse(e.target.result); const serverIds = Object.keys(parsedData); if (serverIds.length === 0) return;
-            qbcDatabase = parsedData; activeServerId = serverIds[0]; saveToLocalStorage(); 
+            qbcDatabase = parsedData; activeServerId = serverIds; saveToLocalStorage(); 
             const selectServerEl = document.getElementById('serverSelect');
             if (selectServerEl) {
                 selectServerEl.innerHTML = "";
@@ -331,9 +331,11 @@ function importQbcConfig(event) {
     }; reader.readAsText(files.item(0));
 }
 
+// 👑 NETTOYAGE RADICAL DU ZOOM : Plus aucune modification sur le style du Body ou du transform
 function changeUiZoom(zoomValue) {
-    document.body.style.zoom = zoomValue + "%";
-    localStorage.setItem("qbc_preferred_zoom", zoomValue);
+    document.body.style.zoom = "100%"; 
+    document.body.style.transform = "none";
+    localStorage.setItem("qbc_preferred_zoom", "100");
 }
 
 function copyMasterPayload() { 
@@ -359,7 +361,7 @@ function createNewServerInstance() {
     if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
 }
 
-// LIENS DE SOUDURE UNIVERSELS DIRECTS (PLUS BESOIN DE WINDOW CAR TOUT EST DANS UN SEUL FICHIER)
+// LIENS DE SOUDURE UNIVERSELS DIRECTS
 window.qbcCopierLigneFrançaise = qbcCopierLigneFrançaise;
 window.qbcCollerLigneAnglaise = qbcCollerLigneAnglaise;
 window.toggleLineEnglishIndividual = toggleLineEnglishIndividual;
@@ -383,12 +385,3 @@ window.exportQbcConfig = function() {
     const anchor = document.createElement('a'); anchor.setAttribute("href", dataStr); anchor.setAttribute("download", "qbc-backup.json");
     document.body.appendChild(anchor); anchor.click(); anchor.remove();
 };
-
-
-
-
-
-
-
-
-
