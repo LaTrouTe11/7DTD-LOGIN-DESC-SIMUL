@@ -721,12 +721,60 @@ window.importQbcConfigFromGitHub = function() {
     const syncLabel = document.getElementById('qbcTimeTrackerText');
     const historyLabel = document.getElementById('qbcFileHistoryText');
     
+    // 🔍 DÉTECTION AUTOMATIQUE DE L'ENVIRONNEMENT (Si on est sur GitHub Pages statique)
+    const isServerlessStatic = window.location.hostname.includes("github.io") || 
+        (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && !window.location.hostname.includes(".run.app"));
+
+    if (isServerlessStatic) {
+        if (syncLabel) {
+            syncLabel.innerText = "⏳ TÉLÉCHARGEMENT DIRECT DEPUIS GITHUB PAGES...";
+            syncLabel.style.color = "#fbbf24";
+        }
+        
+        // Requête directe sur l'URL publique du fichier JSON brut sur GitHub !
+        const rawUrl = 'https://raw.githubusercontent.com/LaTrouTe11/7DTD-LOGIN-DESC-SIMUL/main/qbc-backup.json?t=' + Date.now();
+        fetch(rawUrl)
+        .then(res => {
+            if (!res.ok) throw new Error("Fichier introuvable sur le dépôt public.");
+            return res.json();
+        })
+        .then(data => {
+            qbcDatabase = data;
+            const serverIds = Object.keys(qbcDatabase);
+            if (serverIds.length > 0) activeServerId = serverIds[0];
+            
+            if (typeof saveToLocalStorage === 'function') saveToLocalStorage();
+            if (typeof renderServerSelect === 'function') renderServerSelect();
+            if (typeof initServerSelector === 'function') initServerSelector();
+            if (typeof refreshAllViews === 'function') refreshAllViews();
+
+            const m = new Date();
+            const horodatage = `${String(m.getDate()).padStart(2,'0')}/${String(m.getMonth()+1).padStart(2,'0')}/${m.getFullYear()} à ${String(m.getHours()).padStart(2,'0')}:${String(m.getMinutes()).padStart(2,'0')}:${String(m.getSeconds()).padStart(2,'0')}`;
+            
+            if (syncLabel) {
+                syncLabel.innerText = `✅ CHARGEMENT RÉUSSI — CONFIG PRODUCTION SYNCHRONISÉE !`;
+                syncLabel.style.color = "#34d399";
+            }
+            if (historyLabel) {
+                historyLabel.innerHTML = `🌐 Source : <strong style="color:#ffffff;">GitHub Public (Brut)</strong> | 📅 Mis à jour le : <span style="color:#fbbf24;">${horodatage}</span>`;
+                historyLabel.style.display = "block";
+            }
+            alert("🌐 PARFAIT ! Ton cockpit a récupéré et chargé la dernière sauvegarde officielle depuis GitHub !");
+        })
+        .catch(err => {
+            console.error(err);
+            alert("❌ IMPOSSIBLE DE CHARGER : Assure-toi que le fichier qbc-backup.json a bien été poussé sur ton GitHub principal.");
+            if (syncLabel) { syncLabel.innerText = "❌ ÉCHEC DU CHARGEMENT GITHUB"; syncLabel.style.color = "#f87171"; }
+        });
+        return; // On arrête ici pour les environnements statiques
+    }
+
+    // --- LOGIQUE NATIVE SI ON EST EN LOCAL OU SUR LE SERVEUR EXPRESS DE DÉVELOPPEMENT ---
     if (syncLabel) {
-        syncLabel.innerText = "⏳ RÉCUPÉRATION DU FICHIER SUR GITHUB EN COURS...";
+        syncLabel.innerText = "⏳ RÉCUPÉRATION DU FICHIER SUR GITHUB LOCAL EN COURS...";
         syncLabel.style.color = "#fbbf24";
     }
 
-    // Appelle notre API Express qui utilise ton Token
     fetch('/api/load-from-github')
     .then(res => res.json())
     .then(data => {
