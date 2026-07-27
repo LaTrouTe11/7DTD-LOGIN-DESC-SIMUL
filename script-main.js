@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 1 SUR 3 === [ STRUCTURE & TIMEOUT CORE ]    ===
+   === SCRIPT-MAIN.JS : PARTIE 1 SUR 3 === [ CONFIGURATION & REGISTRES ] ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
@@ -50,14 +50,13 @@ function qbcCollerLigneAnglaise(isDesc, index) {
     }).catch(err => { alert("Fais un Ctrl + V manuel dans la case EN !"); });
 }
 
-// PROTECTION ANTI-PAGE BLANCHE : On attend 200ms que Chrome charge les 3 scripts avant de dessiner la grille
 document.addEventListener("DOMContentLoaded", () => {
     loadFromLocalStorage();
     const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
     changeUiZoom(savedZoom);
     setTimeout(() => {
         if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
-    }, 200);
+    }, 150);
 });
 /* ==========================================================================
    === SCRIPT-MAIN.JS : PARTIE 2 SUR 3 === [ CONSTRUCTEUR DE LA GRILLE ]   ===
@@ -125,7 +124,7 @@ function renderDescFormLines() {
     buildFormRows(true, qbcDatabase[activeServerId]?.descLines || [], toggleEl ? toggleEl.checked : false); 
 }
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 3 SUR 3 === [ ACTIONS, LOGIQUE & ACCROCHES ] ===
+   === SCRIPT-MAIN.JS : PARTIE 3 SUR 3 === [ LOGIQUE ET ZOOM CORRIGÉ ]     ===
    ========================================================================== */
 function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
 function loadFromLocalStorage() {
@@ -185,10 +184,9 @@ function importQbcConfig(event) {
     }; reader.readAsText(files.item(0));
 }
 
+// CORRECTION TECHNIQUE DU ZOOM : Plus de double scale() destructeur de CSS !
 function changeUiZoom(zoomValue) {
     document.body.style.zoom = zoomValue + "%";
-    document.body.style.transform = "scale(" + (zoomValue / 100) + ")";
-    document.body.style.transformOrigin = "top center";
     localStorage.setItem("qbc_preferred_zoom", zoomValue);
 }
 
@@ -213,6 +211,7 @@ window.exportQbcConfig = function() {
     document.body.appendChild(anchor); anchor.click(); anchor.remove();
 };
 window.triggerJsonImport = function() { document.getElementById('jsonFileInput')?.click(); };
+
 
 
 
