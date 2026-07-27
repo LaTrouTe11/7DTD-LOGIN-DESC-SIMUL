@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 1 SUR 2 === [ CONFIGURATION & MOTEUR DE COPIE ] ===
+   === SCRIPT-MAIN.JS : PARTIE 1 SUR 3 === [ STRUCTURE & CORE COPIER ]   ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
@@ -28,7 +28,6 @@ const symbolPalette = [
     { char: "☣", name: "Biohazard" }, { char: "⚠️", name: "Alerte" }, { char: "🚀", name: "Téléport" }, { char: "✗", name: "Croix" }
 ];
 
-// COPIE DU TEXTE FR VERS LE PRESSE-PAPIERS SANS BUG D'INDEX
 function qbcCopierLigneFrançaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
     if (!list || !list[index]) return;
@@ -40,7 +39,6 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     dummy.value = txt; dummy.select(); document.execCommand("copy"); dummy.remove();
 }
 
-// INJECTION SECURISEE DE LA TRADUCTION GOOGLE DANS LA CASE ANGLAISE
 function qbcCollerLigneAnglaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
     if (!list || !list[index]) return;
@@ -51,17 +49,8 @@ function qbcCollerLigneAnglaise(isDesc, index) {
         }
     }).catch(err => { alert("Fais un Ctrl + V manuel dans la case EN !"); });
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    loadFromLocalStorage();
-    const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
-    changeUiZoom(savedZoom);
-    const selectZoomEl = document.getElementById("uiZoomSelect");
-    if (selectZoomEl) selectZoomEl.value = savedZoom;
-    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
-});
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE B1 === [ RENDU DYNAMIQUE DE LA GRILLE ]     ===
+   === SCRIPT-MAIN.JS : PARTIE 2 SUR 3 === [ CONSTRUCTEUR DE LA GRILLE ]   ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); 
@@ -126,7 +115,7 @@ function renderDescFormLines() {
     buildFormRows(true, qbcDatabase[activeServerId]?.descLines || [], toggleEl ? toggleEl.checked : false); 
 }
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE B2 === [ MEMOIRE, EVENTS & LIEN DE FUSION ] ===
+   === SCRIPT-MAIN.JS : PARTIE 3 SUR 3 === [ ACTIONS, LOGIQUE & ACCROCHES ] ===
    ========================================================================== */
 function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
 function loadFromLocalStorage() {
@@ -193,7 +182,7 @@ function changeUiZoom(zoomValue) {
     localStorage.setItem("qbc_preferred_zoom", zoomValue);
 }
 
-// LIEN DE FUSION FENÊTRE UNIVERSEL POUR DÉBLOQUER LES COPIERS/COLLERS ET LE SMARTPHONE
+// LIENS DE SOUDURE UNIVERSELS : Accessibles instantanément par l'index.html
 window.qbcCopierLigneFrançaise = qbcCopierLigneFrançaise;
 window.qbcCollerLigneAnglaise = qbcCollerLigneAnglaise;
 window.toggleLineEnglishIndividual = toggleLineEnglishIndividual;
@@ -204,6 +193,17 @@ window.removeDescLine = removeDescLine;
 window.renderFormLines = renderFormLines;
 window.renderDescFormLines = renderDescFormLines;
 window.switchTab = switchTab;
+window.importQbcConfig = importQbcConfig;
+window.changeUiZoom = changeUiZoom;
+window.addNewLine = addNewLine;
+window.addNewDescLine = addNewDescLine;
+window.exportQbcConfig = function() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4)); 
+    const anchor = document.createElement('a'); anchor.setAttribute("href", dataStr); anchor.setAttribute("download", "qbc-backup.json");
+    document.body.appendChild(anchor); anchor.click(); anchor.remove();
+};
+window.triggerJsonImport = function() { document.getElementById('jsonFileInput')?.click(); };
+
 
 
 
