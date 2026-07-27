@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 1 SUR 3 === [ CONFIGURATION & REGISTRES ] ===
+   === SCRIPT-MAIN.JS : PARTIE 1 SUR 3 === [ STRUCTURE & TIMEOUT CORE ]    ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     changeUiZoom(savedZoom);
     setTimeout(() => {
         if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
-    }, 150);
+    }, 200);
 });
 /* ==========================================================================
    === SCRIPT-MAIN.JS : PARTIE 2 SUR 3 === [ CONSTRUCTEUR DE LA GRILLE ]   ===
@@ -111,7 +111,8 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
         div.innerHTML = `<div class="line-controls"><span class="line-number">L.${index+1}</span> ${lineControlsBlock} ${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'window.removeDescLine':'window.removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text || ''}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." /></div>${enRow}</div>`;
         container.appendChild(div);
     }); 
-    if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC();
+    if (typeof window.processAndCompileQBC === "function") { window.processAndCompileQBC(); }
+    else if (typeof processAndCompileQBC === "function") { processAndCompileQBC(); }
 }
 
 function renderFormLines() { 
@@ -124,7 +125,7 @@ function renderDescFormLines() {
     buildFormRows(true, qbcDatabase[activeServerId]?.descLines || [], toggleEl ? toggleEl.checked : false); 
 }
 /* ==========================================================================
-   === SCRIPT-MAIN.JS : PARTIE 3 SUR 3 === [ LOGIQUE ET ZOOM CORRIGÉ ]     ===
+   === SCRIPT-MAIN.JS : PARTIE 3 SUR 3 === [ ACTIONS, LOGIQUE & ACCROCHES ] ===
    ========================================================================== */
 function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
 function loadFromLocalStorage() {
@@ -132,7 +133,7 @@ function loadFromLocalStorage() {
     if (saved) {
         try {
             qbcDatabase = JSON.parse(saved); const serverIds = Object.keys(qbcDatabase);
-            if (serverIds.length > 0) activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0];
+            if (serverIds.length > 0) activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds;
         } catch(e) { console.error(e); }
     }
 }
@@ -158,9 +159,26 @@ function insertLineAt(isDesc, i) {
     if (isDesc) renderDescFormLines(); else renderFormLines(); 
 }
 
-function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC(); }
-function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } saveToLocalStorage(); if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC(); }
-function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; if (typeof window.processAndCompileQBC === "function") window.processAndCompileQBC(); }
+// CORRECTION CHIRURGICALE DU CLAVIER FR : Appelle de force les deux écoutes globale/locale pour rafraîchir le bas
+function updateLineTextFR(isDesc, i, v) { 
+    if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; 
+    else qbcDatabase[activeServerId].loginLines[i].text = v; 
+    saveToLocalStorage(); 
+    if (typeof window.processAndCompileQBC === "function") { window.processAndCompileQBC(); }
+    else if (typeof processAndCompileQBC === "function") { processAndCompileQBC(); }
+}
+
+// CORRECTION CHIRURGICALE DU CLAVIER EN : Appelle de force les deux écoutes globale/locale pour rafraîchir le bas
+function updateLineTextEN(isDesc, i, v) { 
+    if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; 
+    else qbcDatabase[activeServerId].loginLines[i].text_en = v; 
+    if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } 
+    saveToLocalStorage(); 
+    if (typeof window.processAndCompileQBC === "function") { window.processAndCompileQBC(); }
+    else if (typeof processAndCompileQBC === "function") { processAndCompileQBC(); }
+}
+
+function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; if (typeof window.processAndCompileQBC === "function") { window.processAndCompileQBC(); } else if (typeof processAndCompileQBC === "function") { processAndCompileQBC(); } }
 function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
 function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", symbol_start: "", text: "MESSAGE LOG", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderFormLines(); }
 function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); renderFormLines(); }
@@ -179,18 +197,17 @@ function importQbcConfig(event) {
     reader.onload = function(e) {
         try {
             const parsedData = JSON.parse(e.target.result); const serverIds = Object.keys(parsedData); if (serverIds.length === 0) return;
-            qbcDatabase = parsedData; activeServerId = serverIds[0]; saveToLocalStorage(); if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); alert("IMPORTATION REUSSIE");
+            qbcDatabase = parsedData; activeServerId = serverIds; saveToLocalStorage(); if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); alert("IMPORTATION REUSSIE");
         } catch (err) { alert("ERREUR LECTURE JSON"); }
     }; reader.readAsText(files.item(0));
 }
 
-// CORRECTION TECHNIQUE DU ZOOM : Plus de double scale() destructeur de CSS !
 function changeUiZoom(zoomValue) {
     document.body.style.zoom = zoomValue + "%";
     localStorage.setItem("qbc_preferred_zoom", zoomValue);
 }
 
-// LIENS DE SOUDURE UNIVERSELS : Accessibles instantanément par l'index.html
+// LIENS DE SOUDURE UNIVERSELS : Accessibles instantanément par l'index.html et les modules esclaves
 window.qbcCopierLigneFrançaise = qbcCopierLigneFrançaise;
 window.qbcCollerLigneAnglaise = qbcCollerLigneAnglaise;
 window.toggleLineEnglishIndividual = toggleLineEnglishIndividual;
@@ -211,6 +228,7 @@ window.exportQbcConfig = function() {
     document.body.appendChild(anchor); anchor.click(); anchor.remove();
 };
 window.triggerJsonImport = function() { document.getElementById('jsonFileInput')?.click(); };
+
 
 
 
