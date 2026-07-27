@@ -1,5 +1,5 @@
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : BLOC 1 SUR 6 === [ REGISTRES & MATRIX DATABASE ] ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 1 SUR 6 === [ REGISTRES & MATRIX DATABASE ] ===
    ========================================================================== */
 let currentActiveTab = 'login';
 let activeServerId = '7dtd_core';
@@ -20,11 +20,6 @@ let qbcDatabase = {
             { symbol: "•", symbol_start: "", symbol_en_start: "", symbol_en_end: "", text: "Bienvenue sur l'infrastructure de Varennes.", text_en: "", color: "00ff00", color_en: "00ff00", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} },
             { symbol: "•", symbol_start: "", symbol_en_start: "", symbol_en_end: "", text: "Serveur PvE québécois haute performance.", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }
         ]
-    },
-    '7dtd_projectz': {
-        name: "QBC FLAGGARD PROJECTZ 3.0",
-        loginLines: [{ symbol: "❤", symbol_start: "", symbol_en_start: "", symbol_en_end: "", text: "QBC FLAGGARD ProjectZ 3.0 +MODS ❤", text_en: "", color: "ff0000", color_en: "ff0000", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }],
-        descLines: [{ symbol: "🤖", symbol_start: "", symbol_en_start: "", symbol_en_end: "", text: "Gestion ProjectZ 3.0 par les GMs.", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false, style_fr: {u:false,b:false}, style_en: {u:false,b:false} }]
     }
 };
 
@@ -39,12 +34,12 @@ const symbolPalette = [
     { char: "⚔️", name: "Épées" }, { char: "⚙️", name: "Système" }, { char: "💎", name: "Diamant" }, { char: "⏰", name: "Reboot" }
 ];
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : BLOC 2 SUR 6 === [ INITIALISATION DU COCKPIT ]   ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 2 SUR 6 === [ INITIALISATION ABSOLUE ]    ===
    ========================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-    loadFromLocalStorage();
+    window.loadFromLocalStorage();
     const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
-    changeUiZoom(savedZoom);
+    window.changeUiZoom(savedZoom);
     const selectZoomEl = document.getElementById("uiZoomSelect");
     if (selectZoomEl) selectZoomEl.value = savedZoom;
     
@@ -60,31 +55,35 @@ document.addEventListener("DOMContentLoaded", () => {
         selectServerEl.value = activeServerId;
         selectServerEl.addEventListener('change', (e) => {
             activeServerId = e.target.value;
-            if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+            window.refreshAllViews();
         });
     }
     
-    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+    window.refreshAllViews();
 });
 
-// COMMUTATEURS GLOBAUX DE L'ANGLAIS
-function toggleLoginEnglish(checked) { 
+// COMMUTATEURS GLOBAUX DE TRADUCTION ANGLAISE EN VARIABLE DIRECTE
+window.toggleLoginEnglish = function(checked) { 
     isLoginEnglishActive = checked; 
     const lines = qbcDatabase[activeServerId]?.loginLines || [];
     lines.forEach(line => { line.show_english = checked; });
-    renderFormLines(); 
-}
+    window.renderFormLines(); 
+};
 
-function toggleDescEnglish(checked) { 
+window.toggleDescEnglish = function(checked) { 
     isDescEnglishActive = checked; 
     const lines = qbcDatabase[activeServerId]?.descLines || [];
     lines.forEach(line => { line.show_english = checked; });
-    renderDescFormLines(); 
-}
+    window.renderDescFormLines(); 
+};
+
+window.refreshAllViews = function() {
+    if (currentActiveTab === 'login') window.renderFormLines(); else window.renderDescFormLines();
+};
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : BLOC 3 SUR 6 === [ COMMANDE DES LIGNES & COPIE ] ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 3 SUR 6 === [ COMMANDE DES LIGNES & COPIE ] ===
    ========================================================================== */
-function qbcCopierLigneFrançaise(isDesc, index) {
+window.qbcCopierLigneFrançaise = function(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
     if (!list || !list[index]) return;
     let txt = list[index].text ? list[index].text.trim() : "";
@@ -93,41 +92,41 @@ function qbcCopierLigneFrançaise(isDesc, index) {
     if (numMatch && numMatch.length > 0) { txt = txt.substring(numMatch.length).trim(); }
     const dummy = document.createElement("textarea"); document.body.appendChild(dummy);
     dummy.value = txt; dummy.select(); document.execCommand("copy"); dummy.remove();
-}
+};
 
-function qbcCollerLigneAnglaise(isDesc, index) {
+window.qbcCollerLigneAnglaise = function(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
     if (!list || !list[index]) return;
     navigator.clipboard.readText().then(texteCopie => {
         if (texteCopie && texteCopie.trim() !== "") {
             list[index].text_en = texteCopie.trim(); list[index].show_english = true;
-            saveToLocalStorage(); if (isDesc) renderDescFormLines(); else renderFormLines();
+            window.saveToLocalStorage(); window.refreshAllViews();
         }
     }).catch(err => { alert("Fais un Ctrl + V manuel dans la case EN !"); });
-}
+};
 
-function toggleLineEnglishIndividual(isDesc, i) { 
+window.toggleLineEnglishIndividual = function(isDesc, i) { 
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
     if (!list || !list[i]) return;
     list[i].show_english = !list[i].show_english; 
-    if (isDesc) renderDescFormLines(); else renderFormLines(); 
-}
+    window.refreshAllViews();
+};
 
-function moveLine(isDesc, i, d) { 
+window.moveLine = function(isDesc, i, d) { 
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
     if (!list) return; const t = i + d; if (t < 0 || t >= list.length) return; 
     const tmp = list[i]; list[i] = list[t]; list[t] = tmp; 
-    if (isDesc) renderDescFormLines(); else renderFormLines(); 
-}
+    window.refreshAllViews();
+};
 
-function insertLineAt(isDesc, i) { 
+window.insertLineAt = function(isDesc, i) { 
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
     if (!list) return;
     list.splice(i, 0, { symbol: "•", symbol_start: "", text: "MESSAGE ÉDITABLE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); 
-    if (isDesc) renderDescFormLines(); else renderFormLines(); 
-}
+    window.refreshAllViews();
+};
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : BLOC 4 SUR 6 === [ CONSTRUCTEUR DE FORMULAIRE ]  ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 4 SUR 6 === [ CONSTRUCTEUR DE LA GRILLE ] ===
    ========================================================================== */
 function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     const container = document.getElementById(isDesc ? 'descLinesContainer' : 'linesContainer'); 
@@ -167,32 +166,32 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
             enRow = `<div class="eng-input-box" style="width:100%; ${displayStyle}"><div class="input-row" style="margin-top:6px; display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#38bdf8; width:30px; font-weight:bold;">EN:</span><input type="text" class="input-line" style="border-left:4px dashed #${line.color_en}; flex-grow:1;" value="${line.text_en || ''}" oninput="updateLineTextEN(${isDesc}, ${index}, this.value)" placeholder="Anglais..." /></div></div>`; 
         }
         
-        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn" onclick="qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 FR</button><button type="button" class="double-line-btn" onclick="qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 EN</button><button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 EN</button>` : "";
+        let transBtn = (isDesc || index > 0) ? `<button type="button" class="double-line-btn" onclick="window.qbcCopierLigneFrançaise(${isDesc}, ${index})">📋 FR</button><button type="button" class="double-line-btn" onclick="window.qbcCollerLigneAnglaise(${isDesc}, ${index})">📥 EN</button><button type="button" class="double-line-btn ${line.show_english?'active':''}" onclick="window.toggleLineEnglishIndividual(${isDesc}, ${index})">🌐 EN</button>` : "";
         
         let upDis = index === 0 ? "disabled style='opacity:0.3;'" : "", downDis = index === currentLines.length - 1 ? "disabled style='opacity:0.3;'" : "";
         let lineControlsBlock = `
-            <button type="button" class="order-btn" ${upDis} onclick="moveLine(${isDesc}, ${index}, -1)">🔼</button>
-            <button type="button" class="order-btn" ${downDis} onclick="moveLine(${isDesc}, ${index}, 1)">🔽</button>
-            <button type="button" class="btn-insert-here" onclick="insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>
+            <button type="button" class="order-btn" ${upDis} onclick="window.moveLine(${isDesc}, ${index}, -1)">🔼</button>
+            <button type="button" class="order-btn" ${downDis} onclick="window.moveLine(${isDesc}, ${index}, 1)">🔽</button>
+            <button type="button" class="btn-insert-here" onclick="window.insertLineAt(${isDesc}, ${index + 1})">➕ INSÉRER</button>
         `;
 
-        div.innerHTML = `<div class="line-controls"><span class="line-number">L.${index+1}</span> ${lineControlsBlock} ${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'removeDescLine':'removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text || ''}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." /></div>${enRow}</div>`;
+        div.innerHTML = `<div class="line-controls"><span class="line-number">L.${index+1}</span> ${lineControlsBlock} ${symStartSel} ${symSel} ${colSel} <span style="color:#4b5563;">|</span> ${symEnStartSel} ${symEnEndSel} ${colEnSel} ${transBtn}<button type="button" class="btn-action" style="color:#f87171; margin-left:auto;" onclick="${isDesc?'window.removeDescLine':'window.removeLine'}(${index})">❌</button></div><div class="line-inputs-block"><div class="input-row" style="display:flex; width:100%; align-items:center;"><span style="font-size:11px; color:#34d399; width:30px; font-weight:bold;">FR:</span><input type="text" class="input-line" style="border-left:4px solid #${line.color}; flex-grow:1;" value="${line.text || ''}" oninput="updateLineTextFR(${isDesc}, ${index}, this.value)" placeholder="Texte..." /></div>${enRow}</div>`;
         container.appendChild(div);
     }); 
     processAndCompileQBC();
 }
 
-function renderFormLines() { 
+window.renderFormLines = function() { 
     const toggleEl = document.getElementById('loginEnglishToggle');
     buildFormRows(false, qbcDatabase[activeServerId]?.loginLines || [], toggleEl ? toggleEl.checked : false); 
-}
+};
 
-function renderDescFormLines() { 
+window.renderDescFormLines = function() { 
     const toggleEl = document.getElementById('descEnglishToggle');
     buildFormRows(true, qbcDatabase[activeServerId]?.descLines || [], toggleEl ? toggleEl.checked : false); 
-}
+};
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : BLOC 5 SUR 6 === [ ENCODAGE DE COMPILATION LIVE ] ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 5 SUR 6 === [ ENCODAGE TEXTMESHPRO & APERÇU ] ===
    ========================================================================== */
 function processAndCompileQBC() {
     const isLogin = (currentActiveTab === 'login'); 
@@ -222,7 +221,7 @@ function processAndCompileQBC() {
         if (line.symbol_en_end === undefined) line.symbol_en_end = "";
         if (line.color_en === undefined) line.color_en = line.color || "ffffff";
 
-        // --- COMPILATION DU MESSAGE FRANÇAIS ---
+        // --- COMPILATION DU BLOC FRANÇAIS ---
         let fullFR = textFR;
         if (line.symbol_start && line.symbol_start.trim() !== "") fullFR = line.symbol_start + " " + fullFR;
         if (line.symbol && line.symbol.trim() !== "") fullFR = fullFR + " " + line.symbol;
@@ -231,7 +230,7 @@ function processAndCompileQBC() {
         let chunkFR = "[" + (line.color || "ffffff") + "]" + fullFR + "[-]"; 
         const isEnglishActive = line.show_english || isGlobalEnglish;
         
-        // --- COMPILATION DU MESSAGE ANGLAIS CROISÉ ---
+        // --- COMPILATION DU BLOC ANGLAIS CROISÉ ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
             let fullEN = textEN;
             if (line.symbol_en_start && line.symbol_en_start.trim() !== "") fullEN = line.symbol_en_start + " " + fullEN;
@@ -255,7 +254,7 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    // INJECTION SIMULTANÉE SÉCURISÉE DANS LE PANNEAU DU BAS
+    // INJECTION DE SÉCURITÉ DANS LES DEUX BLOCS NOIRS DU PANNEAU INFERIEUR
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
@@ -278,18 +277,10 @@ function processAndCompileQBC() {
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : BLOC 6 SUR 6 === [ MÉMOIRE, ACTIONS & SAUVETAGE ] ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 6 SUR 6 === [ MÉMOIRE & INTERRUPTEURS ]   ===
    ========================================================================== */
-function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
-function loadFromLocalStorage() {
-    const saved = localStorage.getItem("qbc_matrix_data");
-    if (saved) {
-        try {
-            qbcDatabase = JSON.parse(saved); const serverIds = Object.keys(qbcDatabase);
-            if (serverIds.length > 0) activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds;
-        } catch(e) { console.error(e); }
-    }
-}
+window.saveToLocalStorage = saveToLocalStorage;
+window.loadFromLocalStorage = loadFromLocalStorage;
 
 function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); processAndCompileQBC(); }
 function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } saveToLocalStorage(); processAndCompileQBC(); }
@@ -297,42 +288,37 @@ function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId]
 function updateLineSymbolStart(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol_start = v; else qbcDatabase[activeServerId].loginLines[i].symbol_start = v; processAndCompileQBC(); }
 function updateLineSymbolEnStart(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_start = v; else qbcDatabase[activeServerId].loginLines[i].symbol_en_start = v; processAndCompileQBC(); }
 function updateLineSymbolEnEnd(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_end = v; else qbcDatabase[activeServerId].loginLines[i].symbol_en_end = v; processAndCompileQBC(); }
-function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
-function updateLineColorEn(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color_en = h; else qbcDatabase[activeServerId].loginLines[i].color_en = h; if(isDesc) renderDescFormLines(); else renderFormLines(); }
+function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; window.refreshAllViews(); }
+function updateLineColorEn(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color_en = h; else qbcDatabase[activeServerId].loginLines[i].color_en = h; window.refreshAllViews(); }
 
-function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", symbol_start: "", text: "NOUVEAU MESSAGE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderFormLines(); }
-function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); renderFormLines(); }
-function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", text: "NOUVELLE DESCRIPTION", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderDescFormLines(); }
-function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
+window.addNewLine = function() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", symbol_start: "", text: "NOUVEAU MESSAGE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); window.renderFormLines(); };
+window.removeLine = function(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); window.renderFormLines(); };
+window.addNewDescLine = function() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", text: "NOUVELLE DESCRIPTION", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); window.renderDescFormLines(); };
+window.removeDescLine = function(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); window.renderDescFormLines(); };
 
-function switchTab(t) { 
+// SOUDURE DIRECTE ET ABSOLUE PAR INTERRUPTEUR DE VARIABLE GLOBALE
+window.switchTab = function(t) { 
     currentActiveTab = t; 
     
-    // 1. Gestion des boutons (Allume le bouton cliqué en bleu, éteint l'autre)
-    const btnLogin = document.getElementById('tab-login-btn') || document.getElementById('btnTabLogin');
-    const btnDesc = document.getElementById('tab-desc-btn') || document.getElementById('btnTabDesc');
-    
+    const btnLogin = document.getElementById('tab-login-btn');
+    const btnDesc = document.getElementById('tab-desc-btn');
     if (btnLogin) btnLogin.classList.toggle('active', t === 'login');
     if (btnDesc) btnDesc.classList.toggle('active', t === 'desc');
     
-    // 2. Gestion des conteneurs (Affiche la bonne grille, masque l'autre)
-    const containerLogin = document.getElementById('content-login') || document.getElementById('loginFormContainer');
-    const containerDesc = document.getElementById('content-desc') || document.getElementById('descFormContainer');
-    
+    const containerLogin = document.getElementById('content-login');
+    const containerDesc = document.getElementById('content-desc');
     if (containerLogin) containerLogin.style.display = (t === 'login') ? 'block' : 'none';
     if (containerDesc) containerDesc.style.display = (t === 'desc') ? 'block' : 'none';
     
-    // 3. Reconstruction immédiate des lignes à l'écran
-    if (t === 'login') renderFormLines(); else renderDescFormLines(); 
-}
+    window.refreshAllViews(); 
+};
 
-
-function importQbcConfig(event) {
+window.importQbcConfig = function(event) {
     const files = event.target.files; if (!files || files.length === 0) return; const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const parsedData = JSON.parse(e.target.result); const serverIds = Object.keys(parsedData); if (serverIds.length === 0) return;
-            qbcDatabase = parsedData; activeServerId = serverIds; saveToLocalStorage(); 
+            qbcDatabase = parsedData; activeServerId = serverIds[0]; saveToLocalStorage(); 
             const selectServerEl = document.getElementById('serverSelect');
             if (selectServerEl) {
                 selectServerEl.innerHTML = "";
@@ -341,59 +327,39 @@ function importQbcConfig(event) {
                 });
                 selectServerEl.value = activeServerId;
             }
-            if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines(); alert("IMPORTATION RÉUSSIE !");
+            window.refreshAllViews(); alert("IMPORTATION RÉUSSIE !");
         } catch (err) { alert("ERREUR LECTURE JSON"); }
     }; reader.readAsText(files.item(0));
-}
+};
 
-// 👑 NETTOYAGE RADICAL DU ZOOM : Plus aucune modification sur le style du Body ou du transform
-function changeUiZoom(zoomValue) {
-    document.body.style.zoom = "100%"; 
-    document.body.style.transform = "none";
-    localStorage.setItem("qbc_preferred_zoom", "100");
-}
+window.changeUiZoom = function(zoomValue) {
+    document.body.style.zoom = zoomValue + "%";
+    localStorage.setItem("qbc_preferred_zoom", zoomValue);
+};
 
-function copyMasterPayload() { 
+window.copyMasterPayload = function() { 
     const output = document.getElementById('masterOutput'); 
     if (output) { output.select(); document.execCommand('copy'); alert('CHAINE COPIEE AVEC SUCCES'); }
-}
+};
 
-function editCurrentServerName() {
+window.editCurrentServerName = function() {
     const n = prompt("NOUVEAU NOM :", qbcDatabase[activeServerId].name); if (!n || n.trim() === "") return;
     qbcDatabase[activeServerId].name = n.toUpperCase();
     const selectServerEl = document.getElementById('serverSelect');
     if (selectServerEl) selectServerEl.options[selectServerEl.selectedIndex].innerText = n.toUpperCase();
     processAndCompileQBC();
-}
+};
 
-function createNewServerInstance() {
+window.createNewServerInstance = function() {
     const n = prompt("NOM SERVEUR :"); if (!n || n.trim() === "") return; 
     const id = "7dtd_" + Math.random().toString(36).substring(2, 6);
     qbcDatabase[id] = { name: n.toUpperCase(), loginLines: [{ symbol: "❤", symbol_start: "", text: "BIENVENUE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }], descLines: [{ symbol: "•", symbol_start: "", text: "DESCRIPTION", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }] };
     const opt = document.createElement('option'); opt.value = id; opt.innerText = n.toUpperCase(); 
     document.getElementById('serverSelect')?.appendChild(opt); 
     document.getElementById('serverSelect').value = id; activeServerId = id;
-    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
-}
+    window.refreshAllViews();
+};
 
-// LIENS DE SOUDURE UNIVERSELS DIRECTS
-window.qbcCopierLigneFrançaise = qbcCopierLigneFrançaise;
-window.qbcCollerLigneAnglaise = qbcCollerLigneAnglaise;
-window.toggleLineEnglishIndividual = toggleLineEnglishIndividual;
-window.moveLine = moveLine;
-window.insertLineAt = insertLineAt;
-window.removeLine = removeLine;
-window.removeDescLine = removeDescLine;
-window.renderFormLines = renderFormLines;
-window.renderDescFormLines = renderDescFormLines;
-window.switchTab = switchTab;
-window.importQbcConfig = importQbcConfig;
-window.changeUiZoom = changeUiZoom;
-window.addNewLine = addNewLine;
-window.addNewDescLine = addNewDescLine;
-window.editCurrentServerName = editCurrentServerName;
-window.createNewServerInstance = createNewServerInstance;
-window.copyMasterPayload = copyMasterPayload;
 window.triggerJsonImport = function() { document.getElementById('jsonFileInput')?.click(); };
 window.exportQbcConfig = function() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4)); 
