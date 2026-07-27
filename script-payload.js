@@ -1,15 +1,18 @@
 /* ==========================================================================
-   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 1 === [ COMPILATEUR FR TEXTMESH ] ===
+   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 1 === [ COMPILATEUR UNIVERSEL FR ] ===
    ========================================================================== */
 function processAndCompileQBC() {
     const isLogin = (currentActiveTab === 'login'); 
     
-    // FIX SÉCURITÉ ABSOLUE : Force une chaîne texte pure pour empêcher le crash de l'aperçu
+    // FIX DE SÉCURITÉ GLOBAUX : Force une String pure pour empêcher le freeze du bas
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
     
-    const currentLines = isLogin ? qbcDatabase[activeServerId].loginLines : qbcDatabase[activeServerId].descLines;
+    const serverData = qbcDatabase[activeServerId];
+    if (!serverData) return;
+    
+    const currentLines = isLogin ? serverData.loginLines : serverData.descLines;
     if (!currentLines || !Array.isArray(currentLines)) return; 
     
     const isGlobalEnglish = isLogin ? isLoginEnglishActive : isDescEnglishActive; 
@@ -18,8 +21,10 @@ function processAndCompileQBC() {
     
     currentLines.forEach((line, index) => {
         if (!line) return;
-        let textFR = line.text ? line.text.trim() : ""; 
-        let textEN = line.text_en ? line.text_en.trim() : "";
+        
+        // Compatibilité totale entre l'ancienne clé (.text) et la nouvelle (.text_fr)
+        let textFR = (line.text_fr || line.text || "").trim(); 
+        let textEN = (line.text_en || "").trim();
         
         if (line.symbol_start === undefined) line.symbol_start = "";
         if (line.symbol === undefined) line.symbol = "";
@@ -33,10 +38,10 @@ function processAndCompileQBC() {
         if (line.symbol && line.symbol.trim() !== "") fullFR = fullFR + " " + line.symbol;
         if (line.style_fr && line.style_fr.u) fullFR = "[u]" + fullFR + "[/u]"; 
         if (line.style_fr && line.style_fr.b) fullFR = "[b]" + fullFR + "[/b]";
-        let chunkFR = "[" + line.color + "]" + fullFR + "[-]"; 
+        let chunkFR = "[" + (line.color || "ffffff") + "]" + fullFR + "[-]"; 
         const isEnglishActive = line.show_english || isGlobalEnglish;
 /* ==========================================================================
-   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 2 === [ COMPILATEUR EN & PAYLOAD ] ===
+   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 2 === [ ENJECTEUR DÉFINITIF DU BAS ] ===
    ========================================================================== */
         // --- COMPILATION DU BLOC ANGLAIS CROISÉ SANS BOUCLE INFINIE ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
@@ -57,17 +62,17 @@ function processAndCompileQBC() {
             if (line.border_style === "dash") lineChar = "-";
             if (line.border_style === "dot") lineChar = ".";
             let separatorBlock = lineChar.repeat(64);
-            masterPayload += "\\n[" + line.color + "]" + separatorBlock + "[-]";
+            masterPayload += "\\n[" + (line.color || "ffffff") + "]" + separatorBlock + "[-]";
         }
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    // ENVOI SÉCURISÉ DANS L'INTERRUPTEUR GRAPHIQUE HTML
+    // ENVOI SÉCURISÉ DANS L'INTERRUPTEUR GRAPHIQUE HTML (BOX PAYLOAD)
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
-    // TRADUCTION DU CODE EN HTML VISUEL POUR L'APERÇU GRAPHIQUE
-    let htmlContent = masterPayload.replace(/\\n/g, '\n')
+    // TRADUCTION DU CODE EN HTML VISUEL POUR L'APERÇU GRAPHIQUE (BOX JEU)
+    let htmlContent = masterPayload.replace(/\\n/g, '<br>')
                                    .replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>')
                                    .replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>')
                                    .replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
