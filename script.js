@@ -716,26 +716,26 @@ window.exportQbcConfigLocal = function() {
 };
 window.exportQbcConfig = window.exportQbcConfigLocal;
 
-// 🌐 TÉLÉCHARGEMENT ET CHARGEMENT DU JSON DEPUIS TON GITHUB
+/* ==========================================================================
+   === FIX ABSOLU DU CHARGEMENT DIRECT DU CLOUD GITHUB EN PROD            ===
+   ========================================================================== */
 window.importQbcConfigFromGitHub = function() {
     const syncLabel = document.getElementById('qbcTimeTrackerText');
     const historyLabel = document.getElementById('qbcFileHistoryText');
     
-    // 🔍 DÉTECTION AUTOMATIQUE DE L'ENVIRONNEMENT (Si on est sur GitHub Pages statique)
-    const isServerlessStatic = window.location.hostname.includes("github.io") || 
-        (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && !window.location.hostname.includes(".run.app"));
-
-    if (isServerlessStatic) {
+    // 🔍 SÉCURITÉ A : ENVIRONNEMENT EN LIGNE (GITHUB PAGES / PRODUCTION)
+    if (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
         if (syncLabel) {
-            syncLabel.innerText = "⏳ TÉLÉCHARGEMENT DIRECT DEPUIS GITHUB PAGES...";
-            syncLabel.style.color = "#fbbf24";
+            syncLabel.innerText = "⏳ TÉLÉCHARGEMENT EN DIRECT DEPUIS LE REPOSITORIE PUBLIC...";
+            syncLabel.style.color = "#38bdf8";
         }
         
-        // Requête directe sur l'URL publique du fichier JSON brut sur GitHub !
-        const rawUrl = 'https://raw.githubusercontent.com/LaTrouTe11/7DTD-LOGIN-DESC-SIMUL/main/qbc-backup.json?t=' + Date.now();
-        fetch(rawUrl)
+        // Requête directe sans passer par l'API locale /api
+        const publicJsonUrl = "https://raw.githubusercontent.com/LaTrouTe11/7DTD-LOGIN-DESC-SIMUL/main/qbc-backup.json?t=" + Date.now();
+        
+        fetch(publicJsonUrl)
         .then(res => {
-            if (!res.ok) throw new Error("Fichier introuvable sur le dépôt public.");
+            if (!res.ok) throw new Error("Fichier de sauvegarde introuvable ou vide sur ton dépôt GitHub public.");
             return res.json();
         })
         .then(data => {
@@ -752,38 +752,37 @@ window.importQbcConfigFromGitHub = function() {
             const horodatage = `${String(m.getDate()).padStart(2,'0')}/${String(m.getMonth()+1).padStart(2,'0')}/${m.getFullYear()} à ${String(m.getHours()).padStart(2,'0')}:${String(m.getMinutes()).padStart(2,'0')}:${String(m.getSeconds()).padStart(2,'0')}`;
             
             if (syncLabel) {
-                syncLabel.innerText = `✅ CHARGEMENT RÉUSSI — CONFIG PRODUCTION SYNCHRONISÉE !`;
+                syncLabel.innerText = `✅ SUCCÈS CLOUD — ARCHIVE [${qbcDatabase[activeServerId]?.name || "SYNCHRO"}] INTÉGRÉE !`;
                 syncLabel.style.color = "#34d399";
             }
             if (historyLabel) {
-                historyLabel.innerHTML = `🌐 Source : <strong style="color:#ffffff;">GitHub Public (Brut)</strong> | 📅 Mis à jour le : <span style="color:#fbbf24;">${horodatage}</span>`;
+                historyLabel.innerHTML = `🌐 Source : <strong style="color:#ffffff;">GitHub Public (Raw)</strong> | 📅 Synchronisé le : <span style="color:#fbbf24;">${horodatage}</span>`;
                 historyLabel.style.display = "block";
             }
-            alert("🌐 PARFAIT ! Ton cockpit a récupéré et chargé la dernière sauvegarde officielle depuis GitHub !");
         })
         .catch(err => {
             console.error(err);
-            alert("❌ IMPOSSIBLE DE CHARGER : Assure-toi que le fichier qbc-backup.json a bien été poussé sur ton GitHub principal.");
-            if (syncLabel) { syncLabel.innerText = "❌ ÉCHEC DU CHARGEMENT GITHUB"; syncLabel.style.color = "#f87171"; }
+            alert("❌ ÉCHEC : " + err.message + "\nAssure-toi que le fichier qbc-backup.json a bien été poussé sur ton dépôt !");
+            if (syncLabel) { syncLabel.innerText = "❌ ERREUR DE TÉLÉCHARGEMENT PUBLIC"; syncLabel.style.color = "#f87171"; }
         });
-        return; // On arrête ici pour les environnements statiques
+        
+        return; // ⛔ SÉCURITÉ CRITIQUE : Bloque et stoppe le code ici pour empêcher l'erreur réseau !
     }
 
-    // --- LOGIQUE NATIVE SI ON EST EN LOCAL OU SUR LE SERVEUR EXPRESS DE DÉVELOPPEMENT ---
+    // 🖥️ SÉCURITÉ B : ENVIRONNEMENT LOCAL (AI STUDIO / PORT 3000)
     if (syncLabel) {
-        syncLabel.innerText = "⏳ RÉCUPÉRATION DU FICHIER SUR GITHUB LOCAL EN COURS...";
+        syncLabel.innerText = "⏳ INTERROGATION DU SERVEUR PROXY LOCAL (PORT 3000)...";
         syncLabel.style.color = "#fbbf24";
     }
 
     fetch('/api/load-from-github')
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Le serveur Node local a refusé l'accès. Vérifie ton Token.");
+        return res.json();
+    })
     .then(data => {
-        const payload = data && (data.database || data.databasePayload);
-        if (data && data.success && payload) {
-            // Écrase la base locale par la version officielle de GitHub
-            qbcDatabase = payload;
-            
-            // On se repositionne sur le premier serveur de l'archive
+        if (data && data.success && data.database) {
+            qbcDatabase = data.database;
             const serverIds = Object.keys(qbcDatabase);
             if (serverIds.length > 0) activeServerId = serverIds[0];
             
@@ -796,23 +795,21 @@ window.importQbcConfigFromGitHub = function() {
             const horodatage = `${String(m.getDate()).padStart(2,'0')}/${String(m.getMonth()+1).padStart(2,'0')}/${m.getFullYear()} à ${String(m.getHours()).padStart(2,'0')}:${String(m.getMinutes()).padStart(2,'0')}:${String(m.getSeconds()).padStart(2,'0')}`;
             
             if (syncLabel) {
-                syncLabel.innerText = `✅ CHARGEMENT RÉUSSI — CONFIG [${qbcDatabase[activeServerId]?.name || "UNIQUE"}] SYNCHRONISÉE !`;
+                syncLabel.innerText = `✅ CHARGEMENT LOCAL RÉUSSI — CONFIG [${qbcDatabase[activeServerId]?.name || "UNIQUE"}] SYNCHRONISÉE !`;
                 syncLabel.style.color = "#34d399";
             }
             if (historyLabel) {
-                historyLabel.innerHTML = `🌐 Source : <strong style="color:#ffffff;">GitHub (${data.fileName || 'qbc-backup.json'})</strong> | 📅 Synchronisé le : <span style="color:#fbbf24;">${horodatage}</span>`;
+                historyLabel.innerHTML = `🌐 Source : <strong style="color:#ffffff;">GitHub Proxy Local</strong> | 📅 Synchronisé le : <span style="color:#fbbf24;">${horodatage}</span>`;
                 historyLabel.style.display = "block";
             }
-            alert("🌐 PARFAIT ! Ton cockpit a récupéré et chargé la dernière sauvegarde officielle de ton GitHub !");
         } else {
-            alert("❌ IMPOSSIBLE DE CHARGER : " + (data.error || "Vérifie ton fichier sur GitHub"));
-            if (syncLabel) { syncLabel.innerText = "❌ ÉCHEC DU CHARGEMENT GITHUB"; syncLabel.style.color = "#f87171"; }
+            throw new Error(data.error || "Réponse invalide du serveur proxy.");
         }
     })
     .catch(err => {
         console.error(err);
-        alert("❌ ERREUR RÉSEAU : Le serveur local n'a pas répondu.");
-        if (syncLabel) { syncLabel.innerText = "❌ ERREUR DE CHARGEMENT GITHUB"; syncLabel.style.color = "#f87171"; }
+        alert("❌ ERREUR CONSOLE LOCAL : " + err.message);
+        if (syncLabel) { syncLabel.innerText = "❌ ÉCHEC DU PROXY LOCAL"; syncLabel.style.color = "#f87171"; }
     });
 };
 
