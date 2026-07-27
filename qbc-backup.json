@@ -1,0 +1,734 @@
+{
+    "7dtd-core": {
+        "name": "QBC FLAGGARD PVE 3.0",
+        "loginLines": [
+            {
+                "symbol": "❤",
+                "text": "QBC FLAGGARD PVE 3.0 +MODS BIENVENUE ❤",
+                "text_en": "QBC FLAGGARD PVE 3.0 +MODS WELCOME ❤",
+                "color": "ff0000",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "ff0000",
+                "keep_visible": false
+            },
+            {
+                "symbol": "☣",
+                "text": "RÈGLEMENTS :",
+                "text_en": "RULES :",
+                "color": "ffff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "ffff00",
+                "keep_visible": true
+            },
+            {
+                "symbol": "✗",
+                "text": "1- Pas de landclaim au POI Carl's Corn Farm.",
+                "text_en": "1- No landclaim at Carl's Corn Farm POI.",
+                "color": "00ff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "00ff00",
+                "keep_visible": true
+            },
+            {
+                "symbol": "✗",
+                "text": "2- Vol de base interdit (sécurisez vos coffres).",
+                "text_en": "2- Stealing is forbidden (lock your chests).",
+                "color": "00ff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "00ff00",
+                "keep_visible": false
+            },
+            {
+                "symbol": "•",
+                "text": "TÉLÉPORTATIONS :",
+                "text_en": "TÉLÉPORTATIONS :",
+                "color": "ffaa00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "ffaa00",
+                "keep_visible": false
+            },
+            {
+                "symbol": "•",
+                "text": "/sethome [nom] | /home [nom]",
+                "text_en": "/home : Teleport to your home base",
+                "color": "00ffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "00ffff",
+                "keep_visible": false
+            },
+            {
+                "symbol": "•",
+                "text": "/bed : Retourner au dernier lit",
+                "text_en": "/bed : Return to your last bed",
+                "color": "00ffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "00ffff",
+                "keep_visible": false
+            },
+            {
+                "symbol": "⏰",
+                "text": "REBOOTS: 05:00 & 17:00 (EST/QC) | Beauharnois, CA",
+                "text_en": "REBOOTS: 05:00 & 17:00 (EST/QC) | Beauharnois, CA",
+                "color": "F88379",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "F88379",
+                "keep_visible": false
+            }
+        ],
+        "descLines": [
+            {
+                "symbol": "•",
+                "text": "Bienvenue sur l'infrastructure souveraine de Varennes.",
+                "text_en": "Welcome to the sovereign infrastructure of Varennes.",
+                "color": "00ff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Serveur PvE québécois haute performance avec mods industriels uniques.",
+                "text_en": "High performance Quebec PvE server with unique industrial mods.",
+                "color": "ffffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Hébergement physique d'élite basé au Québec à Beauharnois.",
+                "text_en": "Elite physical hosting based in Quebec at Beauharnois.",
+                "color": "ffaa00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Économie dynamique, Hôtel des Ventes et système de loterie actif.",
+                "text_en": "Dynamic economy, Auction House and active lottery system.",
+                "color": "00ffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Protection renforcée et verrouillage automatique des véhicules.",
+                "text_en": "Enhanced protection and automatic vehicle locking.",
+                "color": "ffffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Niveau maximal débloqué avec récompenses exclusives à chaque palier.",
+                "text_en": "Max level unlocked with exclusive rewards at each tier.",
+                "color": "00ff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Communauté francophone soudée et équipe d'administration active.",
+                "text_en": "Tight-knit French-speaking community and active admin team.",
+                "color": "ffff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "🙏",
+                "text": "Merci à l'ensemble des survivants pour leur fidélité et bon jeu !",
+                "text_en": "Thanks to all survivors for their loyalty and have fun !",
+                "color": "ffffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            }
+        ]
+    },
+    "7dtd-projectz": {
+        "name": "QBC FLAGGARD PROJECTZ 3.0",
+        "loginLines": [
+            {
+                "symbol": "❤",
+                "text": "QBC FLAGGARD ProjectZ 3.0 +MODS ❤",
+                "text_en": "QBC FLAGGARD ProjectZ 3.0 +MODS ❤",
+                "color": "ff0000",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "ff0000",
+                "keep_visible": false
+            },
+            {
+                "symbol": "☣",
+                "text": "RÈGLEMENTS :",
+                "text_en": "RULES :",
+                "color": "ffff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "ffff00",
+                "keep_visible": false
+            },
+            {
+                "symbol": "•",
+                "text": "Pas de landclaim à Carl's Corn Farm.",
+                "text_en": "No landclaim at Carl's Corn Farm.",
+                "color": "00ff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "00ff00",
+                "keep_visible": false
+            },
+            {
+                "symbol": "⚠️",
+                "text": "IMPORTANT: Ticket Yautja NE PAS UTILISER.",
+                "text_en": "IMPORTANT: Yautja Ticket DO NOT USE.",
+                "color": "ff3333",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "ff3333",
+                "keep_visible": false
+            },
+            {
+                "symbol": "🚀",
+                "text": "/sethome [nom] | /home [nom] | /teleport friends",
+                "text_en": "/sethome [name] | /home [name] | /teleport friends",
+                "color": "ffaa00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "ffaa00",
+                "keep_visible": false
+            },
+            {
+                "symbol": "⏰",
+                "text": "REBOOTS: 05:00 & 17:00 (EST/QC) | Beauharnois, CA",
+                "text_en": "REBOOTS: 05:00 & 17:00 (EST/QC) | Beauharnois, CA",
+                "color": "F88379",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true,
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "color_en": "F88379",
+                "keep_visible": false
+            }
+        ],
+        "descLines": [
+            {
+                "symbol": "🤖",
+                "text": "Gestion de l'instance ProjectZ 3.0 Hardcore par les GMs.",
+                "text_en": "Management of the ProjectZ 3.0 Hardcore instance by GMs.",
+                "color": "ffffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "🔒",
+                "text": "Protection auto-lock activée sur l'infrastructure complète.",
+                "text_en": "Auto-lock protection enabled on the complete infrastructure.",
+                "color": "00ffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Mods exclusifs axés sur la survie et l'exploration industrielle.",
+                "text_en": "Exclusive mods focused on survival and industrial exploration.",
+                "color": "00ff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Système de quêtes narratives et événements communautaires réguliers.",
+                "text_en": "Story quest system and regular community events.",
+                "color": "ffff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Téléportations sécurisées et lits réactifs pour tous les joueurs.",
+                "text_en": "Secure teleports and responsive beds for all players.",
+                "color": "ffaa00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Commerce inter-joueurs facilité via des commandes dédiées.",
+                "text_en": "Inter-player trade facilitated via dedicated commands.",
+                "color": "00ff00",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "•",
+                "text": "Redémarrages automatisés pour garantir une fluidité constante.",
+                "text_en": "Automated reboots to guarantee constant fluidity.",
+                "color": "F88379",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            },
+            {
+                "symbol": "🙏",
+                "text": "Infrastructure propulsée par la technologie QBC 2026.",
+                "text_en": "Infrastructure powered by QBC 2026 technology.",
+                "color": "ffffff",
+                "border_double": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false,
+                    "i": false,
+                    "s": false
+                },
+                "show_english": true
+            }
+        ]
+    },
+    "7dtd_yqft": {
+        "name": "TEST 7DTD",
+        "loginLines": [
+            {
+                "symbol": "❤",
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "text": "BIENVENUE SUR MON NOUVEAU SERVEUR",
+                "text_en": "",
+                "color": "ffffff",
+                "color_en": "ffffff",
+                "border_style": "none",
+                "show_english": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false
+                },
+                "keep_visible": false
+            }
+        ],
+        "descLines": [
+            {
+                "symbol": "•",
+                "symbol_start": "",
+                "symbol_en_start": "",
+                "symbol_en_end": "",
+                "text": "DESCRIPTION DU SERVEUR",
+                "text_en": "",
+                "color": "ffffff",
+                "color_en": "ffffff",
+                "border_style": "none",
+                "show_english": false,
+                "style_fr": {
+                    "u": false,
+                    "b": false
+                },
+                "style_en": {
+                    "u": false,
+                    "b": false
+                }
+            }
+        ]
+    }
+}
