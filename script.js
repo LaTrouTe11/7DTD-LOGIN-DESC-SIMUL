@@ -34,12 +34,23 @@ const symbolPalette = [
     { char: "⚔️", name: "Épées" }, { char: "⚙️", name: "Système" }, { char: "💎", name: "Diamant" }, { char: "⏰", name: "Reboot" }
 ];
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : PARTIE 2 SUR 6 === [ INITIALISATION ABSOLUE ]    ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 2 SUR 6 === [ ATTACHEMENT INITIALISATION ] ===
    ========================================================================== */
+function saveToLocalStorage() { localStorage.setItem("qbc_matrix_data", JSON.stringify(qbcDatabase)); }
+function loadFromLocalStorage() {
+    const saved = localStorage.getItem("qbc_matrix_data");
+    if (saved) {
+        try {
+            qbcDatabase = JSON.parse(saved); const serverIds = Object.keys(qbcDatabase);
+            if (serverIds.length > 0) activeServerId = serverIds.includes(activeServerId) ? activeServerId : serverIds[0];
+        } catch(e) { console.error(e); }
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-    window.loadFromLocalStorage();
+    loadFromLocalStorage();
     const savedZoom = localStorage.getItem("qbc_preferred_zoom") || "80";
-    window.changeUiZoom(savedZoom);
+    changeUiZoom(savedZoom);
     const selectZoomEl = document.getElementById("uiZoomSelect");
     if (selectZoomEl) selectZoomEl.value = savedZoom;
     
@@ -55,35 +66,34 @@ document.addEventListener("DOMContentLoaded", () => {
         selectServerEl.value = activeServerId;
         selectServerEl.addEventListener('change', (e) => {
             activeServerId = e.target.value;
-            window.refreshAllViews();
+            refreshAllViews();
         });
     }
     
-    window.refreshAllViews();
+    refreshAllViews();
 });
 
-// COMMUTATEURS GLOBAUX DE TRADUCTION ANGLAISE EN VARIABLE DIRECTE
-window.toggleLoginEnglish = function(checked) { 
+function toggleLoginEnglish(checked) { 
     isLoginEnglishActive = checked; 
     const lines = qbcDatabase[activeServerId]?.loginLines || [];
     lines.forEach(line => { line.show_english = checked; });
-    window.renderFormLines(); 
-};
+    renderFormLines(); 
+}
 
-window.toggleDescEnglish = function(checked) { 
+function toggleDescEnglish(checked) { 
     isDescEnglishActive = checked; 
     const lines = qbcDatabase[activeServerId]?.descLines || [];
     lines.forEach(line => { line.show_english = checked; });
-    window.renderDescFormLines(); 
-};
+    renderDescFormLines(); 
+}
 
-window.refreshAllViews = function() {
-    if (currentActiveTab === 'login') window.renderFormLines(); else window.renderDescFormLines();
-};
+function refreshAllViews() {
+    if (currentActiveTab === 'login') renderFormLines(); else renderDescFormLines();
+}
 /* ==========================================================================
    === SCRIPT.JS UNIFIÉ : PARTIE 3 SUR 6 === [ COMMANDE DES LIGNES & COPIE ] ===
    ========================================================================== */
-window.qbcCopierLigneFrançaise = function(isDesc, index) {
+function qbcCopierLigneFrançaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
     if (!list || !list[index]) return;
     let txt = list[index].text ? list[index].text.trim() : "";
@@ -92,39 +102,39 @@ window.qbcCopierLigneFrançaise = function(isDesc, index) {
     if (numMatch && numMatch.length > 0) { txt = txt.substring(numMatch.length).trim(); }
     const dummy = document.createElement("textarea"); document.body.appendChild(dummy);
     dummy.value = txt; dummy.select(); document.execCommand("copy"); dummy.remove();
-};
+}
 
-window.qbcCollerLigneAnglaise = function(isDesc, index) {
+function qbcCollerLigneAnglaise(isDesc, index) {
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines;
     if (!list || !list[index]) return;
     navigator.clipboard.readText().then(texteCopie => {
         if (texteCopie && texteCopie.trim() !== "") {
             list[index].text_en = texteCopie.trim(); list[index].show_english = true;
-            window.saveToLocalStorage(); window.refreshAllViews();
+            saveToLocalStorage(); refreshAllViews();
         }
     }).catch(err => { alert("Fais un Ctrl + V manuel dans la case EN !"); });
-};
+}
 
-window.toggleLineEnglishIndividual = function(isDesc, i) { 
+function toggleLineEnglishIndividual(isDesc, i) { 
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
     if (!list || !list[i]) return;
     list[i].show_english = !list[i].show_english; 
-    window.refreshAllViews();
-};
+    refreshAllViews();
+}
 
-window.moveLine = function(isDesc, i, d) { 
+function moveLine(isDesc, i, d) { 
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
     if (!list) return; const t = i + d; if (t < 0 || t >= list.length) return; 
     const tmp = list[i]; list[i] = list[t]; list[t] = tmp; 
-    window.refreshAllViews();
-};
+    refreshAllViews();
+}
 
-window.insertLineAt = function(isDesc, i) { 
+function insertLineAt(isDesc, i) { 
     const list = isDesc ? qbcDatabase[activeServerId]?.descLines : qbcDatabase[activeServerId]?.loginLines; 
     if (!list) return;
     list.splice(i, 0, { symbol: "•", symbol_start: "", text: "MESSAGE ÉDITABLE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); 
-    window.refreshAllViews();
-};
+    refreshAllViews();
+}
 /* ==========================================================================
    === SCRIPT.JS UNIFIÉ : PARTIE 4 SUR 6 === [ CONSTRUCTEUR DE LA GRILLE ] ===
    ========================================================================== */
@@ -181,17 +191,17 @@ function buildFormRows(isDesc, currentLines, isGlobalEnglish) {
     processAndCompileQBC();
 }
 
-window.renderFormLines = function() { 
+function renderFormLines() { 
     const toggleEl = document.getElementById('loginEnglishToggle');
     buildFormRows(false, qbcDatabase[activeServerId]?.loginLines || [], toggleEl ? toggleEl.checked : false); 
-};
+}
 
-window.renderDescFormLines = function() { 
+function renderDescFormLines() { 
     const toggleEl = document.getElementById('descEnglishToggle');
     buildFormRows(true, qbcDatabase[activeServerId]?.descLines || [], toggleEl ? toggleEl.checked : false); 
-};
+}
 /* ==========================================================================
-   === SCRIPT.JS UNIFIÉ : PARTIE 5 SUR 6 === [ ENCODAGE TEXTMESHPRO & APERÇU ] ===
+   === SCRIPT.JS UNIFIÉ : PARTIE 5 SUR 6 === [ LIVE COMPILATEUR LOGIC ]    ===
    ========================================================================== */
 function processAndCompileQBC() {
     const isLogin = (currentActiveTab === 'login'); 
@@ -254,10 +264,11 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    // INJECTION DE SÉCURITÉ DANS LES DEUX BLOCS NOIRS DU PANNEAU INFERIEUR
+    // INJECTION DANS LA ZONE DE TEXTE PAYLOAD (BOÎTE NOIRE)
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
+    // INJECTION DANS L'APERÇU VISUEL DU JEU (BOÎTE NOIRE)
     let htmlContent = masterPayload.replace(/\\n/g, '<br>')
                                    .replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>')
                                    .replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>')
@@ -266,6 +277,7 @@ function processAndCompileQBC() {
     const prevEl = document.getElementById('preview'); 
     if (prevEl) prevEl.innerHTML = htmlContent; 
     
+    // COMPTEUR ET ALERTES DE LIMITES
     const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter');
     const alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
@@ -279,22 +291,19 @@ function processAndCompileQBC() {
 /* ==========================================================================
    === SCRIPT.JS UNIFIÉ : PARTIE 6 SUR 6 === [ MÉMOIRE & INTERRUPTEURS ]   ===
    ========================================================================== */
-window.saveToLocalStorage = saveToLocalStorage;
-window.loadFromLocalStorage = loadFromLocalStorage;
-
 function updateLineTextFR(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text = v; else qbcDatabase[activeServerId].loginLines[i].text = v; saveToLocalStorage(); processAndCompileQBC(); }
 function updateLineTextEN(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].text_en = v; else qbcDatabase[activeServerId].loginLines[i].text_en = v; if(v.trim()!=="") { if(isDesc) qbcDatabase[activeServerId].descLines[i].show_english=true; else qbcDatabase[activeServerId].loginLines[i].show_english=true; } saveToLocalStorage(); processAndCompileQBC(); }
 function updateLineSymbol(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol = v; else qbcDatabase[activeServerId].loginLines[i].symbol = v; processAndCompileQBC(); }
 function updateLineSymbolStart(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol_start = v; else qbcDatabase[activeServerId].loginLines[i].symbol_start = v; processAndCompileQBC(); }
 function updateLineSymbolEnStart(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_start = v; else qbcDatabase[activeServerId].loginLines[i].symbol_en_start = v; processAndCompileQBC(); }
 function updateLineSymbolEnEnd(isDesc, i, v) { if(isDesc) qbcDatabase[activeServerId].descLines[i].symbol_en_end = v; else qbcDatabase[activeServerId].loginLines[i].symbol_en_end = v; processAndCompileQBC(); }
-function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; window.refreshAllViews(); }
-function updateLineColorEn(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color_en = h; else qbcDatabase[activeServerId].loginLines[i].color_en = h; window.refreshAllViews(); }
+function updateLineColor(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color = h; else qbcDatabase[activeServerId].loginLines[i].color = h; refreshAllViews(); }
+function updateLineColorEn(isDesc, i, h) { if(isDesc) qbcDatabase[activeServerId].descLines[i].color_en = h; else qbcDatabase[activeServerId].loginLines[i].color_en = h; refreshAllViews(); }
 
-window.addNewLine = function() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", symbol_start: "", text: "NOUVEAU MESSAGE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); window.renderFormLines(); };
-window.removeLine = function(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); window.renderFormLines(); };
-window.addNewDescLine = function() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", text: "NOUVELLE DESCRIPTION", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); window.renderDescFormLines(); };
-window.removeDescLine = function(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); window.renderDescFormLines(); };
+function addNewLine() { qbcDatabase[activeServerId].loginLines.push({ symbol: "•", symbol_start: "", text: "NOUVEAU MESSAGE", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderFormLines(); }
+function removeLine(i) { if(qbcDatabase[activeServerId].loginLines.length <= 1) return; qbcDatabase[activeServerId].loginLines.splice(i, 1); saveToLocalStorage(); renderFormLines(); }
+function addNewDescLine() { qbcDatabase[activeServerId].descLines.push({ symbol: "•", symbol_start: "", text: "NOUVELLE DESCRIPTION", text_en: "", color: "ffffff", color_en: "ffffff", border_style: "none", show_english: false }); saveToLocalStorage(); renderDescFormLines(); }
+function removeDescLine(i) { if(qbcDatabase[activeServerId].descLines.length <= 1) return; qbcDatabase[activeServerId].descLines.splice(i, 1); saveToLocalStorage(); renderDescFormLines(); }
 
 // SOUDURE DIRECTE ET ABSOLUE PAR INTERRUPTEUR DE VARIABLE GLOBALE
 window.switchTab = function(t) { 
@@ -310,7 +319,7 @@ window.switchTab = function(t) {
     if (containerLogin) containerLogin.style.display = (t === 'login') ? 'block' : 'none';
     if (containerDesc) containerDesc.style.display = (t === 'desc') ? 'block' : 'none';
     
-    window.refreshAllViews(); 
+    refreshAllViews(); 
 };
 
 window.importQbcConfig = function(event) {
@@ -327,7 +336,7 @@ window.importQbcConfig = function(event) {
                 });
                 selectServerEl.value = activeServerId;
             }
-            window.refreshAllViews(); alert("IMPORTATION RÉUSSIE !");
+            refreshAllViews(); alert("IMPORTATION RÉUSSIE !");
         } catch (err) { alert("ERREUR LECTURE JSON"); }
     }; reader.readAsText(files.item(0));
 };
@@ -357,9 +366,20 @@ window.createNewServerInstance = function() {
     const opt = document.createElement('option'); opt.value = id; opt.innerText = n.toUpperCase(); 
     document.getElementById('serverSelect')?.appendChild(opt); 
     document.getElementById('serverSelect').value = id; activeServerId = id;
-    window.refreshAllViews();
+    refreshAllViews();
 };
 
+// LIENS DE SOUDURE UNIVERSELS DIRECTS
+window.qbcCopierLigneFrançaise = qbcCopierLigneFrançaise;
+window.qbcCollerLigneAnglaise = qbcCollerLigneAnglaise;
+window.toggleLineEnglishIndividual = toggleLineEnglishIndividual;
+window.moveLine = moveLine;
+window.insertLineAt = insertLineAt;
+window.addNewLine = addNewLine;
+window.addNewDescLine = addNewDescLine;
+window.editCurrentServerName = editCurrentServerName;
+window.createNewServerInstance = createNewServerInstance;
+window.copyMasterPayload = copyMasterPayload;
 window.triggerJsonImport = function() { document.getElementById('jsonFileInput')?.click(); };
 window.exportQbcConfig = function() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qbcDatabase, null, 4)); 
