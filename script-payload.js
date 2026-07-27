@@ -1,10 +1,10 @@
 /* ==========================================================================
-   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 1 === [ COMPILATEUR UNIVERSEL FR ] ===
+   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 1 === [ COMPILATEUR COMPATIBLE ] ===
    ========================================================================== */
 function processAndCompileQBC() {
     const isLogin = (currentActiveTab === 'login'); 
     
-    // FIX DE SÉCURITÉ GLOBAUX : Force une String pure pour empêcher le freeze du bas
+    // Sécurité ID String pure
     if (!activeServerId || typeof activeServerId !== 'string' || !qbcDatabase[activeServerId]) {
         activeServerId = '7dtd_core';
     }
@@ -22,8 +22,8 @@ function processAndCompileQBC() {
     currentLines.forEach((line, index) => {
         if (!line) return;
         
-        // Compatibilité totale entre l'ancienne clé (.text) et la nouvelle (.text_fr)
-        let textFR = (line.text_fr || line.text || "").trim(); 
+        // CORRECTION RADICALE : Utilisation stricte de la clé universelle .text pour éviter le crash
+        let textFR = (line.text || line.text_fr || "").trim(); 
         let textEN = (line.text_en || "").trim();
         
         if (line.symbol_start === undefined) line.symbol_start = "";
@@ -41,7 +41,7 @@ function processAndCompileQBC() {
         let chunkFR = "[" + (line.color || "ffffff") + "]" + fullFR + "[-]"; 
         const isEnglishActive = line.show_english || isGlobalEnglish;
 /* ==========================================================================
-   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 2 === [ ENJECTEUR DÉFINITIF DU BAS ] ===
+   === MODULE : SCRIPT-PAYLOAD.JS — PARTIE 2 === [ ACTIONNEUR DE SORTIE FR/EN ] ===
    ========================================================================== */
         // --- COMPILATION DU BLOC ANGLAIS CROISÉ SANS BOUCLE INFINIE ---
         if (isEnglishActive && textEN !== "" && !(isLogin && index === 0)) {
@@ -67,11 +67,11 @@ function processAndCompileQBC() {
         if (index < currentLines.length - 1) masterPayload += "\\n";
     });
     
-    // ENVOI SÉCURISÉ DANS L'INTERRUPTEUR GRAPHIQUE HTML (BOX PAYLOAD)
+    // INJECTION DIRECTE DANS LA BOÎTE DE CODE FINAL PAYLOAD
     const outEl = document.getElementById('masterOutput'); 
     if (outEl) outEl.value = masterPayload; 
     
-    // TRADUCTION DU CODE EN HTML VISUEL POUR L'APERÇU GRAPHIQUE (BOX JEU)
+    // TRADUCTION TEXTMESHPRO VERS HTML POUR REMPLIR DE FORCE L'APERÇU GRAPHIQUE
     let htmlContent = masterPayload.replace(/\\n/g, '<br>')
                                    .replace(/\[([0-9a-fA-F]{6})\](.*?)\[-\]/g, '<span style="color:#$1;">$2</span>')
                                    .replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>')
@@ -80,7 +80,7 @@ function processAndCompileQBC() {
     const prevEl = document.getElementById('preview'); 
     if (prevEl) prevEl.innerHTML = htmlContent; 
     
-    // CALCUL DU COMPTEUR ET AFFICHAGE DES ALERTES DE LIMITES
+    // MISE À JOUR SYNCHRONISÉE DES COMPTEURS METRIQUES
     const total = masterPayload.length;
     const counterEl = document.getElementById(isLogin ? 'totalCharCounter' : 'totalDescCharCounter');
     const alertEl = document.getElementById(isLogin ? 'alertBox' : 'descAlertBox');
@@ -92,14 +92,15 @@ function processAndCompileQBC() {
     if (alertEl) alertEl.style.display = total > limit ? "block" : "none";
 }
 
-// DECLARATION PROPRE POUR LE SCRIPT DE DIAGNOSTIC
+// ALIAS DE LIAISON CRITIQUE POUR LE DIAGNOSTIC D'INDEX
 function generateMasterPayload() {
     processAndCompileQBC();
 }
 
-// SOUDURE MAÎTRESSE EN RACINE LIBRE : Totalement isolée des accolades fermées
+// BRANCHEMENT MAÎTRE SUR LA RACINE DU SIMULATEUR
 window.processAndCompileQBC = processAndCompileQBC;
 window.generateMasterPayload = generateMasterPayload;
+
 
 
 
